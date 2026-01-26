@@ -11,9 +11,9 @@ import {
     CompanyInfo,
     SubChecklistAudit,
     //new asf - ev
-    Events,
+    Auditor,
     //new VMS
-    Products,
+    Checklist,
     Staff,
     Department,
     //old
@@ -204,8 +204,8 @@ const LoadComponent = ({ component: Component }: LoadComponentProps) => (
 //                             element: <LoadComponent component={ServiceType} />,
 //                         },
 //                         {
-//                             path: 'products',
-//                             element: <LoadComponent component={Products} />,
+//                             path: 'Checklist',
+//                             element: <LoadComponent component={Checklist} />,
 //                         },
 //                         {
 //                             path: 'customer',
@@ -228,16 +228,16 @@ const routes = [
     },
     //new asf ev  
     {
-        path: '/master/events',
-        element: <Events/>,
+        path: '/master/auditor',
+        element: <Auditor/>,
     },
     {
         path: '/master/sub-checklist-audit',
         element: <SubChecklistAudit/>,
     },
     {
-        path: '/master/products',
-        element: <Products/>,
+        path: '/master/checklist',
+        element: <Checklist/>,
     },
     {
         path: '/reports/enquiry-report',
@@ -266,10 +266,6 @@ const routes = [
         element: <Role />,
     },
      //new VMS public
-    {
-        path: '/master/products',
-        element: <Products/>,
-    },
     {
         path: '/settings/company-info',
         element: <CompanyInfo />,

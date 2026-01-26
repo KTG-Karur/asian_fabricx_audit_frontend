@@ -38,7 +38,7 @@ export const FormContainer = [
                 uniqueKey: 'value',
             },
             {
-                label: 'Audit Types',
+                label: 'Audits',
                 name: 'audits',
                 inputType: 'multiSelect',
                 placeholder: 'Select audit types',

@@ -107,13 +107,13 @@ export const Role = lazy(() => import('../view/master/role'));
 export const CompanyInfo = lazy(() => import('../view/company-info'));
 
 //new for the VMS
-export const Products = lazy(() => import('../view/master/products'));
+export const Checklist = lazy(() => import('../view/master/checklist'));
 export const Staff = lazy(() => import('../view/master/employee'));
 export const Department = lazy(() => import('../view/master/department'));
 export const ProductEnquiry = lazy(() => import('../view/productEnquiry'));
 
 //new of asf ev
-export const Events = lazy(() => import('../view/master/event-entry'));
+export const Auditor = lazy(() => import('../view/master/auditor'));
 export const EnquiryReport = lazy(() => import('../view/report/enquiry'));
 export const PrintEnquiry = lazy(() => import('../view/documents/enquiry-report-pdf'));
 export const SubChecklistAudit = lazy(() => import('../view/master/subChecklist'));
