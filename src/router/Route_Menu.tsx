@@ -117,3 +117,4 @@ export const Auditor = lazy(() => import('../view/master/auditor'));
 export const EnquiryReport = lazy(() => import('../view/report/enquiry'));
 export const PrintEnquiry = lazy(() => import('../view/documents/enquiry-report-pdf'));
 export const SubChecklistAudit = lazy(() => import('../view/master/subChecklist'));
+export const AuditForm = lazy(() => import('../view/auditForm'));

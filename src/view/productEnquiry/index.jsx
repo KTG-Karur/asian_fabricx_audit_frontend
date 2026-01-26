@@ -1,134 +1,217 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import Table from '../../util/Table';
-import { findArrObj, showMessage, showConfirmationDialog } from '../../util/AllFunction';
-import IconPencil from '../../components/Icon/IconPencil';
-import IconTrashLines from '../../components/Icon/IconTrashLines';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import IconEye from '../../components/Icon/IconEye';
-import IconSearch from '../../components/Icon/IconSearch';
+import IconEdit from '../../components/Icon/IconPencil';
+import IconTrashLines from '../../components/Icon/IconTrashLines';
 import IconPlus from '../../components/Icon/IconPlus';
-import IconUsers from '../../components/Icon/IconUsers';
-import IconCalendar from '../../components/Icon/IconCalendar';
-import IconRefresh from '../../components/Icon/IconRefresh';
+import IconPrinter from '../../components/Icon/IconPrinter';
+import IconDownload from '../../components/Icon/IconFile';
+import IconRestore from '../../components/Icon/IconRefresh';
+import Table from '../../util/Table';
 import Tippy from '@tippyjs/react';
-import _ from 'lodash';
-import { createUplode, resetUplodeStatus } from '../../redux/uplodeSlice';
-// Import slices and actions
-import { getProductEnquiries, createProductEnquiry, updateProductEnquiry, deleteProductEnquiry, resetProductEnquiryStatus } from '../../redux/productEnquirySlice';
-import { getExpo } from '../../redux/expoSlice';
-import { getProducts } from '../../redux/productSlice';
-import { baseURL } from '../../api/ApiConfig';
-import ProductEnquiryForm from './formContainer';
+import 'tippy.js/dist/tippy.css';
 
-const ProductEnquiry = () => {
-    const loginInfo = localStorage.getItem('loginInfo');
-    const localData = JSON.parse(loginInfo);
-    const pageAccessData = findArrObj(localData?.pagePermission, 'label', 'Visitor Enquiry');
-    const accessIds = (pageAccessData[0]?.access || '').split(',').map((id) => id.trim());
-
-    const dispatch = useDispatch();
-
-    // Redux selectors
-    const { enquiryData, loading, error, createEnquirySuccess, updateEnquirySuccess, deleteEnquirySuccess , deleteVisitorCardSuccess , deleteVisitorCardFailed } = useSelector((state) => state.ProductEnquirySlice);
-    const { expoData } = useSelector((state) => state.ExpoSlice);
-    const { productData } = useSelector((state) => state.ProductSlice);
-    const { errors, uplodes, loadings, createUplodeSuccess, createUplodeFailed } = useSelector((state) => ({
-        errors: state.UplodeSlice.error,
-        uplodes: state.UplodeSlice.uplodes,
-        loadings: state.UplodeSlice.loading,
-        createUplodeSuccess: state.UplodeSlice.createUplodeSuccess,
-        createUplodeFailed: state.UplodeSlice.createUplodeFailed,
-    }));
-
+const ExternalProviderAudit = () => {
+    const navigate = useNavigate();
+    const [audits, setAudits] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
-    const [isEdit, setIsEdit] = useState(false);
-    const [selectedEnquiry, setSelectedEnquiry] = useState(null);
-    const [formKey, setFormKey] = useState(0);
+    const [filteredAudits, setFilteredAudits] = useState([]);
     const [currentPage, setCurrentPage] = useState(0);
     const [pageSize, setPageSize] = useState(10);
+    const [loading, setLoading] = useState(false);
+
+    // Enhanced dummy data with more realistic audit information
+    const dummyAudits = [
+        {
+            id: 1,
+            supplierName: 'ABC Manufacturing Ltd.',
+            supplierType: 'Manufacturer',
+            employeeCount: 150,
+            productionCapacity: '5000 units/month',
+            asianAuditorName: 'Rajesh Kumar',
+            lastAuditDate: '2024-02-15',
+            machineCount: 25,
+            products: 'Textiles, Fabrics',
+            visitDate: '2024-03-10',
+            supplierRepresentative: 'Mr. Sharma',
+            lastAuditScore: 85,
+            currentScore: 88,
+            transportAvailable: true,
+            accommodationAvailable: false,
+            animalsAllowed: false,
+            status: 'Completed',
+            auditDate: '2024-03-10',
+            checklistCount: 19,
+            workerInterviewCount: 5,
+            isActive: 1,
+            createdDate: '2024-03-10'
+        },
+        {
+            id: 2,
+            supplierName: 'XYZ Textile Mills',
+            supplierType: 'Textile Producer',
+            employeeCount: 200,
+            productionCapacity: '8000 meters/day',
+            asianAuditorName: 'Priya Sharma',
+            lastAuditDate: '2024-01-20',
+            machineCount: 40,
+            products: 'Cotton Fabrics, Polyester',
+            visitDate: '2024-03-05',
+            supplierRepresentative: 'Ms. Gupta',
+            lastAuditScore: 78,
+            currentScore: 82,
+            transportAvailable: true,
+            accommodationAvailable: true,
+            animalsAllowed: true,
+            status: 'In Progress',
+            auditDate: '2024-03-05',
+            checklistCount: 19,
+            workerInterviewCount: 3,
+            isActive: 1,
+            createdDate: '2024-03-05'
+        },
+        {
+            id: 3,
+            supplierName: 'Global Garments Inc.',
+            supplierType: 'Garment Manufacturer',
+            employeeCount: 300,
+            productionCapacity: '10000 pieces/day',
+            asianAuditorName: 'Amit Patel',
+            lastAuditDate: '2024-02-28',
+            machineCount: 60,
+            products: 'Ready-made Garments',
+            visitDate: '2024-03-12',
+            supplierRepresentative: 'Mr. Singh',
+            lastAuditScore: 90,
+            currentScore: 92,
+            transportAvailable: false,
+            accommodationAvailable: true,
+            animalsAllowed: false,
+            status: 'Pending',
+            auditDate: '2024-03-12',
+            checklistCount: 19,
+            workerInterviewCount: 4,
+            isActive: 1,
+            createdDate: '2024-03-12'
+        },
+        {
+            id: 4,
+            supplierName: 'Tech Components Corp.',
+            supplierType: 'Electronic Components',
+            employeeCount: 120,
+            productionCapacity: '20000 units/month',
+            asianAuditorName: 'Sanjay Verma',
+            lastAuditDate: '2024-02-10',
+            machineCount: 35,
+            products: 'PCB Boards, Sensors',
+            visitDate: '2024-03-15',
+            supplierRepresentative: 'Dr. Reddy',
+            lastAuditScore: 92,
+            currentScore: 95,
+            transportAvailable: true,
+            accommodationAvailable: false,
+            animalsAllowed: false,
+            status: 'Completed',
+            auditDate: '2024-03-15',
+            checklistCount: 19,
+            workerInterviewCount: 6,
+            isActive: 1,
+            createdDate: '2024-03-15'
+        },
+        {
+            id: 5,
+            supplierName: 'Food Processing Unit',
+            supplierType: 'Food Manufacturer',
+            employeeCount: 180,
+            productionCapacity: '10000 kg/day',
+            asianAuditorName: 'Meera Nair',
+            lastAuditDate: '2024-02-05',
+            machineCount: 45,
+            products: 'Packaged Foods, Spices',
+            visitDate: '2024-03-18',
+            supplierRepresentative: 'Mrs. Iyer',
+            lastAuditScore: 75,
+            currentScore: 80,
+            transportAvailable: false,
+            accommodationAvailable: true,
+            animalsAllowed: true,
+            status: 'In Progress',
+            auditDate: '2024-03-18',
+            checklistCount: 19,
+            workerInterviewCount: 4,
+            isActive: 0,
+            createdDate: '2024-03-18'
+        }
+    ];
 
     useEffect(() => {
-        dispatch(getProductEnquiries({ showAll: true }));
-        dispatch(getExpo({ showAll: true }));
-        dispatch(getProducts({}));
-    }, [dispatch]);
-
-    // Handle success messages and form reset
-    useEffect(() => {
-        if (createEnquirySuccess) {
-            showMessage('success', 'Enquiry created successfully');
-            dispatch(resetProductEnquiryStatus());
-            handleFormReset();
-            dispatch(getProductEnquiries({ showAll: true }));
-        }
-        if (updateEnquirySuccess) {
-            showMessage('success', 'Enquiry updated successfully');
-            dispatch(resetProductEnquiryStatus());
-            handleFormReset();
-            dispatch(getProductEnquiries({ showAll: true }));
-        }
-        if (deleteEnquirySuccess) {
-            showMessage('success', 'Enquiry deactivated successfully');
-            dispatch(resetProductEnquiryStatus());
-            dispatch(getProductEnquiries({ showAll: true }));
-        }
-    }, [createEnquirySuccess, updateEnquirySuccess, deleteEnquirySuccess, dispatch]);
+        setLoading(true);
+        // Simulate API call
+        setTimeout(() => {
+            setAudits(dummyAudits);
+            setFilteredAudits(dummyAudits);
+            setLoading(false);
+        }, 500);
+    }, []);
 
     useEffect(() => {
-        if (deleteVisitorCardSuccess) {
-            showMessage('success', 'Visitor card image deleted successfully');
-            dispatch(resetProductEnquiryStatus());
-            dispatch(getProductEnquiries({ showAll: true }));
+        if (searchTerm.trim() === '') {
+            setFilteredAudits(audits);
+        } else {
+            const filtered = audits.filter(audit =>
+                audit.supplierName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                audit.supplierType.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                audit.products.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                audit.asianAuditorName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                audit.supplierRepresentative.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            setFilteredAudits(filtered);
         }
-        if (deleteVisitorCardFailed) {
-            showMessage('error', 'Failed to delete visitor card image');
-            dispatch(resetProductEnquiryStatus());
+        setCurrentPage(0);
+    }, [searchTerm, audits]);
+
+    const handleCreateNewAudit = () => {
+        navigate('/audit/external-provider/form', { 
+            state: { mode: 'create' }
+        });
+    };
+
+    const handleViewAudit = (audit) => {
+        navigate('/audit/external-provider/form', { 
+            state: { 
+                mode: 'view', 
+                auditData: audit 
+            }
+        });
+    };
+
+    const handleEditAudit = (audit) => {
+        navigate('/audit/external-provider/form', { 
+            state: { 
+                mode: 'edit', 
+                auditData: audit 
+            }
+        });
+    };
+
+    const getStatusBadge = (status) => {
+        switch (status) {
+            case 'Completed':
+                return <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Completed</span>;
+            case 'In Progress':
+                return <span className="px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">In Progress</span>;
+            case 'Pending':
+                return <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Pending</span>;
+            default:
+                return <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">{status}</span>;
         }
-    }, [deleteVisitorCardSuccess, deleteVisitorCardFailed, dispatch]);
+    };
 
-    useEffect(() => {
-        if (createUplodeSuccess) {
-            showMessage('success', 'Visitor image uploaded successfully');
-            dispatch(resetUplodeStatus());
-            dispatch(getProductEnquiries({ showAll: true }));
-        }
-        if (createUplodeFailed) {
-            showMessage('warning', 'Visitor image upload failed');
-            dispatch(resetUplodeStatus());
-        }
-    }, [createUplodeSuccess, createUplodeFailed, dispatch]);
-
-    // Statistics - count both active and inactive
-    const stats = useMemo(() => {
-        const totalEnquiries = enquiryData.length;
-        const activeEnquiries = enquiryData.filter((e) => e.isActive).length;
-        const totalProducts = enquiryData.reduce((sum, enquiry) => sum + (enquiry.products?.length || 0), 0);
-        const sampleRequests = enquiryData.reduce((sum, enquiry) => sum + (enquiry.products?.filter((p) => p.sampleRequired).length || 0), 0);
-
-        return { totalEnquiries, activeEnquiries, totalProducts, sampleRequests };
-    }, [enquiryData]);
-
-    const filteredEnquiries = useMemo(() => {
-        if (!searchTerm) return enquiryData;
-
-        const searchLower = searchTerm.toLowerCase();
-        return enquiryData.filter(
-            (enquiry) =>
-                (enquiry.enquiryNo || '').toLowerCase().includes(searchLower) ||
-                (enquiry.visitorName || '').toLowerCase().includes(searchLower) ||
-                (enquiry.companyName || '').toLowerCase().includes(searchLower) ||
-                (enquiry.email || '').toLowerCase().includes(searchLower) ||
-                (expoData.find((e) => e.id === enquiry.expoId)?.expoName || '').toLowerCase().includes(searchLower) ||
-                (enquiry.natureOfEnquiry || '').toLowerCase().includes(searchLower) ||
-                enquiry.products?.some((p) => p.productNo.toLowerCase().includes(searchLower) || p.productName.toLowerCase().includes(searchLower)) ||
-                false
-        );
-    }, [enquiryData, searchTerm, expoData]);
-
-    const getPaginatedData = () => {
-        const startIndex = currentPage * pageSize;
-        const endIndex = startIndex + pageSize;
-        return filteredEnquiries.slice(startIndex, endIndex);
+    const getScoreBadge = (score) => {
+        if (score >= 90) return <span className="px-2 py-1 rounded text-xs font-bold bg-green-500 text-white">{score}%</span>;
+        if (score >= 80) return <span className="px-2 py-1 rounded text-xs font-bold bg-blue-500 text-white">{score}%</span>;
+        if (score >= 70) return <span className="px-2 py-1 rounded text-xs font-bold bg-yellow-500 text-white">{score}%</span>;
+        return <span className="px-2 py-1 rounded text-xs font-bold bg-red-500 text-white">{score}%</span>;
     };
 
     const handlePaginationChange = (pageIndex, newPageSize) => {
@@ -136,347 +219,295 @@ const ProductEnquiry = () => {
         setPageSize(newPageSize);
     };
 
-    // Table columns
-    const columns = useMemo(
-        () => [
-            {
-                Header: 'ENQUIRY',
-                accessor: 'enquiryNo',
-                sort: true,
-                Cell: ({ value, row }) => {
-                    const expo = expoData.find((e) => e.id === row.original.expoId);
-                    return (
-                        <div className="flex items-center space-x-4">
-                            <div className="relative flex-shrink-0">
-                                <div className={`absolute -bottom-1 -right-1 w-3 h-3 rounded-full border-2 border-white ${row.original.isActive ? 'bg-green-500' : 'bg-gray-400'}`}></div>
-                            </div>
-                            <div className="min-w-0 flex-1">
-                                <button
-                                    onClick={() => handleEnquiryClick(row.original)}
-                                    className={`text-sm font-semibold hover:text-blue-600 transition-colors text-left block ${!row.original.isActive ? 'text-gray-500' : 'text-gray-900'}`}
-                                >
-                                    {value || 'N/A'}
-                                </button>
-                                <p className={`text-sm truncate ${!row.original.isActive ? 'text-gray-400' : 'text-gray-600'}`}>{row.original.visitorName || 'Unknown Visitor'}</p>
-                                <p className="text-xs text-gray-500 truncate">{expo?.expoName || 'No Expo'}</p>
-                                <div className="flex items-center space-x-1 mt-1">
-                                    <span className={`text-xs px-2 py-1 rounded-full ${!row.original.isActive ? 'bg-gray-100 text-gray-600' : 'bg-blue-100 text-blue-800'}`}>
-                                        {row.original.products?.length || 0} products
-                                    </span>
-                                    {!row.original.isActive && <span className="text-xs bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full">Inactive</span>}
-                                </div>
-                            </div>
-                        </div>
-                    );
-                },
-            },
-            {
-                Header: 'VISITOR INFO',
-                accessor: 'companyName',
-                sort: true,
-                Cell: ({ row }) => (
-                    <div className="space-y-1">
-                        <span className={`text-sm font-medium block ${!row.original.isActive ? 'text-gray-500' : 'text-gray-900'}`}>{row.original.companyName || 'N/A'}</span>
-                        <span className="text-xs text-gray-500 block">
-                            {row.original.city}, {row.original.country}
-                        </span>
-                        <span className="text-xs text-blue-600 block">{row.original.email}</span>
-                    </div>
-                ),
-            },
-            {
-                Header: 'SAMPLES & QUANTITY',
-                accessor: 'sampleRequired',
-                sort: true,
-                Cell: ({ row }) => {
-                    const products = row.original.products || [];
-                    const sampleProducts = products.filter((p) => p.sampleRequired).length;
-                    const totalQuantity = products.reduce((sum, p) => sum + (p.quantity || 0), 0);
+    const getPaginatedData = () => {
+        const activeAudits = filteredAudits.filter(a => a.isActive === 1);
+        const startIndex = currentPage * pageSize;
+        const endIndex = startIndex + pageSize;
+        return activeAudits.slice(startIndex, endIndex);
+    };
 
-                    return (
-                        <div className="space-y-2">
-                            <div className="flex flex-wrap gap-1">
-                                <span
-                                    className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                                        sampleProducts > 0
-                                            ? !row.original.isActive
-                                                ? 'bg-gray-100 text-gray-600 border border-gray-200'
-                                                : 'bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 border border-green-200'
-                                            : !row.original.isActive
-                                            ? 'bg-gray-100 text-gray-400 border border-gray-200'
-                                            : 'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-600 border border-gray-200'
-                                    }`}
-                                >
-                                    {sampleProducts > 0 ? (
-                                        <>
-                                            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                <path
-                                                    fillRule="evenodd"
-                                                    d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                                                    clipRule="evenodd"
-                                                />
-                                            </svg>
-                                            {sampleProducts} samples
-                                        </>
-                                    ) : (
-                                        'No Samples'
-                                    )}
-                                </span>
-                            </div>
-                            {totalQuantity > 0 && (
-                                <div className={`px-2 py-1 rounded-lg border ${!row.original.isActive ? 'bg-gray-100 border-gray-200' : 'bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-200'}`}>
-                                    <span className={`text-xs font-bold block text-center ${!row.original.isActive ? 'text-gray-600' : 'text-blue-700'}`}>
-                                        Total: {totalQuantity.toLocaleString()} units
-                                    </span>
-                                </div>
-                            )}
-                        </div>
-                    );
-                },
-            },
-            {
-                Header: 'STATUS',
-                accessor: 'isActive',
-                sort: true,
-                Cell: ({ value }) => (
-                    <div className="flex items-center">
-                        <button
-                            className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-300 ${
-                                value ? 'bg-gradient-to-r from-green-400 to-green-600 text-white shadow-lg' : 'bg-gradient-to-r from-yellow-400 to-yellow-600 text-white shadow-lg'
-                            }`}
-                        >
-                            {value ? 'Active' : 'Inactive'}
-                        </button>
+    const getTotalCount = () => {
+        return filteredAudits.filter(a => a.isActive === 1).length;
+    };
+
+    const handleDeleteAudit = (audit) => {
+        if (window.confirm('Are you sure you want to delete this audit? This action cannot be undone.')) {
+            const updatedAudits = audits.map(a => 
+                a.id === audit.id ? { ...a, isActive: 0 } : a
+            );
+            setAudits(updatedAudits);
+            setFilteredAudits(updatedAudits);
+        }
+    };
+
+    const handleRestoreAudit = (audit) => {
+        const updatedAudits = audits.map(a => 
+            a.id === audit.id ? { ...a, isActive: 1 } : a
+        );
+        setAudits(updatedAudits);
+        setFilteredAudits(updatedAudits);
+    };
+
+    const getAuditDetails = (audit) => {
+        return `${audit.employeeCount} employees • ${audit.machineCount} machines • ${audit.workerInterviewCount} interviews`;
+    };
+
+    const columns = [
+        {
+            Header: 'Supplier Details',
+            accessor: 'supplierName',
+            sort: true,
+            Cell: ({ value, row }) => {
+                const audit = row.original;
+                return (
+                    <div>
+                        <div className="font-medium text-gray-800">{value}</div>
+                        <div className="text-sm text-gray-600 mt-1">{audit.supplierType}</div>
+                        <div className="text-xs text-gray-500 mt-1">{audit.products}</div>
+                        <div className="text-xs text-gray-500 mt-1">{getAuditDetails(audit)}</div>
                     </div>
-                ),
+                );
             },
-            {
-                Header: 'ACTIONS',
-                accessor: 'actions',
-                Cell: ({ row }) => (
-                    <div className="flex items-center space-x-2">
-                        {row.original.isActive ? (
+        },
+        {
+            Header: 'Audit Info',
+            accessor: 'auditInfo',
+            Cell: ({ row }) => {
+                const audit = row.original;
+                return (
+                    <div>
+                        <div className="font-medium text-gray-800">{audit.asianAuditorName}</div>
+                        <div className="text-sm text-gray-600 mt-1">Auditor</div>
+                        <div className="text-xs text-gray-500 mt-1">{new Date(audit.visitDate).toLocaleDateString()}</div>
+                        <div className="text-xs text-gray-500 mt-1">{audit.supplierRepresentative}</div>
+                    </div>
+                );
+            },
+        },
+        {
+            Header: 'Scores',
+            accessor: 'scores',
+            Cell: ({ row }) => {
+                const audit = row.original;
+                return (
+                    <div className="space-y-2">
+                        <div>
+                            <div className="text-xs text-gray-500 mb-1">Last Score</div>
+                            <div>{getScoreBadge(audit.lastAuditScore)}</div>
+                        </div>
+                        <div>
+                            <div className="text-xs text-gray-500 mb-1">Current Score</div>
+                            <div>{getScoreBadge(audit.currentScore)}</div>
+                        </div>
+                    </div>
+                );
+            },
+        },
+        {
+            Header: 'Status',
+            accessor: 'status',
+            Cell: ({ value, row }) => {
+                const audit = row.original;
+                return (
+                    <div className="space-y-2">
+                        <div>{getStatusBadge(value)}</div>
+                        <div className="text-xs text-gray-500">
+                            {audit.checklistCount} checklist items
+                        </div>
+                    </div>
+                );
+            },
+            width: 150,
+        },
+        {
+            Header: 'Actions',
+            accessor: 'actions',
+            Cell: ({ row }) => {
+                const audit = row.original;
+                const isActive = audit.isActive === 1;
+
+                return (
+                    <div className="flex items-center space-x-3">
+                        <Tippy content="View Full Audit">
+                            <button 
+                                onClick={() => handleViewAudit(audit)} 
+                                className="flex items-center px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg transition-colors"
+                            >
+                                <IconEye className="w-4 h-4 mr-1.5" />
+                                <span className="text-sm font-medium">View</span>
+                            </button>
+                        </Tippy>
+
+                        {isActive ? (
                             <>
-                                {_.includes(accessIds, '3') && (
-                                    <Tippy content="Edit Enquiry">
-                                        <button className="text-success p-2 rounded-lg bg-green-50 hover:bg-green-100 transition-colors" onClick={() => handleEdit(row.original)}>
-                                            <IconPencil className="w-4 h-4" />
-                                        </button>
-                                    </Tippy>
-                                )}
-                                {_.includes(accessIds, '4') && (
-                                    <Tippy content="Deactivate Enquiry">
-                                        <button className="text-danger p-2 rounded-lg bg-red-50 hover:bg-red-100 transition-colors" onClick={() => handleDeactivate(row.original)}>
-                                            <IconTrashLines className="w-4 h-4" />
-                                        </button>
-                                    </Tippy>
-                                )}
+                                <Tippy content="Edit Audit">
+                                    <button 
+                                        onClick={() => handleEditAudit(audit)} 
+                                        className="flex items-center px-3 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 rounded-lg transition-colors"
+                                    >
+                                        <IconEdit className="w-4 h-4 mr-1.5" />
+                                        <span className="text-sm font-medium">Edit</span>
+                                    </button>
+                                </Tippy>
+                                <Tippy content="Delete Audit">
+                                    <button 
+                                        onClick={() => handleDeleteAudit(audit)} 
+                                        className="text-danger hover:text-danger-dark"
+                                    >
+                                        <IconTrashLines className="w-5 h-5" />
+                                    </button>
+                                </Tippy>
                             </>
                         ) : (
-                            <>
-                                {_.includes(accessIds, '6') && (
-                                    <Tippy content="Activate Enquiry">
-                                        <button className="text-success p-2 rounded-lg bg-green-50 hover:bg-green-100 transition-colors" onClick={() => handleActivate(row.original)}>
-                                            <IconRefresh className="w-4 h-4" />
-                                        </button>
-                                    </Tippy>
-                                )}
-                            </>
+                            <Tippy content="Restore Audit">
+                                <button 
+                                    onClick={() => handleRestoreAudit(audit)} 
+                                    className="flex items-center px-3 py-1.5 bg-yellow-50 text-yellow-700 hover:bg-yellow-100 rounded-lg transition-colors"
+                                >
+                                    <IconRestore className="w-4 h-4 mr-1.5" />
+                                    <span className="text-sm font-medium">Restore</span>
+                                </button>
+                            </Tippy>
                         )}
                     </div>
-                ),
-                width: 120,
+                );
             },
-        ],
-        [expoData, accessIds]
-    );
-
-    const handleEnquiryClick = (enquiry) => {
-        console.log('Enquiry clicked:', enquiry);
-    };
-
-    const handleEdit = (enquiry) => {
-        if (!enquiry.isActive) {
-            showMessage('warning', 'Cannot edit inactive enquiries. Please activate the enquiry first.');
-            return;
-        }
-        setSelectedEnquiry(enquiry);
-        setIsEdit(true);
-        document.getElementById('enquiry-form-section').scrollIntoView({ behavior: 'smooth' });
-    };
-
-    const handleDeactivate = async (enquiry) => {
-        const confirmed = await showConfirmationDialog('Are you sure you want to deactivate this enquiry?', 'Yes, Deactivate', 'This enquiry will be marked as inactive but will remain in the list.');
-
-        if (confirmed) {
-            dispatch(
-                updateProductEnquiry({
-                    request: { isActive: false },
-                    enquiryId: enquiry.enquiryId,
-                })
-            );
-        }
-    };
-
-    const handleActivate = async (enquiry) => {
-        const confirmed = await showConfirmationDialog('Are you sure you want to activate this enquiry?', 'Yes, Activate', 'This enquiry will be marked as active and can be edited.');
-
-        if (confirmed) {
-            dispatch(
-                updateProductEnquiry({
-                    request: { isActive: true },
-                    enquiryId: enquiry.enquiryId,
-                })
-            );
-        }
-    };
-
-    const handleFormSubmit = async (enquiryData, visitingCardFiles) => {
-        try {
-            let enquiryResponse;
-
-            if (isEdit && selectedEnquiry) {
-                enquiryResponse = await dispatch(
-                    updateProductEnquiry({
-                        request: enquiryData,
-                        enquiryId: selectedEnquiry.enquiryId,
-                    })
-                ).unwrap();
-            } else {
-                enquiryResponse = await dispatch(createProductEnquiry(enquiryData)).unwrap();
-            }
-
-            if (visitingCardFiles && visitingCardFiles.length > 0 && enquiryResponse?.data[0]?.enquiryId) {
-                const uploadFormData = new FormData();
-
-                visitingCardFiles.forEach((file, index) => {
-                    uploadFormData.append('visitingCard', file);
-                });
-
-                dispatch(
-                    createUplode({
-                        request: uploadFormData,
-                        id: enquiryResponse?.data[0]?.enquiryId,
-                    })
-                ).then((uploadResult) => {
-                    if (createUplodeSuccess) {
-                        showMessage('success', 'Enquiry and visitor images uploaded successfully');
-                        dispatch(getProductEnquiries({ showAll: true }));
-                    } else if (createUplodeFailed) {
-                        showMessage('warning', 'Enquiry saved but some visitor images failed to upload');
-                    }
-                });
-            } else {
-                showMessage('success', isEdit ? 'Enquiry updated successfully' : 'Enquiry created successfully');
-            }
-
-            handleFormReset();
-        } catch (error) {
-            showMessage('error', `Failed to ${isEdit ? 'update' : 'create'} enquiry: ${error.message}`);
-        }
-    };
-
-    const handleFormReset = () => {
-        setSelectedEnquiry(null);
-        setIsEdit(false);
-        setFormKey((prevKey) => prevKey + 1);
-    };
-
-    const handleSearch = (value) => {
-        setSearchTerm(value);
-        setCurrentPage(0);
-    };
+            width: 200,
+        },
+    ];
 
     return (
-        <div className="space-y-6 animate-fade-in">
-            {/* Enhanced Header with Gradient */}
-            <div className="bg-gradient-to-br from-purple-600 via-blue-600 to-cyan-600 rounded-3xl p-8 text-white relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-32 translate-x-32"></div>
-                <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full -translate-x-24 translate-y-24"></div>
-                <div className="absolute top-1/2 left-1/2 w-32 h-32 bg-white/5 rounded-full -translate-x-1/2 -translate-y-1/2"></div>
+        <div className="p-6 space-y-6">
+            <div className="p-6 text-center">
+                <h1 className="text-3xl font-extrabold text-gray-800">External Provider Audit Management</h1>
+                <p className="text-gray-600 mt-2">Manage and track compliance audits for external suppliers and providers</p>
+            </div>
 
-                <div className="relative z-10">
-                    <div className="flex items-center space-x-3 mb-3">
-                        <div className="p-2 bg-white/20 rounded-xl backdrop-blur-sm">
-                            <IconUsers className="w-6 h-6 text-white" />
-                        </div>
-                        <h1 className="text-3xl font-bold">Visitor Enquiries</h1>
-                    </div>
-                    <p className="text-blue-100 opacity-90 text-lg max-w-2xl">Capture and manage visitor enquiries with multiple products from textile fairs and exhibitions</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-6 text-white shadow-lg">
+                    <div className="text-3xl font-bold mb-2">{audits.filter(a => a.isActive === 1).length}</div>
+                    <div className="text-sm font-medium opacity-90">Active Audits</div>
+                    <div className="text-xs opacity-75 mt-1">Total ongoing audits</div>
+                </div>
+                <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white shadow-lg">
+                    <div className="text-3xl font-bold mb-2">{audits.filter(a => a.status === 'Completed' && a.isActive === 1).length}</div>
+                    <div className="text-sm font-medium opacity-90">Completed</div>
+                    <div className="text-xs opacity-75 mt-1">Successfully audited</div>
+                </div>
+                <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-xl p-6 text-white shadow-lg">
+                    <div className="text-3xl font-bold mb-2">{audits.filter(a => a.status === 'In Progress' && a.isActive === 1).length}</div>
+                    <div className="text-sm font-medium opacity-90">In Progress</div>
+                    <div className="text-xs opacity-75 mt-1">Currently being audited</div>
+                </div>
+                <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-6 text-white shadow-lg">
+                    <div className="text-3xl font-bold mb-2">{audits.filter(a => a.status === 'Pending' && a.isActive === 1).length}</div>
+                    <div className="text-sm font-medium opacity-90">Pending</div>
+                    <div className="text-xs opacity-75 mt-1">Scheduled for audit</div>
                 </div>
             </div>
 
-            {/* Enquiry Form Section */}
-            <div id="enquiry-form-section">
-                {_.includes(accessIds, '2') && (
-                    <ProductEnquiryForm
-                        key={formKey}
-                        onSubmit={handleFormSubmit}
-                        onReset={handleFormReset}
-                        isEdit={isEdit}
-                        selectedEnquiry={selectedEnquiry}
-                        loading={loading}
-                        expos={expoData}
-                        products={productData}
-                    />
-                )}
-            </div>
-
-            {/* Enhanced Search Bar with Gradient */}
-            <div className="bg-gradient-to-br from-white via-gray-50 to-blue-50 rounded-2xl p-6 shadow-lg border border-gray-200">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div className="flex-1 max-w-2xl">
-                        <div className="relative">
-                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                <IconSearch className="w-5 h-5 text-gray-400" />
-                            </div>
-                            <input
-                                type="text"
-                                placeholder="Search enquiries by visitor, company, product, expo, or enquiry details..."
-                                value={searchTerm}
-                                onChange={(e) => handleSearch(e.target.value)}
-                                className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-2xl focus:ring-3 focus:ring-purple-500/20 focus:border-purple-500 transition-all duration-200 bg-white/80 focus:bg-white shadow-sm hover:shadow-md"
-                            />
-                            {searchTerm && (
-                                <button onClick={() => handleSearch('')} className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-gray-600 transition-colors">
-                                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                    <div className="flex items-center space-x-3">
-                        <span className="text-sm font-medium text-gray-600 bg-white px-3 py-2 rounded-lg border border-gray-200">
-                            {filteredEnquiries.length} {filteredEnquiries.length === 1 ? 'enquiry' : 'enquiries'} found
-                        </span>
-                        <span className="text-sm font-medium text-green-600 bg-green-50 px-3 py-2 rounded-lg border border-green-200">{stats.activeEnquiries} active</span>
-                    </div>
-                </div>
-            </div>
-
-            {/* Enhanced Enquiries Table */}
-            <div className="bg-gradient-to-br from-white to-gray-50 rounded-2xl shadow-xl border border-gray-200 overflow-hidden">
+            <div className="datatables">
                 <Table
                     columns={columns}
+                    Title={'External Provider Audits'}
+                    toggle={handleCreateNewAudit}
                     data={getPaginatedData()}
-                    Title=""
-                    isSearchable={false}
-                    isSortable={true}
-                    pagination={true}
                     pageSize={pageSize}
                     pageIndex={currentPage}
-                    totalCount={filteredEnquiries.length}
-                    totalPages={Math.ceil(filteredEnquiries.length / pageSize)}
+                    totalCount={getTotalCount()}
+                    totalPages={Math.ceil(getTotalCount() / pageSize)}
                     onPaginationChange={handlePaginationChange}
-                    classStyle="rounded-2xl"
-                    hover={true}
-                    compact={false}
-                    loading={loading}
+                    pagination={true}
+                    isSearchable={true}
+                    isSortable={true}
+                    btnName="New Audit"
+                    loadings={loading}
+                    customSearch={
+                        <div className="flex items-center space-x-4">
+                            <input
+                                type="text"
+                                placeholder="Search by supplier name, type, products, auditor..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="form-input w-full max-w-md"
+                            />
+                            <button className="btn btn-outline-primary">
+                                <IconPrinter className="w-4 h-4 mr-2" />
+                                Print
+                            </button>
+                            <button className="btn btn-outline-secondary">
+                                <IconDownload className="w-4 h-4 mr-2" />
+                                Export
+                            </button>
+                        </div>
+                    }
                 />
             </div>
+
+            {filteredAudits.filter(a => a.isActive === 0).length > 0 && (
+                <div className="mt-8">
+                    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+                        <div className="flex">
+                            <div className="flex-shrink-0">
+                                <IconRestore className="h-5 w-5 text-yellow-400" />
+                            </div>
+                            <div className="ml-3">
+                                <p className="text-sm text-yellow-700">
+                                    You have {filteredAudits.filter(a => a.isActive === 0).length} deleted audits. 
+                                    They can be restored from the table below.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+                        <div className="px-6 py-4 border-b border-gray-200">
+                            <h3 className="text-lg font-semibold text-gray-800">Deleted Audits</h3>
+                        </div>
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-50">
+                                    <tr>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Supplier</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Auditor</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Visit Date</th>
+                                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {filteredAudits.filter(a => a.isActive === 0).map(audit => (
+                                        <tr key={audit.id}>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="font-medium text-gray-900">{audit.supplierName}</div>
+                                                <div className="text-sm text-gray-500">{audit.supplierType}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm text-gray-900">{audit.asianAuditorName}</div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <div className="text-sm text-gray-900">
+                                                    {new Date(audit.visitDate).toLocaleDateString()}
+                                                </div>
+                                            </td>
+                                            <td className="px-6 py-4 whitespace-nowrap">
+                                                <button
+                                                    onClick={() => handleRestoreAudit(audit)}
+                                                    className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-lg text-yellow-700 bg-yellow-100 hover:bg-yellow-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500"
+                                                >
+                                                    <IconRestore className="w-3 h-3 mr-1" />
+                                                    Restore
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
 
-export default ProductEnquiry;
+export default ExternalProviderAudit;
