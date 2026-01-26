@@ -27,7 +27,7 @@ import {
     ERROR503,
     Maintenence,
     LoginBoxed,
-    ProductEnquiry,
+    Audit,
     PrintEnquiry,
     EnquiryReport,
 } from './Route_Menu';
@@ -258,8 +258,8 @@ const routes = [
         element: <Department/>,
     },
      {
-        path: '/join/product-enquiry',
-        element: <ProductEnquiry />,
+        path: '/audit/external-provider',
+        element: <Audit />,
     },
     //old
     {

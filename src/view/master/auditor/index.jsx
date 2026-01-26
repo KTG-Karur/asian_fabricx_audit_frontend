@@ -743,58 +743,42 @@ const Index = () => {
         </div>
       </ModelViewBox>
 
-      {viewCertModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
-            <div className="flex justify-between items-center p-6 border-b">
-              <h3 className="text-lg font-semibold">Certifications</h3>
-              <button
-                onClick={() => setViewCertModal(false)}
-                className="text-gray-400 hover:text-gray-600"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <div className="p-6 overflow-y-auto max-h-[calc(90vh-120px)]">
-              {selectedCertifications.length === 0 ? (
-                <p className="text-center text-gray-500 py-8">No certifications uploaded</p>
-              ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {selectedCertifications.map((cert, index) => (
-                    <div key={index} className="border rounded-lg overflow-hidden">
-                      {cert.type?.includes('image') || cert.url?.includes('image') ? (
-                        <img
-                          src={cert.url || '/placeholder-image.jpg'}
-                          alt={cert.name}
-                          className="w-full h-48 object-cover"
-                        />
-                      ) : (
-                        <div className="w-full h-48 bg-red-50 flex flex-col items-center justify-center">
-                          <div className="text-red-600 text-4xl mb-2">PDF</div>
-                          <p className="text-sm text-gray-600">PDF Document</p>
-                        </div>
-                      )}
-                      <div className="p-3 bg-gray-50">
-                        <p className="text-sm font-medium truncate">{cert.name}</p>
-                      </div>
+      <ModelViewBox
+        modal={viewCertModal}
+        modelHeader="Certifications"
+        setModel={() => setViewCertModal(false)}
+        modelSize="lg"
+        hideFooter={true}
+        saveBtn = {false}
+      >
+        <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
+          {selectedCertifications.length === 0 ? (
+            <p className="text-center text-gray-500 py-8">No certifications uploaded</p>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {selectedCertifications.map((cert, index) => (
+                <div key={index} className="border rounded-lg overflow-hidden">
+                  {cert.type?.includes('image') || cert.url?.includes('image') ? (
+                    <img
+                      src={cert.url || '/placeholder-image.jpg'}
+                      alt={cert.name}
+                      className="w-full h-48 object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-48 bg-red-50 flex flex-col items-center justify-center">
+                      <div className="text-red-600 text-4xl mb-2">PDF</div>
+                      <p className="text-sm text-gray-600">PDF Document</p>
                     </div>
-                  ))}
+                  )}
+                  <div className="p-3 bg-gray-50">
+                    <p className="text-sm font-medium truncate">{cert.name}</p>
+                  </div>
                 </div>
-              )}
+              ))}
             </div>
-            <div className="px-6 py-3 border-t bg-gray-50">
-              <button
-                onClick={() => setViewCertModal(false)}
-                className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition float-right"
-              >
-                Close
-              </button>
-            </div>
-          </div>
+          )}
         </div>
-      )}
+      </ModelViewBox>
     </div>
   );
 };

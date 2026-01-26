@@ -110,7 +110,7 @@ export const CompanyInfo = lazy(() => import('../view/company-info'));
 export const Checklist = lazy(() => import('../view/master/checklist'));
 export const Staff = lazy(() => import('../view/master/employee'));
 export const Department = lazy(() => import('../view/master/department'));
-export const ProductEnquiry = lazy(() => import('../view/productEnquiry'));
+export const Audit = lazy(() => import('../view/audit'));
 
 //new of asf ev
 export const Auditor = lazy(() => import('../view/master/auditor'));
