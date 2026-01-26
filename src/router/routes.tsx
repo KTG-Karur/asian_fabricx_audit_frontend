@@ -28,6 +28,7 @@ import {
     Maintenence,
     LoginBoxed,
     ProductEnquiry,
+    Suppliers,
     PrintEnquiry,
     EnquiryReport,
 } from './Route_Menu';
@@ -256,6 +257,10 @@ const routes = [
     {
         path: '/master/department',
         element: <Department/>,
+    },
+     {
+        path: '/master/suppliers',
+        element: <Suppliers/>,
     },
      {
         path: '/join/product-enquiry',
