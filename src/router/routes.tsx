@@ -228,45 +228,41 @@ const routes = [
         path: '/',
         element: <Index />,
     },
-    //new asf ev  
+    //new asf ev
     {
         path: '/master/auditor',
-        element: <Auditor/>,
+        element: <Auditor />,
     },
     {
         path: '/audit/external-provider/form',
-        element: <AuditForm/>,
+        element: <AuditForm />,
     },
     {
         path: '/master/sub-checklist-audit',
-        element: <SubChecklistAudit/>,
+        element: <SubChecklistAudit />,
     },
     {
         path: '/master/checklist',
-        element: <Checklist/>,
+        element: <Checklist />,
     },
     {
         path: '/reports/enquiry-report',
-        element: <EnquiryReport/>,
+        element: <EnquiryReport />,
     },
     //old
     {
         path: '/master/staff',
-        element: <Staff/>,
+        element: <Staff />,
     },
     {
         path: '/master/department',
-        element: <Department/>,
+        element: <Department />,
     },
-     {
+    {
         path: '/master/suppliers',
-        element: <Suppliers/>,
+        element: <Suppliers />,
     },
-     {
-        path: '/master/suppliers',
-        element: <Suppliers/>,
-    },
-     {
+    {
         path: '/audit/external-provider',
         element: <Audit />,
     },
@@ -279,7 +275,7 @@ const routes = [
         path: '/master/role',
         element: <Role />,
     },
-     //new VMS public
+    //new VMS public
     {
         path: '/settings/company-info',
         element: <CompanyInfo />,
@@ -347,11 +343,11 @@ const dontCkeckRouts = [
     //new VMS
     {
         path: '/master/sub-checklist-audit',
-        element: <SubChecklistAudit/>,
+        element: <SubChecklistAudit />,
     },
     {
         path: '/audit/external-provider/form',
-        element: <AuditForm/>,
+        element: <AuditForm />,
     },
     //old
     {
