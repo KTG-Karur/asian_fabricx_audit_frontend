@@ -9,6 +9,7 @@ import {
     Employee,
     Role,
     CompanyInfo,
+    SubChecklistAudit,
     //new asf - ev
     Events,
     //new VMS
@@ -231,6 +232,10 @@ const routes = [
         element: <Events/>,
     },
     {
+        path: '/master/sub-checklist-audit',
+        element: <SubChecklistAudit/>,
+    },
+    {
         path: '/master/products',
         element: <Products/>,
     },
@@ -330,6 +335,10 @@ const routes = [
 
 const dontCkeckRouts = [
     //new VMS
+    {
+        path: '/master/sub-checklist-audit',
+        element: <SubChecklistAudit/>,
+    },
     //old
     {
         path: '/documents/print-enquiry',

@@ -1,132 +1,59 @@
-// Form Container
-const FormContainer = [
+// formContainer.js
+export const FormContainer = [
     {
         formFields: [
             {
-                label: 'Expo Name',
-                name: 'expoName',
+                label: 'Auditor ID',
+                name: 'auditorId',
                 inputType: 'text',
-                placeholder: 'Enter Expo Name',
-                require: true,
+                placeholder: 'Auto-generated ID',
                 classStyle: 'col-span-6',
-                validation: {
-                    required: 'Expo Name is required',
-                    minLength: {
-                        value: 2,
-                        message: 'Expo Name must be at least 2 characters'
-                    },
-                    maxLength: {
-                        value: 100,
-                        message: 'Expo Name must be less than 100 characters'
-                    }
-                }
+                required: true,
+                disabled: true,
             },
             {
-                label: 'Country',
-                name: 'country',
+                label: 'Full Name',
+                name: 'name',
                 inputType: 'text',
-                placeholder: 'Enter Country',
-                require: true,
+                placeholder: 'Enter auditor full name',
                 classStyle: 'col-span-6',
+                required: true,
                 validation: {
-                    required: 'Country is required',
+                    required: 'Name is required',
                     minLength: {
                         value: 2,
-                        message: 'Country must be at least 2 characters'
-                    },
-                    maxLength: {
-                        value: 100,
-                        message: 'Country must be less than 100 characters'
+                        message: 'Name must be at least 2 characters'
                     }
                 }
             },
             {
-                label: 'Place',
-                name: 'place',
-                inputType: 'textarea',
-                placeholder: 'Enter Place/Venue',
-                rows: 1,
-                require: true,
+                label: 'Designation',
+                name: 'designation',
+                inputType: 'select',
+                placeholder: 'Select designation',
                 classStyle: 'col-span-6',
-                validation: {
-                    required: 'Place is required',
-                    minLength: {
-                        value: 2,
-                        message: 'Place must be at least 2 characters'
-                    },
-                    maxLength: {
-                        value: 200,
-                        message: 'Place must be less than 200 characters'
-                    }
-                }
-            },
-            {
-                label: 'Staff Attending',
-                name: 'staffIds',
-                inputType: 'multiSelect',
-                placeholder: 'Select Staff Members',
-                require: true,
-                classStyle: 'col-span-6',
-                optionList: 'staffList', 
-                uniqueKey: 'value',
+                required: true,
+                optionList: 'designationList',
                 displayKey: 'label',
-                validation: {
-                    required: 'At least one staff member is required'
-                }
+                uniqueKey: 'value',
             },
             {
-                label: 'From Date',
-                name: 'fromDate',
-                inputType: 'date',
-                placeholder: 'Select From Date',
-                require: true,
-                classStyle: 'col-span-3',
-                validation: {
-                    required: 'From Date is required'
-                }
+                label: 'Audit Types',
+                name: 'audits',
+                inputType: 'multiSelect',
+                placeholder: 'Select audit types',
+                classStyle: 'col-span-6',
+                required: true,
+                optionList: 'auditList',
+                displayKey: 'label',
+                uniqueKey: 'value',
             },
             {
-                label: 'To Date',
-                name: 'toDate',
-                inputType: 'date',
-                placeholder: 'Select To Date',
-                require: true,
-                classStyle: 'col-span-3',
-                validation: {
-                    required: 'To Date is required'
-                }
-            },
-            {
-                label: 'Year',
-                name: 'year',
-                inputType: 'text',
-                placeholder: 'Enter Year',
-                require: true,
-                classStyle: 'col-span-3',
-                validation: {
-                    required: 'Year is required',
-                    pattern: {
-                        value: /^(19|20)\d{2}$/,
-                        message: 'Please enter a valid year'
-                    }
-                }
-            },
-            {
-                label: 'Expo Completed',
-                name: 'isCompleted',
+                label: 'Enable Authentication',
+                name: 'isAuthenticated',
                 inputType: 'checkbox',
-                placeholder: 'Mark if expo is completed',
-                require: false,
-                classStyle: 'col-span-3',
-                options: [
-                    {
-                        label: 'Yes, this expo has been completed',
-                        value: true
-                    }
-                ]
-            }
+                classStyle: 'col-span-12',
+            },
         ],
     },
 ];
-
-export { FormContainer };

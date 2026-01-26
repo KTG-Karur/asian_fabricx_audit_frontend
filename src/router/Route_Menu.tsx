@@ -116,3 +116,4 @@ export const ProductEnquiry = lazy(() => import('../view/productEnquiry'));
 export const Events = lazy(() => import('../view/master/event-entry'));
 export const EnquiryReport = lazy(() => import('../view/report/enquiry'));
 export const PrintEnquiry = lazy(() => import('../view/documents/enquiry-report-pdf'));
+export const SubChecklistAudit = lazy(() => import('../view/master/subChecklist'));
