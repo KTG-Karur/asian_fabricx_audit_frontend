@@ -1,22 +1,70 @@
-// formContainer.js
-export const FormContainer = [
+
+export const formFields = [
     {
-        formFields: [
-            {
-                label: 'Title',
-                name: 'title',
-                inputType: 'text',
-                placeholder: 'Enter checklist title',
-                classStyle: 'col-span-12',
-                required: true,
-                validation: {
-                    required: 'Title is required',
-                    minLength: {
-                        value: 3,
-                        message: 'Title must be at least 3 characters'
-                    }
-                }
-            }
-        ]
-    }
+        label: 'Supplier/Provider',
+        name: 'supplierId',
+        inputType: 'select',
+        placeholder: 'Select supplier',
+        classStyle: 'col-span-6',
+        required: true,
+        optionList: 'supplierList',
+        displayKey: 'name',
+        uniqueKey: 'id',
+    },
+    {
+        label: 'Audit Count',
+        name: 'supplierAuditCount',
+        inputType: 'number',
+        placeholder: 'Audit count',
+        classStyle: 'col-span-6',
+        required: false,
+        readOnly: true,
+        isDisabled: true,
+    },
+    {
+        label: 'Assign to Auditor',
+        name: 'assignedAuditorId',
+        inputType: 'select',
+        placeholder: 'Select auditor',
+        classStyle: 'col-span-6',
+        required: true,
+        optionList: 'auditorList',
+        displayKey: 'name',
+        uniqueKey: 'id',
+        displayAdditional: 'designation',
+    },
+    {
+        label: 'Assignment Date',
+        name: 'assignmentDate',
+        inputType: 'date',
+        placeholder: 'Select assignment date',
+        classStyle: 'col-span-6',
+        required: true,
+    },
+    {
+        label: 'Due Date',
+        name: 'dueDate',
+        inputType: 'date',
+        placeholder: 'Select due date',
+        classStyle: 'col-span-6',
+        required: true,
+        minmumDate: 'assignmentDate',
+    },
+    {
+        label: 'Next Audit Date',
+        name: 'nextAuditDate',
+        inputType: 'date',
+        placeholder: 'Select next audit date',
+        classStyle: 'col-span-6',
+        required: true,
+        minmumDate: 'assignmentDate',
+    },
+    {
+        label: 'Remarks / Instructions',
+        name: 'remarks',
+        inputType: 'textarea',
+        placeholder: 'Add any special instructions or remarks for the auditor...',
+        classStyle: 'col-span-12',
+        rows: 3,
+    },
 ];

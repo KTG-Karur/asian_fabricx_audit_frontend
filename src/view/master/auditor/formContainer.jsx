@@ -36,17 +36,8 @@ export const FormContainer = [
                 optionList: 'designationList',
                 displayKey: 'label',
                 uniqueKey: 'value',
-            },
-            {
-                label: 'Audits',
-                name: 'audits',
-                inputType: 'multiSelect',
-                placeholder: 'Select audit types',
-                classStyle: 'col-span-6',
-                required: true,
-                optionList: 'auditList',
-                displayKey: 'label',
-                uniqueKey: 'value',
+                showSelectmodel: true, // This will trigger the button in your FormComponent
+                btnName: 'Add Designation', // Button text
             },
             {
                 label: 'Enable Authentication',

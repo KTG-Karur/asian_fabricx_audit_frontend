@@ -1,22 +1,25 @@
 import { useState, Fragment, useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import Select from 'react-select';
 import IconPencil from '../../../components/Icon/IconPencil';
 import IconTrashLines from '../../../components/Icon/IconTrashLines';
 import IconRestore from '../../../components/Icon/IconRestore';
 import IconEye from '../../../components/Icon/IconEye';
+import IconPlus from '../../../components/Icon/IconPlus';
 import Table from '../../../util/Table';
 import Tippy from '@tippyjs/react';
 import ModelViewBox from '../../../util/ModelViewBox';
-import FormLayout from '../../../util/formLayout';
 import { showMessage } from '../../../util/AllFunction';
 import _ from 'lodash';
-import { FormContainer } from './formContainer';
+import { getDesignation, createDesignation, resetDesignationStatus } from '../../../redux/designationSlice';
 
 const dummyAuditors = [
   {
     id: 1,
-    name: 'John Smith',
+    name: 'John',
     auditorId: 'AUD001',
     designation: 'Senior Auditor',
+    designationId: '96af0672-2428-4a0b-8770-9e2a877415bf',
     certifications: [
       { id: 1, name: 'ISO-9001-Certificate.jpg', url: 'cert1.jpg' },
       { id: 2, name: 'Internal-Auditor-Certificate.jpg', url: 'cert2.jpg' }
@@ -31,9 +34,10 @@ const dummyAuditors = [
   },
   {
     id: 2,
-    name: 'Sarah Johnson',
+    name: 'Sarah',
     auditorId: 'AUD002',
     designation: 'Lead Auditor',
+    designationId: '593ad470-64c0-4a38-ad2c-d0cee894e11d',
     certifications: [
       { id: 1, name: 'Lead-Auditor-Certificate.jpg', url: 'cert3.jpg' }
     ],
@@ -47,9 +51,10 @@ const dummyAuditors = [
   },
   {
     id: 3,
-    name: 'Michael Chen',
+    name: 'Michael',
     auditorId: 'AUD003',
     designation: 'Junior Auditor',
+    designationId: '7ad7ec3e-6b7e-4321-8efc-9b25fdab91a7',
     certifications: [],
     lastLogin: '2024-01-10T09:15:00',
     audits: ['Preliminary Audit'],
@@ -61,41 +66,32 @@ const dummyAuditors = [
   }
 ];
 
-const designationOptions = [
-  { value: 'junior_auditor', label: 'Junior Auditor' },
-  { value: 'auditor', label: 'Auditor' },
-  { value: 'senior_auditor', label: 'Senior Auditor' },
-  { value: 'lead_auditor', label: 'Lead Auditor' },
-  { value: 'principal_auditor', label: 'Principal Auditor' }
-];
-
-const auditTypeOptions = [
-  { value: 'factory_audit', label: 'Factory Audit' },
-  { value: 'quality_audit', label: 'Quality Audit' },
-  { value: 'safety_audit', label: 'Safety Audit' },
-  { value: 'environmental_audit', label: 'Environmental Audit' },
-  { value: 'compliance_audit', label: 'Compliance Audit' },
-  { value: 'preliminary_audit', label: 'Preliminary Audit' },
-  { value: 'follow_up_audit', label: 'Follow-up Audit' }
-];
-
 const Index = () => {
+  const dispatch = useDispatch();
+  
+  const designationState = useSelector((state) => state.DesignationSlice || {});
+  const {
+    designationData = [],
+    loading: designationLoading = false,
+    createDesignationSuccess = false,
+    error: designationError = null,
+  } = designationState;
+
   const [modal, setModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [state, setState] = useState({
     name: '',
     auditorId: '',
-    designation: '',
+    designation: null,
+    designationId: '',
     certifications: [],
-    audits: [],
     isAuthenticated: false,
     username: '',
     password: '',
-    existingPassword: '', 
+    existingPassword: '',
   });
   const [auditors, setAuditors] = useState(dummyAuditors);
-  const [formContain, setFormContain] = useState(FormContainer);
   const [errors, setErrors] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
@@ -105,6 +101,58 @@ const Index = () => {
   const [selectedCertifications, setSelectedCertifications] = useState([]);
   const [showPassword, setShowPassword] = useState(false);
   const [isPasswordChanged, setIsPasswordChanged] = useState(false);
+  
+  const [showAddDesignation, setShowAddDesignation] = useState(false);
+  const [newDesignation, setNewDesignation] = useState('');
+  const [addingDesignation, setAddingDesignation] = useState(false);
+  const [designationOptions, setDesignationOptions] = useState([]);
+
+  useEffect(() => {
+    dispatch(getDesignation({}));
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (designationData && designationData.length > 0) {
+      const options = designationData
+        .filter(item => item.isActive === 1)
+        .map(item => ({
+          value: item.designationId,
+          label: item.designationName,
+          isActive: item.isActive
+        }));
+      
+      setDesignationOptions(options);
+      
+      if (isEdit && selectedItem && selectedItem.designationId) {
+        const selectedDesignation = options.find(d => d.value === selectedItem.designationId);
+        if (selectedDesignation) {
+          setState(prev => ({
+            ...prev,
+            designation: selectedDesignation,
+            designationId: selectedDesignation.value
+          }));
+        }
+      }
+    }
+  }, [designationData, isEdit, selectedItem]);
+
+  useEffect(() => {
+    if (createDesignationSuccess) {
+      showMessage('success', 'Designation created successfully');
+      setNewDesignation('');
+      setShowAddDesignation(false);
+      setAddingDesignation(false);
+      
+      dispatch(getDesignation({}));
+      dispatch(resetDesignationStatus());
+    }
+    
+    if (designationError) {
+      showMessage('error', designationError);
+      setAddingDesignation(false);
+      dispatch(resetDesignationStatus());
+    }
+  }, [createDesignationSuccess, designationError, dispatch]);
 
   const generateNextAuditorId = () => {
     const existingIds = auditors
@@ -122,15 +170,17 @@ const Index = () => {
     onFormClear();
     setModal(false);
     setCertificationFiles([]);
+    setShowAddDesignation(false);
+    setNewDesignation('');
   };
 
   const onFormClear = () => {
     setState({
       name: '',
       auditorId: '',
-      designation: '',
+      designation: null,
+      designationId: '',
       certifications: [],
-      audits: [],
       isAuthenticated: false,
       username: '',
       password: '',
@@ -140,6 +190,8 @@ const Index = () => {
     setErrors([]);
     setShowPassword(false);
     setIsPasswordChanged(false);
+    setShowAddDesignation(false);
+    setNewDesignation('');
   };
 
   const createModel = () => {
@@ -159,20 +211,20 @@ const Index = () => {
       return;
     }
 
-    const selectedAudits = auditTypeOptions.filter(audit => 
-      data.audits.includes(audit.label)
+    const selectedDesignation = designationOptions.find(d => 
+      d.value === data.designationId || d.label === data.designation
     );
 
     const newState = {
       name: data.name || '',
       auditorId: data.auditorId || '',
-      designation: designationOptions.find(d => d.label === data.designation) || '',
+      designation: selectedDesignation || null,
+      designationId: selectedDesignation ? selectedDesignation.value : '',
       certifications: data.certifications || [],
-      audits: selectedAudits,
       isAuthenticated: data.isAuthenticated || false,
       username: data.username || '',
-      password: '', 
-      existingPassword: data.password || '********', 
+      password: '',
+      existingPassword: data.password || '********',
     };
 
     setState(newState);
@@ -237,7 +289,6 @@ const Index = () => {
     if (!state.name?.trim()) newErrors.push('name');
     if (!state.auditorId?.trim()) newErrors.push('auditorId');
     if (!state.designation) newErrors.push('designation');
-    if (!state.audits?.length) newErrors.push('audits');
     
     if (state.isAuthenticated) {
       if (!state.username?.trim()) newErrors.push('username');
@@ -271,11 +322,9 @@ const Index = () => {
       const auditorData = {
         name: state.name.trim(),
         auditorId: state.auditorId.trim(),
-        designation: typeof state.designation === 'object' ? state.designation.label : state.designation,
+        designation: state.designation ? state.designation.label : '',
+        designationId: state.designation ? state.designation.value : '',
         certifications: state.certifications,
-        audits: Array.isArray(state.audits) ? state.audits.map(audit => 
-          typeof audit === 'object' ? audit.label : audit
-        ) : [],
         isAuthenticated: state.isAuthenticated,
         username: state.isAuthenticated ? state.username.trim() : '',
         password: finalPassword,
@@ -326,20 +375,48 @@ const Index = () => {
     }
   };
 
-  const handleSelectChange = (selectedOption, name) => {
-    setState(prev => ({ ...prev, [name]: selectedOption }));
+  const handleDesignationChange = (selectedOption) => {
+    setState(prev => ({
+      ...prev,
+      designation: selectedOption,
+      designationId: selectedOption ? selectedOption.value : ''
+    }));
 
-    if (errors.includes(name)) {
-      setErrors(prev => prev.filter(error => error !== name));
+    if (errors.includes('designation')) {
+      setErrors(prev => prev.filter(error => error !== 'designation'));
     }
   };
 
-  const handleMultiSelectChange = (selectedOptions, name) => {
-    setState(prev => ({ ...prev, [name]: selectedOptions }));
-
-    if (errors.includes(name)) {
-      setErrors(prev => prev.filter(error => error !== name));
+  const toggleAddDesignation = () => {
+    setShowAddDesignation(prev => !prev);
+    if (showAddDesignation) {
+      setNewDesignation('');
     }
+  };
+
+  const handleAddDesignation = () => {
+    if (!newDesignation.trim()) {
+      showMessage('error', 'Please enter designation name');
+      return;
+    }
+
+    const duplicate = designationOptions.find(d => 
+      d.label.toLowerCase() === newDesignation.trim().toLowerCase()
+    );
+    
+    if (duplicate) {
+      showMessage('error', 'Designation already exists');
+      return;
+    }
+
+    setAddingDesignation(true);
+    
+    const designationData = {
+      designationName: newDesignation.trim(),
+      status: 'Active',
+    };
+
+    dispatch(createDesignation(designationData));
   };
 
   const handleDeleteAuditor = (auditor) => {
@@ -415,24 +492,6 @@ const Index = () => {
                 <IconEye className="w-4 h-4" />
               </button>
             </Tippy>
-          )}
-        </div>
-      ),
-    },
-    {
-      Header: 'Audits Assigned',
-      accessor: 'audits',
-      Cell: ({ value }) => (
-        <div className="flex flex-wrap gap-1">
-          {value?.slice(0, 2).map((audit, index) => (
-            <span key={index} className="px-2 py-1 text-xs bg-blue-100 text-blue-800 rounded">
-              {audit}
-            </span>
-          ))}
-          {value?.length > 2 && (
-            <span className="px-2 py-1 text-xs bg-gray-100 text-gray-600 rounded">
-              +{value.length - 2} more
-            </span>
           )}
         </div>
       ),
@@ -620,24 +679,171 @@ const Index = () => {
           </div>
         </div>
 
-        <FormLayout
-          dynamicForm={formContain}
-          handleSubmit={onFormSubmit}
-          setState={setState}
-          state={state}
-          onChangeCallBack={{
-            handleInputChange: handleInputChange,
-            handleSelectChange: handleSelectChange,
-            handleMultiSelectChange: handleMultiSelectChange,
-          }}
-          errors={errors}
-          setErrors={setErrors}
-          loadings={loading}
-          optionListState={{
-            designationList: designationOptions,
-            auditList: auditTypeOptions
-          }}
-        />
+        {/* Custom Form Fields */}
+        <div className="grid grid-cols-12 gap-4 mt-5">
+          {/* Auditor ID */}
+          <div className="col-span-6 mb-2">
+            <label className="block mb-1 font-medium text-gray-700">
+              Auditor ID <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              name="auditorId"
+              value={state.auditorId}
+              disabled
+              className="form-input w-full bg-gray-50 cursor-not-allowed"
+            />
+            {errors.includes('auditorId') && <p className="text-red-600 text-sm mt-1">* Please enter Auditor ID</p>}
+          </div>
+
+          {/* Full Name */}
+          <div className="col-span-6 mb-2">
+            <label className="block mb-1 font-medium text-gray-700">
+              Full Name <span className="text-red-500">*</span>
+            </label>
+            <input
+              type="text"
+              name="name"
+              value={state.name}
+              onChange={handleInputChange}
+              placeholder="Enter auditor full name"
+              className="form-input w-full"
+            />
+            {errors.includes('name') && <p className="text-red-600 text-sm mt-1">* Please enter Name</p>}
+          </div>
+
+          {/* Designation with Add Button */}
+          <div className="col-span-6 mb-2">
+            <div className="flex items-center mb-1">
+              <label className="block font-medium text-gray-700 mr-2">
+                Designation <span className="text-red-500">*</span>
+              </label>
+              <button
+                type="button"
+                onClick={toggleAddDesignation}
+                className="flex items-center text-green-600 hover:text-green-800"
+                title={showAddDesignation ? "Hide Add Designation" : "Add New Designation"}
+              >
+                <IconPlus className={`w-4 h-4 transition-transform ${showAddDesignation ? 'rotate-45' : ''}`} />
+              </button>
+            </div>
+            
+            <Select
+              menuPortalTarget={document.body}
+              menuPosition="fixed"
+              isMulti={false}
+              required={true}
+              onChange={handleDesignationChange}
+              getOptionLabel={(option) => option.label}
+              getOptionValue={(option) => option.value}
+              value={state.designation}
+              className="react-select react-select-container"
+              classNamePrefix="react-select"
+              isSearchable
+              onFocus={() => {
+                if (errors.includes('designation')) {
+                  setErrors(prev => prev.filter(error => error !== 'designation'));
+                }
+              }}
+              options={designationOptions}
+              isLoading={designationLoading}
+              placeholder="Select designation"
+              styles={{
+                option: (provided, state) => ({
+                  ...provided,
+                  fontSize: '16px',
+                  color: '#000',
+                  backgroundColor: state.isSelected ? '#e6f7ff' : state.isFocused ? '#71b6f98a' : '#fff',
+                  cursor: 'pointer',
+                }),
+                menuPortal: (base) => ({
+                  ...base,
+                  zIndex: 9999,
+                }),
+                menu: (provided) => ({
+                  ...provided,
+                  fontSize: '16px',
+                  color: '#000',
+                }),
+                singleValue: (provided) => ({
+                  ...provided,
+                  fontSize: '16px',
+                  color: '#000',
+                }),
+                control: (provided, state) => ({
+                  ...provided,
+                  borderColor: errors.includes('designation') ? '#ef4444' : '#d1d5db',
+                  '&:hover': {
+                    borderColor: errors.includes('designation') ? '#ef4444' : '#9ca3af',
+                  },
+                  boxShadow: state.isFocused && !errors.includes('designation') ? '0 0 0 2px rgba(59, 130, 246, 0.5)' : 'none',
+                }),
+                input: (provided) => ({
+                  ...provided,
+                  fontSize: '16px',
+                  color: '#000',
+                }),
+              }}
+            />
+            {errors.includes('designation') && <p className="text-red-600 text-sm mt-1">* Please select Designation</p>}
+          </div>
+
+          {/* Enable Authentication Checkbox */}
+          <div className="col-span-12 mb-2">
+            <label className="inline-flex items-center">
+              <input
+                type="checkbox"
+                name="isAuthenticated"
+                checked={state.isAuthenticated}
+                onChange={handleInputChange}
+                className="form-checkbox"
+              />
+              <span className="ml-2">Enable Authentication</span>
+            </label>
+          </div>
+        </div>
+
+        {/* Add Designation Form - Collapsible */}
+        {showAddDesignation && (
+          <div className="border rounded-lg p-4 bg-gray-50 mt-4 mb-4 animate-fade-in">
+            <div className="flex items-center justify-between mb-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Add New Designation
+              </label>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAddDesignation(false);
+                  setNewDesignation('');
+                }}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newDesignation}
+                onChange={(e) => setNewDesignation(e.target.value)}
+                placeholder="Enter designation name"
+                className="form-input flex-1"
+                disabled={addingDesignation}
+              />
+              <button
+                type="button"
+                onClick={handleAddDesignation}
+                disabled={addingDesignation}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {addingDesignation ? 'Adding...' : 'Add'}
+              </button>
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              Designation will be available in the dropdown after creation
+            </p>
+          </div>
+        )}
 
         <div className="grid grid-cols-12 gap-4 mt-4">
           {state.isAuthenticated ? (
@@ -749,7 +955,7 @@ const Index = () => {
         setModel={() => setViewCertModal(false)}
         modelSize="lg"
         hideFooter={true}
-        saveBtn = {false}
+        saveBtn={false}
       >
         <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
           {selectedCertifications.length === 0 ? (

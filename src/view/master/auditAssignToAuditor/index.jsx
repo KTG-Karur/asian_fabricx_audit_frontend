@@ -1,278 +1,286 @@
-import { useState, useEffect } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
-import IconPencil from '../../../components/Icon/IconPencil';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Select from 'react-select';
+import IconEye from '../../../components/Icon/IconEye';
+import IconEdit from '../../../components/Icon/IconPencil';
 import IconTrashLines from '../../../components/Icon/IconTrashLines';
-import IconPlus from '../../../components/Icon/IconPlus';
-import IconChevronUp from '../../../components/Icon/IconChevronUp';
-import IconChevronDown from '../../../components/Icon/IconChevronDown';
-import IconArrowLeft from '../../../components/Icon/IconArrowLeft';
-import IconCheck from '../../../components/Icon/IconX';
-import IconFile from '../../../components/Icon/IconFile';
-import IconCamera from '../../../components/Icon/IconPlus';
+import IconCalendar from '../../../components/Icon/IconCalendar';
+import IconClock from '../../../components/Icon/IconClock';
+import IconCheckCircle from '../../../components/Icon/IconCircleCheck';
+import IconXCircle from '../../../components/Icon/IconCircleCheck';
+import IconRefresh from '../../../components/Icon/IconRefresh';
+import IconUser from '../../../components/Icon/IconUser';
+import IconBuilding from '../../../components/Icon/IconHome';
+import IconSearch from '../../../components/Icon/IconSearch';
+import IconList from '../../../components/Icon/IconCircleCheck';
 import Table from '../../../util/Table';
 import Tippy from '@tippyjs/react';
 import ModelViewBox from '../../../util/ModelViewBox';
+import FormLayout from '../../../util/formLayout';
 import { showMessage } from '../../../util/AllFunction';
+import 'tippy.js/dist/tippy.css';
+import { formFields } from './formContainer';
 
-const SubChecklistAudit = () => {
-    const location = useLocation();
+const AuditAssignToAuditor = () => {
     const navigate = useNavigate();
 
-    const [modal, setModal] = useState(false);
-    const [loading, setLoading] = useState(false);
-    const [isEdit, setIsEdit] = useState(false);
-    const [itemState, setItemState] = useState({
-        checklistId: '',
-        name: '',
-        order: 0,
-        hasOptions: false,
-        hasDescription: false,
-        hasImage: false,
-    });
-    const [checklists, setChecklists] = useState([]);
-    const [checklist, setChecklist] = useState(null);
-    const [errors, setErrors] = useState([]);
-    const [selectedCheckItem, setSelectedCheckItem] = useState(null);
-    const [currentPage, setCurrentPage] = useState(0);
-    const [pageSize, setPageSize] = useState(10);
-
-    const columns = [
+    const dummyAuditors = [
         {
-            Header: 'Order',
-            accessor: 'order',
-            width: 100,
-            Cell: ({ row }) => {
-                const item = row.original;
-                const items = checklist.checkItems || [];
-                const isFirstItem = item.order === 1;
-                const isLastItem = item.order === items.length;
-
-                return (
-                    <div className="flex items-center space-x-2">
-                        <span className="font-bold">{item.order}</span>
-                        <div className="flex flex-col">
-                            <button onClick={() => moveItemUp(item.id)} className={`text-gray-500 hover:text-blue-600 ${isFirstItem ? 'opacity-30 cursor-not-allowed' : ''}`} disabled={isFirstItem}>
-                                <IconChevronUp className="w-4 h-4" />
-                            </button>
-                            <button onClick={() => moveItemDown(item.id)} className={`text-gray-500 hover:text-blue-600 ${isLastItem ? 'opacity-30 cursor-not-allowed' : ''}`} disabled={isLastItem}>
-                                <IconChevronDown className="w-4 h-4" />
-                            </button>
-                        </div>
-                    </div>
-                );
-            },
+            id: 1,
+            name: 'John Smith',
+            auditorId: 'AUD001',
+            designation: 'Senior Auditor',
+            designationId: '96af0672-2428-4a0b-8770-9e2a877415bf',
+            certifications: [{ id: 1, name: 'ISO-9001-Certificate.jpg', url: 'cert1.jpg' }],
+            lastLogin: '2024-01-15T10:30:00',
+            isAuthenticated: true,
+            isActive: 1,
+            createdDate: '2024-01-01',
         },
         {
-            Header: 'Check Item Name',
-            accessor: 'name',
-            sort: true,
-            Cell: ({ value }) => <div className="font-medium text-gray-800">{value}</div>,
+            id: 2,
+            name: 'Sarah Johnson',
+            auditorId: 'AUD002',
+            designation: 'Lead Auditor',
+            designationId: '593ad470-64c0-4a38-ad2c-d0cee894e11d',
+            certifications: [{ id: 1, name: 'Lead-Auditor-Certificate.jpg', url: 'cert3.jpg' }],
+            lastLogin: '2024-01-14T14:20:00',
+            isAuthenticated: true,
+            isActive: 1,
+            createdDate: '2024-01-05',
         },
         {
-            Header: 'Configuration',
-            accessor: 'config',
-            Cell: ({ row }) => {
-                const item = row.original;
-                return renderItemIndicators(item);
-            },
-            width: 200,
-        },
-        {
-            Header: 'Status',
-            accessor: 'isActive',
-            Cell: ({ value }) => (
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${value === 1 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>{value === 1 ? 'Active' : 'Inactive'}</span>
-            ),
-            width: 100,
-        },
-        {
-            Header: 'Actions',
-            accessor: 'actions',
-            Cell: ({ row }) => {
-                const item = row.original;
-                const isActive = item.isActive === 1;
-
-                return (
-                    <div className="flex items-center space-x-2">
-                        {isActive ? (
-                            <>
-                                <Tippy content="Edit">
-                                    <button onClick={() => onEditForm(item)} className="text-success hover:text-success-dark">
-                                        <IconPencil className="w-4 h-4" />
-                                    </button>
-                                </Tippy>
-                                <Tippy content="Delete">
-                                    <button onClick={() => handleDeleteCheckItem(item)} className="text-danger hover:text-danger-dark">
-                                        <IconTrashLines className="w-4 h-4" />
-                                    </button>
-                                </Tippy>
-                            </>
-                        ) : (
-                            <Tippy content="Restore">
-                                <button onClick={() => handleRestoreCheckItem(item)} className="text-warning hover:text-warning-dark font-bold">
-                                    ↶
-                                </button>
-                            </Tippy>
-                        )}
-                    </div>
-                );
-            },
-            width: 100,
+            id: 3,
+            name: 'Michael Chen',
+            auditorId: 'AUD003',
+            designation: 'Junior Auditor',
+            designationId: '7ad7ec3e-6b7e-4321-8efc-9b25fdab91a7',
+            certifications: [],
+            lastLogin: '2024-01-10T09:15:00',
+            isAuthenticated: false,
+            isActive: 1,
+            createdDate: '2024-01-10',
         },
     ];
+
+    const dummySuppliers = [
+        { id: 1, name: 'ABC Manufacturing Ltd.', type: 'Manufacturer', auditCount: 3 },
+        { id: 2, name: 'XYZ Textile Mills', type: 'Textile Producer', auditCount: 2 },
+        { id: 3, name: 'Global Garments Inc.', type: 'Garment Manufacturer', auditCount: 1 },
+        { id: 4, name: 'Tech Components Corp.', type: 'Electronic Components', auditCount: 0 },
+        { id: 5, name: 'Food Processing Unit', type: 'Food Manufacturer', auditCount: 1 },
+        { id: 6, name: 'Precision Tools Co.', type: 'Tool Manufacturer', auditCount: 0 },
+        { id: 7, name: 'Quality Fabrics Ltd.', type: 'Fabric Supplier', auditCount: 0 },
+        { id: 8, name: 'Modern Packaging Inc.', type: 'Packaging Supplier', auditCount: 0 },
+    ];
+
+    const dummyAuditAssignments = [
+        {
+            id: 1,
+            auditId: 'AUDIT-2024-001',
+            auditType: 'External Provider Audit',
+            supplierId: 1,
+            supplierName: 'ABC Manufacturing Ltd.',
+            supplierType: 'Manufacturer',
+            supplierAuditCount: 3,
+            assignedAuditorId: 1,
+            assignedAuditorName: 'John Smith',
+            assignedAuditorIdCode: 'AUD001',
+            assignmentDate: '2024-03-01',
+            dueDate: '2024-03-31',
+            nextAuditDate: '2024-09-30',
+            status: 'Scheduled',
+            completionDate: null,
+            score: 88,
+            totalChecklistItems: 280,
+            completedChecklistItems: 150,
+            workerInterviews: 5,
+            lastUpdated: '2024-03-15T10:30:00',
+            remarks: 'Initial assessment completed. Follow-up required for safety compliance.',
+            isActive: 1,
+        },
+        {
+            id: 2,
+            auditId: 'AUDIT-2024-002',
+            auditType: 'Factory Audit',
+            supplierId: 2,
+            supplierName: 'XYZ Textile Mills',
+            supplierType: 'Textile Producer',
+            supplierAuditCount: 2,
+            assignedAuditorId: 2,
+            assignedAuditorName: 'Sarah Johnson',
+            assignedAuditorIdCode: 'AUD002',
+            assignmentDate: '2024-03-05',
+            dueDate: '2024-04-05',
+            nextAuditDate: '2024-09-28',
+            status: 'Completed',
+            completionDate: '2024-03-28',
+            score: 92,
+            totalChecklistItems: 280,
+            completedChecklistItems: 280,
+            workerInterviews: 6,
+            lastUpdated: '2024-03-28T15:45:00',
+            remarks: 'Audit completed successfully. No major non-conformities found.',
+            isActive: 1,
+        },
+        {
+            id: 3,
+            auditId: 'AUDIT-2024-003',
+            auditType: 'Quality Audit',
+            supplierId: 3,
+            supplierName: 'Global Garments Inc.',
+            supplierType: 'Garment Manufacturer',
+            supplierAuditCount: 1,
+            assignedAuditorId: 1,
+            assignedAuditorName: 'John Smith',
+            assignedAuditorIdCode: 'AUD001',
+            assignmentDate: '2024-03-10',
+            dueDate: '2024-04-10',
+            nextAuditDate: '2024-10-10',
+            status: 'Pending',
+            completionDate: null,
+            score: null,
+            totalChecklistItems: 280,
+            completedChecklistItems: 0,
+            workerInterviews: 0,
+            lastUpdated: '2024-03-10T09:00:00',
+            remarks: 'Scheduled for next week.',
+            isActive: 1,
+        },
+        {
+            id: 4,
+            auditId: 'AUDIT-2024-004',
+            auditType: 'Safety Audit',
+            supplierId: 4,
+            supplierName: 'Tech Components Corp.',
+            supplierType: 'Electronic Components',
+            supplierAuditCount: 1,
+            assignedAuditorId: 3,
+            assignedAuditorName: 'Michael Chen',
+            assignedAuditorIdCode: 'AUD003',
+            assignmentDate: '2024-03-12',
+            dueDate: '2024-04-12',
+            nextAuditDate: '2024-10-12',
+            status: 'In Progress',
+            completionDate: null,
+            score: null,
+            totalChecklistItems: 280,
+            completedChecklistItems: 80,
+            workerInterviews: 2,
+            lastUpdated: '2024-03-18T14:20:00',
+            remarks: 'Initial findings show need for improvement in emergency exits.',
+            isActive: 1,
+        },
+        {
+            id: 5,
+            auditId: 'AUDIT-2024-005',
+            auditType: 'Environmental Audit',
+            supplierId: 5,
+            supplierName: 'Food Processing Unit',
+            supplierType: 'Food Manufacturer',
+            supplierAuditCount: 1,
+            assignedAuditorId: 2,
+            assignedAuditorName: 'Sarah Johnson',
+            assignedAuditorIdCode: 'AUD002',
+            assignmentDate: '2024-02-20',
+            dueDate: '2024-03-20',
+            nextAuditDate: '2024-08-20',
+            status: 'Overdue',
+            completionDate: null,
+            score: null,
+            totalChecklistItems: 280,
+            completedChecklistItems: 120,
+            workerInterviews: 3,
+            lastUpdated: '2024-03-19T11:15:00',
+            remarks: 'Delayed due to supplier unavailability.',
+            isActive: 1,
+        },
+    ];
+
+    const statusOptions = [
+        { value: 'all', label: 'All Status' },
+        { value: 'Scheduled', label: 'Scheduled' },
+        { value: 'Pending', label: 'Pending' },
+        { value: 'In Progress', label: 'In Progress' },
+        { value: 'Completed', label: 'Completed' },
+        { value: 'Overdue', label: 'Overdue' },
+    ];
+
+    const [auditors, setAuditors] = useState(dummyAuditors);
+    const [suppliers, setSuppliers] = useState(dummySuppliers);
+    const [auditAssignments, setAuditAssignments] = useState(dummyAuditAssignments);
+    const [filteredAssignments, setFilteredAssignments] = useState(dummyAuditAssignments);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState({ value: 'all', label: 'All Status' });
+    const [auditorFilter, setAuditorFilter] = useState({ value: 'all', label: 'All Auditors' });
+    const [supplierFilter, setSupplierFilter] = useState({ value: 'all', label: 'All Suppliers' });
+    const [currentPage, setCurrentPage] = useState(0);
+    const [pageSize, setPageSize] = useState(10);
+    const [loading, setLoading] = useState(false);
+
+    const [assignModal, setAssignModal] = useState(false);
+    const [editModal, setEditModal] = useState(false);
+    const [viewModal, setViewModal] = useState(false);
+
+    const [assignmentForm, setAssignmentForm] = useState({
+        supplierId: '',
+        supplierAuditCount: 0,
+        assignedAuditorId: '',
+        assignmentDate: new Date().toISOString().split('T')[0],
+        dueDate: '',
+        nextAuditDate: '',
+        remarks: '',
+    });
+
+    const [selectedAssignment, setSelectedAssignment] = useState(null);
+    const [errors, setErrors] = useState([]);
+
+    const [assignFormContain] = useState([
+        {
+            formFields,
+        },
+    ]);
+
     useEffect(() => {
-        if (location.state?.checklist && location.state?.checklists) {
-            setChecklist(location.state.checklist);
-            setChecklists(location.state.checklists);
-        } else {
-            navigate('/master/checklist');
-        }
-    }, [location.state, navigate]);
+        setLoading(true);
+        setTimeout(() => {
+            setLoading(false);
+        }, 500);
+    }, []);
 
-    const closeModel = () => {
-        setIsEdit(false);
-        onFormClear();
-        setModal(false);
-    };
+    useEffect(() => {
+        let filtered = auditAssignments.filter((assignment) => assignment.isActive === 1);
 
-    const onFormClear = () => {
-        setItemState({
-            checklistId: checklist?.id || '',
-            name: '',
-            order: 0,
-            hasOptions: false,
-            hasDescription: false,
-            hasImage: false,
-        });
-        setSelectedCheckItem(null);
-        setErrors([]);
-    };
-
-    const createModel = () => {
-        onFormClear();
-        setIsEdit(false);
-
-        const maxItemOrder = checklist?.checkItems?.length > 0 ? Math.max(...checklist.checkItems.map((i) => i.order)) : 0;
-
-        setItemState({
-            checklistId: checklist?.id || '',
-            name: '',
-            order: maxItemOrder + 1,
-            hasOptions: false,
-            hasDescription: false,
-            hasImage: false,
-        });
-        setModal(true);
-        setErrors([]);
-    };
-
-    const onEditForm = (item) => {
-        setItemState({
-            checklistId: checklist?.id || '',
-            name: item.name || '',
-            order: item.order || 0,
-            hasOptions: item.hasOptions || false,
-            hasDescription: item.hasDescription || false,
-            hasImage: item.hasImage || false,
-        });
-        setIsEdit(true);
-        setSelectedCheckItem(item);
-        setModal(true);
-        setErrors([]);
-    };
-
-    const validateForm = () => {
-        const newErrors = [];
-        if (!itemState.name?.trim()) newErrors.push('name');
-        if (!itemState.order || itemState.order < 1) newErrors.push('order');
-
-        setErrors(newErrors);
-        return newErrors.length === 0;
-    };
-
-    const onFormSubmit = async (e) => {
-        if (e) e.preventDefault();
-        if (!validateForm()) {
-            showMessage('error', 'Please fill all required fields correctly');
-            return;
+        if (searchTerm) {
+            filtered = filtered.filter(
+                (assignment) =>
+                    assignment.auditId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    assignment.supplierName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    assignment.assignedAuditorName.toLowerCase().includes(searchTerm.toLowerCase()),
+            );
         }
 
-        try {
-            if (!checklist) {
-                showMessage('error', 'Checklist not found');
-                return;
-            }
-
-            const checklistIndex = checklists.findIndex((c) => c.id === checklist.id);
-            if (checklistIndex === -1) {
-                showMessage('error', 'Checklist not found');
-                return;
-            }
-
-            const updatedChecklists = [...checklists];
-
-            if (isEdit && selectedCheckItem) {
-                const updatedItem = {
-                    ...selectedCheckItem,
-                    name: itemState.name.trim(),
-                    order: itemState.order,
-                    hasOptions: itemState.hasOptions,
-                    hasDescription: itemState.hasDescription,
-                    hasImage: itemState.hasImage,
-                };
-
-                if (itemState.hasOptions) {
-                    updatedItem.options = [
-                        { id: 1, label: 'Yes', value: 'yes' },
-                        { id: 2, label: 'No', value: 'no' },
-                        { id: 3, label: 'Not Applicable', value: 'na' },
-                    ];
-                } else {
-                    delete updatedItem.options;
-                }
-
-                updatedChecklists[checklistIndex].checkItems = updatedChecklists[checklistIndex].checkItems.map((item) => (item.id === selectedCheckItem.id ? updatedItem : item));
-
-                showMessage('success', 'Check item updated successfully');
-            } else {
-                const newCheckItem = {
-                    id: Date.now(),
-                    checklistId: checklist.id,
-                    name: itemState.name.trim(),
-                    order: itemState.order,
-                    isActive: 1,
-                    hasOptions: itemState.hasOptions,
-                    hasDescription: itemState.hasDescription,
-                    hasImage: itemState.hasImage,
-                };
-
-                if (itemState.hasOptions) {
-                    newCheckItem.options = [
-                        { id: 1, label: 'Yes', value: 'yes' },
-                        { id: 2, label: 'No', value: 'no' },
-                        { id: 3, label: 'Not Applicable', value: 'na' },
-                    ];
-                }
-
-                updatedChecklists[checklistIndex].checkItems = [...(updatedChecklists[checklistIndex].checkItems || []), newCheckItem];
-                showMessage('success', 'Check item created successfully');
-            }
-
-            updatedChecklists[checklistIndex].checkItems.sort((a, b) => a.order - b.order);
-            setChecklists(updatedChecklists);
-            setChecklist(updatedChecklists[checklistIndex]);
-
-            closeModel();
-        } catch (error) {
-            showMessage('error', 'Failed to save check item');
+        if (statusFilter.value !== 'all') {
+            filtered = filtered.filter((assignment) => assignment.status === statusFilter.value);
         }
-    };
+
+        if (auditorFilter.value !== 'all') {
+            filtered = filtered.filter((assignment) => assignment.assignedAuditorId === parseInt(auditorFilter.value));
+        }
+
+        if (supplierFilter.value !== 'all') {
+            filtered = filtered.filter((assignment) => assignment.supplierId === parseInt(supplierFilter.value));
+        }
+
+        setFilteredAssignments(filtered);
+        setCurrentPage(0);
+    }, [searchTerm, statusFilter, auditorFilter, supplierFilter, auditAssignments]);
 
     const handleInputChange = (e) => {
-        const { name, value, type, checked } = e.target;
-        setItemState((prev) => ({
+        const { name, value } = e.target;
+        setAssignmentForm((prev) => ({
             ...prev,
-            [name]: type === 'checkbox' ? checked : value,
+            [name]: value,
         }));
 
         if (errors.includes(name)) {
@@ -280,67 +288,297 @@ const SubChecklistAudit = () => {
         }
     };
 
-    const handleDeleteCheckItem = (item) => {
-        showMessage('warning', 'Are you sure you want to delete this check item?', () => {
-            const checklistIndex = checklists.findIndex((c) => c.id === checklist.id);
-            if (checklistIndex === -1) return;
+    const handleSelectChange = (selectedOption, name) => {
+        setAssignmentForm((prev) => ({
+            ...prev,
+            [name]: selectedOption ? selectedOption.value : '',
+        }));
 
-            const updatedChecklists = [...checklists];
-            updatedChecklists[checklistIndex].checkItems = updatedChecklists[checklistIndex].checkItems.filter((i) => i.id !== item.id).map((item, index) => ({ ...item, order: index + 1 }));
+        if (name === 'supplierId' && selectedOption) {
+            const selectedSupplier = suppliers.find((s) => s.id === selectedOption.value);
+            if (selectedSupplier) {
+                setAssignmentForm((prev) => ({
+                    ...prev,
+                    supplierId: selectedOption.value,
+                    supplierAuditCount: selectedSupplier.auditCount || 0,
+                    supplierType: selectedSupplier.type,
+                }));
+            }
+        }
 
-            setChecklists(updatedChecklists);
-            setChecklist(updatedChecklists[checklistIndex]);
+        if (errors.includes(name)) {
+            setErrors((prev) => prev.filter((error) => error !== name));
+        }
+    };
 
-            showMessage('success', 'Check item deleted successfully');
+    const validateForm = () => {
+        const newErrors = [];
+        if (!assignmentForm.supplierId) newErrors.push('supplierId');
+        if (!assignmentForm.assignedAuditorId) newErrors.push('assignedAuditorId');
+        if (!assignmentForm.assignmentDate) newErrors.push('assignmentDate');
+        if (!assignmentForm.dueDate) newErrors.push('dueDate');
+        if (!assignmentForm.nextAuditDate) newErrors.push('nextAuditDate');
+
+        setErrors(newErrors);
+        return newErrors.length === 0;
+    };
+
+    const generateNextAuditId = () => {
+        const existingIds = auditAssignments
+            .map((a) => a.auditId)
+            .filter((id) => id.startsWith('AUDIT-'))
+            .map((id) => {
+                const match = id.match(/AUDIT-(\d+)-(\d+)/);
+                return match ? parseInt(match[2]) : 0;
+            })
+            .filter((id) => !isNaN(id));
+
+        const maxId = existingIds.length > 0 ? Math.max(...existingIds) : 0;
+        const year = new Date().getFullYear();
+        return `AUDIT-${year}-${String(maxId + 1).padStart(3, '0')}`;
+    };
+
+    const openAssignModal = () => {
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        const nextAudit = new Date();
+        nextAudit.setMonth(nextAudit.getMonth() + 6);
+
+        setAssignmentForm({
+            supplierId: '',
+            supplierAuditCount: 0,
+            assignedAuditorId: '',
+            assignmentDate: new Date().toISOString().split('T')[0],
+            dueDate: tomorrow.toISOString().split('T')[0],
+            nextAuditDate: nextAudit.toISOString().split('T')[0],
+            remarks: '',
+        });
+        setErrors([]);
+        setAssignModal(true);
+    };
+
+    const openEditModal = (assignment) => {
+        setSelectedAssignment(assignment);
+        setAssignmentForm({
+            supplierId: assignment.supplierId.toString(),
+            supplierAuditCount: assignment.supplierAuditCount,
+            assignedAuditorId: assignment.assignedAuditorId.toString(),
+            assignmentDate: assignment.assignmentDate,
+            dueDate: assignment.dueDate,
+            nextAuditDate: assignment.nextAuditDate,
+            remarks: assignment.remarks || '',
+        });
+        setErrors([]);
+        setEditModal(true);
+    };
+
+    const openViewModal = (assignment) => {
+        setSelectedAssignment(assignment);
+        setViewModal(true);
+    };
+
+    const closeModal = () => {
+        setAssignModal(false);
+        setEditModal(false);
+        setViewModal(false);
+        setSelectedAssignment(null);
+        setErrors([]);
+    };
+
+    const handleAssignSubmit = () => {
+        if (!validateForm()) {
+            showMessage('error', 'Please fill all required fields');
+            return;
+        }
+
+        const selectedAuditor = auditors.find((a) => a.id === parseInt(assignmentForm.assignedAuditorId));
+        const selectedSupplier = suppliers.find((s) => s.id === parseInt(assignmentForm.supplierId));
+
+        if (!selectedAuditor || !selectedSupplier) {
+            showMessage('error', 'Invalid auditor or supplier selected');
+            return;
+        }
+
+        const newAssignment = {
+            id: auditAssignments.length + 1,
+            auditId: generateNextAuditId(),
+            auditType: 'External Provider Audit',
+            supplierId: parseInt(assignmentForm.supplierId),
+            supplierName: selectedSupplier.name,
+            supplierType: selectedSupplier.type,
+            supplierAuditCount: selectedSupplier.auditCount + 1,
+            assignedAuditorId: parseInt(assignmentForm.assignedAuditorId),
+            assignedAuditorName: selectedAuditor.name,
+            assignedAuditorIdCode: selectedAuditor.auditorId,
+            assignmentDate: assignmentForm.assignmentDate,
+            dueDate: assignmentForm.dueDate,
+            nextAuditDate: assignmentForm.nextAuditDate,
+            status: 'Scheduled',
+            completionDate: null,
+            score: null,
+            totalChecklistItems: 280,
+            completedChecklistItems: 0,
+            workerInterviews: 0,
+            lastUpdated: new Date().toISOString(),
+            remarks: assignmentForm.remarks.trim(),
+            isActive: 1,
+        };
+
+        setAuditAssignments((prev) => [...prev, newAssignment]);
+
+        const updatedSuppliers = suppliers.map((supplier) => {
+            if (supplier.id === parseInt(assignmentForm.supplierId)) {
+                return { ...supplier, auditCount: supplier.auditCount + 1 };
+            }
+            return supplier;
+        });
+        setSuppliers(updatedSuppliers);
+
+        showMessage('success', 'Audit assigned successfully');
+        closeModal();
+    };
+
+    const handleUpdateSubmit = () => {
+        if (!validateForm()) {
+            showMessage('error', 'Please fill all required fields');
+            return;
+        }
+
+        const selectedAuditor = auditors.find((a) => a.id === parseInt(assignmentForm.assignedAuditorId));
+        const selectedSupplier = suppliers.find((s) => s.id === parseInt(assignmentForm.supplierId));
+
+        if (!selectedAuditor || !selectedSupplier) {
+            showMessage('error', 'Invalid auditor or supplier selected');
+            return;
+        }
+
+        const updatedAssignments = auditAssignments.map((assignment) => {
+            if (assignment.id === selectedAssignment.id) {
+                return {
+                    ...assignment,
+                    supplierId: parseInt(assignmentForm.supplierId),
+                    supplierName: selectedSupplier.name,
+                    supplierType: selectedSupplier.type,
+                    supplierAuditCount: selectedSupplier.auditCount,
+                    assignedAuditorId: parseInt(assignmentForm.assignedAuditorId),
+                    assignedAuditorName: selectedAuditor.name,
+                    assignedAuditorIdCode: selectedAuditor.auditorId,
+                    assignmentDate: assignmentForm.assignmentDate,
+                    dueDate: assignmentForm.dueDate,
+                    nextAuditDate: assignmentForm.nextAuditDate,
+                    remarks: assignmentForm.remarks.trim(),
+                    lastUpdated: new Date().toISOString(),
+                };
+            }
+            return assignment;
+        });
+
+        setAuditAssignments(updatedAssignments);
+        showMessage('success', 'Assignment updated successfully');
+        closeModal();
+    };
+
+    const handleStartAudit = (assignment) => {
+        navigate('/audit/external-provider/form', {
+            state: {
+                mode: 'edit',
+                auditData: {
+                    supplierName: assignment.supplierName,
+                    supplierType: assignment.supplierType,
+                    supplierAuditCount: assignment.supplierAuditCount,
+                    asianAuditorName: assignment.assignedAuditorName,
+                    status: 'In Progress',
+                    auditId: assignment.auditId,
+                    auditDate: assignment.assignmentDate,
+                    auditType: assignment.auditType,
+                    visitDate: assignment.assignmentDate,
+                },
+            },
         });
     };
 
-    const moveItemUp = (itemId) => {
-        if (!checklist) return;
-
-        const itemIndex = checklist.checkItems.findIndex((i) => i.id === itemId);
-        if (itemIndex <= 0) return;
-
-        const updatedChecklists = [...checklists];
-        const checklistIndex = updatedChecklists.findIndex((c) => c.id === checklist.id);
-        if (checklistIndex === -1) return;
-
-        const items = [...updatedChecklists[checklistIndex].checkItems];
-        const temp = items[itemIndex];
-        items[itemIndex] = items[itemIndex - 1];
-        items[itemIndex - 1] = temp;
-
-        items.forEach((item, idx) => {
-            item.order = idx + 1;
+    const handleDeleteAssignment = (assignment) => {
+        showMessage('warning', 'Are you sure you want to delete this assignment?', () => {
+            const updatedAssignments = auditAssignments.map((a) => (a.id === assignment.id ? { ...a, isActive: 0 } : a));
+            setAuditAssignments(updatedAssignments);
+            showMessage('success', 'Assignment deleted successfully');
         });
-
-        updatedChecklists[checklistIndex].checkItems = items;
-        setChecklists(updatedChecklists);
-        setChecklist(updatedChecklists[checklistIndex]);
     };
 
-    const moveItemDown = (itemId) => {
-        if (!checklist) return;
+    const handleRestoreAssignment = (assignment) => {
+        const updatedAssignments = auditAssignments.map((a) => (a.id === assignment.id ? { ...a, isActive: 1 } : a));
+        setAuditAssignments(updatedAssignments);
+        showMessage('success', 'Assignment restored successfully');
+    };
 
-        const itemIndex = checklist.checkItems.findIndex((i) => i.id === itemId);
-        if (itemIndex >= checklist.checkItems.length - 1) return;
+    const navigateToAuditForm = (assignment) => {
+        const mode = assignment.status === 'Completed' ? 'view' : 'edit';
 
-        const updatedChecklists = [...checklists];
-        const checklistIndex = updatedChecklists.findIndex((c) => c.id === checklist.id);
-        if (checklistIndex === -1) return;
-
-        const items = [...updatedChecklists[checklistIndex].checkItems];
-        const temp = items[itemIndex];
-        items[itemIndex] = items[itemIndex + 1];
-        items[itemIndex + 1] = temp;
-
-        items.forEach((item, idx) => {
-            item.order = idx + 1;
+        navigate('/audit/external-provider/form', {
+            state: {
+                mode: mode,
+                auditData: {
+                    supplierName: assignment.supplierName,
+                    supplierType: assignment.supplierType,
+                    supplierAuditCount: assignment.supplierAuditCount,
+                    asianAuditorName: assignment.assignedAuditorName,
+                    status: assignment.status,
+                    auditId: assignment.auditId,
+                    auditDate: assignment.assignmentDate,
+                    auditType: assignment.auditType,
+                    visitDate: assignment.assignmentDate,
+                },
+            },
         });
+    };
 
-        updatedChecklists[checklistIndex].checkItems = items;
-        setChecklists(updatedChecklists);
-        setChecklist(updatedChecklists[checklistIndex]);
+    const getStatusBadge = (status) => {
+        switch (status) {
+            case 'Completed':
+                return (
+                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 flex items-center w-fit">
+                        <IconCheckCircle className="w-3 h-3 mr-1" /> Completed
+                    </span>
+                );
+            case 'In Progress':
+                return (
+                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 flex items-center w-fit">
+                        <IconRefresh className="w-3 h-3 mr-1 animate-spin" /> In Progress
+                    </span>
+                );
+            case 'Pending':
+                return (
+                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800 flex items-center w-fit">
+                        <IconClock className="w-3 h-3 mr-1" /> Pending
+                    </span>
+                );
+            case 'Scheduled':
+                return (
+                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800 flex items-center w-fit">
+                        <IconCalendar className="w-3 h-3 mr-1" /> Scheduled
+                    </span>
+                );
+            case 'Overdue':
+                return (
+                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 flex items-center w-fit">
+                        <IconXCircle className="w-3 h-3 mr-1" /> Overdue
+                    </span>
+                );
+            default:
+                return <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-800">{status}</span>;
+        }
+    };
+
+    const getProgressPercentage = (assignment) => {
+        if (assignment.totalChecklistItems === 0) return 0;
+        return Math.round((assignment.completedChecklistItems / assignment.totalChecklistItems) * 100);
+    };
+
+    const getProgressColor = (percentage) => {
+        if (percentage >= 90) return 'bg-green-500';
+        if (percentage >= 70) return 'bg-yellow-500';
+        if (percentage >= 50) return 'bg-orange-500';
+        return 'bg-red-500';
     };
 
     const handlePaginationChange = (pageIndex, newPageSize) => {
@@ -349,97 +587,376 @@ const SubChecklistAudit = () => {
     };
 
     const getPaginatedData = () => {
-        const items = checklist?.checkItems || [];
         const startIndex = currentPage * pageSize;
         const endIndex = startIndex + pageSize;
-        return items.slice(startIndex, endIndex);
+        return filteredAssignments.slice(startIndex, endIndex);
     };
 
     const getTotalCount = () => {
-        return checklist?.checkItems?.length || 0;
+        return filteredAssignments.length;
     };
 
-    const renderItemIndicators = (item) => {
-        const indicators = [];
-
-        if (item.hasOptions) {
-            indicators.push(
-                <Tippy key="options" content="Has Yes/No/NA options">
-                    <div className="flex items-center space-x-1 bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
-                        <IconCheck className="w-3 h-3" />
-                        <span>Options</span>
-                    </div>
-                </Tippy>,
-            );
-        }
-
-        if (item.hasDescription) {
-            indicators.push(
-                <Tippy key="desc" content="Requires description">
-                    <div className="flex items-center space-x-1 bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                        <IconFile className="w-3 h-3" />
-                        <span>Desc</span>
-                    </div>
-                </Tippy>,
-            );
-        }
-
-        if (item.hasImage) {
-            indicators.push(
-                <Tippy key="image" content="Requires image upload">
-                    <div className="flex items-center space-x-1 bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">
-                        <IconCamera className="w-3 h-3" />
-                        <span>Image</span>
-                    </div>
-                </Tippy>,
-            );
-        }
-
-        return <div className="flex items-center space-x-1">{indicators}</div>;
+    const getStatistics = () => {
+        const activeAssignments = auditAssignments.filter((a) => a.isActive === 1);
+        return {
+            total: activeAssignments.length,
+            completed: activeAssignments.filter((a) => a.status === 'Completed').length,
+            inProgress: activeAssignments.filter((a) => a.status === 'In Progress').length,
+            pending: activeAssignments.filter((a) => a.status === 'Pending').length,
+            scheduled: activeAssignments.filter((a) => a.status === 'Scheduled').length,
+            overdue: activeAssignments.filter((a) => a.status === 'Overdue').length,
+        };
     };
 
-    const handleBack = () => {
-        // Navigate back to main page with updated checklists
-        navigate('/master/checklist', {
-            state: { checklists: checklists },
-        });
-    };
+    const stats = getStatistics();
 
-    if (!checklist) {
-        return (
-            <div className="flex items-center justify-center h-screen">
-                <div className="text-center">
-                    <div className="text-gray-500">No checklist selected</div>
-                    <button onClick={handleBack} className="mt-4 px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition">
-                        Go Back
-                    </button>
-                </div>
-            </div>
-        );
-    }
+    const supplierList = suppliers.map((supplier) => ({
+        id: supplier.id,
+        name: supplier.name,
+        type: supplier.type,
+        auditCount: supplier.auditCount,
+    }));
+
+    const auditorList = auditors
+        .filter((auditor) => auditor.isActive === 1 && auditor.isAuthenticated)
+        .map((auditor) => ({
+            id: auditor.id,
+            name: `${auditor.name} (${auditor.auditorId})`,
+            designation: auditor.designation,
+        }));
+
+    const columns = [
+        {
+            Header: 'Audit Details',
+            accessor: 'auditDetails',
+            Cell: ({ row }) => {
+                const assignment = row.original;
+                const progress = getProgressPercentage(assignment);
+                const isOverdue = new Date(assignment.dueDate) < new Date() && assignment.status !== 'Completed';
+
+                return (
+                    <div>
+                        <div className="font-bold text-gray-800 mb-2">{assignment.auditId}</div>
+                        <div className="text-sm font-medium text-gray-700 mb-1">{assignment.auditType}</div>
+                        <div className="flex items-center text-sm text-gray-600 mb-2">
+                            <IconBuilding className="w-3 h-3 mr-1" />
+                            {assignment.supplierName}
+                        </div>
+                        <div className="flex items-center justify-between text-xs text-gray-500 mb-2">
+                            <span>{assignment.supplierType}</span>
+                            <span className="flex items-center bg-gray-100 px-2 py-1 rounded">
+                                <IconList className="w-3 h-3 mr-1" />
+                                Audit #{assignment.supplierAuditCount}
+                            </span>
+                        </div>
+
+                        {assignment.status !== 'Scheduled' && assignment.status !== 'Pending' && (
+                            <div className="space-y-1">
+                                <div className="flex justify-between text-xs text-gray-600">
+                                    <span>Progress: {progress}%</span>
+                                    <span>
+                                        {assignment.completedChecklistItems}/{assignment.totalChecklistItems} items
+                                    </span>
+                                </div>
+                                <div className="w-full bg-gray-200 rounded-full h-1.5">
+                                    <div className={`h-1.5 rounded-full ${getProgressColor(progress)}`} style={{ width: `${progress}%` }}></div>
+                                </div>
+                            </div>
+                        )}
+
+                        {isOverdue && assignment.status !== 'Completed' && (
+                            <div className="text-xs text-red-600 mt-1 flex items-center">
+                                <IconXCircle className="w-3 h-3 mr-1" />
+                                Past due date
+                            </div>
+                        )}
+                    </div>
+                );
+            },
+            sort: true,
+        },
+        {
+            Header: 'Auditor & Dates',
+            accessor: 'auditorDates',
+            Cell: ({ row }) => {
+                const assignment = row.original;
+                const isOverdue = new Date(assignment.dueDate) < new Date() && assignment.status !== 'Completed';
+
+                return (
+                    <div className="space-y-2">
+                        <div className="flex items-center">
+                            <IconUser className="w-4 h-4 text-gray-500 mr-2" />
+                            <div>
+                                <div className="font-medium text-gray-800">{assignment.assignedAuditorName}</div>
+                                <div className="text-xs text-gray-500">{assignment.assignedAuditorIdCode}</div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-1 text-sm">
+                            <div className="flex items-center">
+                                <IconCalendar className="w-3 h-3 text-gray-400 mr-2" />
+                                <span className="text-gray-600">Assigned: </span>
+                                <span className="ml-1 font-medium">{new Date(assignment.assignmentDate).toLocaleDateString()}</span>
+                            </div>
+                            <div className="flex items-center">
+                                <IconCalendar className={`w-3 h-3 mr-2 ${isOverdue ? 'text-red-500' : 'text-gray-400'}`} />
+                                <span className={`${isOverdue ? 'text-red-600' : 'text-gray-600'}`}>Due: </span>
+                                <span className={`ml-1 font-medium ${isOverdue ? 'text-red-600' : ''}`}>{new Date(assignment.dueDate).toLocaleDateString()}</span>
+                            </div>
+                            {assignment.status === 'Completed' && assignment.nextAuditDate && (
+                                <div className="flex items-center">
+                                    <IconCalendar className="w-3 h-3 text-gray-400 mr-2" />
+                                    <span className="text-gray-600">Next Audit: </span>
+                                    <span className="ml-1 font-medium">{new Date(assignment.nextAuditDate).toLocaleDateString()}</span>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                );
+            },
+            width: 200,
+        },
+        {
+            Header: 'Status & Score',
+            accessor: 'statusScore',
+            Cell: ({ row }) => {
+                const assignment = row.original;
+
+                return (
+                    <div className="space-y-3">
+                        <div>{getStatusBadge(assignment.status)}</div>
+
+                        {assignment.score !== null ? (
+                            <div className="text-center">
+                                <div className="text-2xl font-bold text-gray-800">{assignment.score}%</div>
+                                <div className="text-xs text-gray-500">Final Score</div>
+                            </div>
+                        ) : assignment.status === 'Scheduled' || assignment.status === 'Pending' ? (
+                            <div className="text-center text-gray-400 text-sm">Not started</div>
+                        ) : (
+                            <div className="text-center">
+                                <div className="text-2xl font-bold text-gray-800">{getProgressPercentage(assignment)}%</div>
+                                <div className="text-xs text-gray-500">Progress</div>
+                            </div>
+                        )}
+
+                        <div className="text-xs text-gray-500 text-center">{assignment.workerInterviews} worker interviews</div>
+                    </div>
+                );
+            },
+            width: 150,
+        },
+        {
+            Header: 'Actions',
+            accessor: 'actions',
+            Cell: ({ row }) => {
+                const assignment = row.original;
+
+                return (
+                    <div className="flex flex-col space-y-2">
+                        <div className="flex space-x-2">
+                            <Tippy content="View Details">
+                                <button
+                                    onClick={() => openViewModal(assignment)}
+                                    className="flex-1 flex items-center justify-center px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg transition-colors text-sm"
+                                >
+                                    <IconEye className="w-4 h-4" />
+                                </button>
+                            </Tippy>
+
+                            {assignment.status !== 'Completed' && (
+                                <Tippy content="Edit Assignment">
+                                    <button
+                                        onClick={() => openEditModal(assignment)}
+                                        className="flex-1 flex items-center justify-center px-3 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 rounded-lg transition-colors text-sm"
+                                    >
+                                        <IconEdit className="w-4 h-4" />
+                                    </button>
+                                </Tippy>
+                            )}
+
+                            <Tippy content="Delete Assignment">
+                                <button
+                                    onClick={() => handleDeleteAssignment(assignment)}
+                                    className="flex-1 flex items-center justify-center px-3 py-1.5 bg-red-50 text-red-700 hover:bg-red-100 rounded-lg transition-colors text-sm"
+                                >
+                                    <IconTrashLines className="w-4 h-4" />
+                                </button>
+                            </Tippy>
+                        </div>
+
+                        <div className="flex space-x-2">
+                            {assignment.status === 'Scheduled' && (
+                                <button onClick={() => handleStartAudit(assignment)} className="flex-1 px-3 py-1.5 bg-yellow-100 text-yellow-700 hover:bg-yellow-200 rounded-lg text-sm font-medium">
+                                    Start Audit
+                                </button>
+                            )}
+
+                            {(assignment.status === 'Pending' || assignment.status === 'In Progress' || assignment.status === 'Overdue') && (
+                                <button onClick={() => navigateToAuditForm(assignment)} className="flex-1 px-3 py-1.5 bg-blue-100 text-blue-700 hover:bg-blue-200 rounded-lg text-sm font-medium">
+                                    Continue
+                                </button>
+                            )}
+
+                            {assignment.status === 'Completed' && (
+                                <button onClick={() => navigateToAuditForm(assignment)} className="flex-1 px-3 py-1.5 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg text-sm font-medium">
+                                    View Report
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                );
+            },
+            width: 200,
+        },
+    ];
 
     return (
         <div className="p-6 space-y-6">
-            <div className="flex items-center justify-between">
-                <div className="flex items-center space-x-4">
-                    <div>
-                        <h1 className="text-2xl font-bold text-gray-800">{checklist.title}</h1>
-                        <p className="text-gray-600">
-                            Checklist ID: {checklist.id} | Order: {checklist.order} | Items: {checklist.checkItems?.length || 0}
-                        </p>
-                    </div>
-                </div>
-                <button onClick={handleBack} className="flex items-center text-gray-600 hover:text-gray-900">
-                        <IconArrowLeft className="w-5 h-5 mr-2" />
-                        Back to Checklists
-                    </button>
+            <div className="text-center mb-8">
+                <h1 className="text-3xl font-extrabold text-gray-800">Audit Assignment Management</h1>
+                <p className="text-gray-600 mt-2">Assign and manage audits to auditors, track progress and completion</p>
             </div>
 
-            <div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+                <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-4 text-white shadow-lg">
+                    <div className="text-2xl font-bold">{stats.total}</div>
+                    <div className="text-sm font-medium opacity-90">Total Assignments</div>
+                </div>
+                <div className="bg-gradient-to-r from-purple-500 to-purple-600 rounded-xl p-4 text-white shadow-lg">
+                    <div className="text-2xl font-bold">{stats.scheduled}</div>
+                    <div className="text-sm font-medium opacity-90">Scheduled</div>
+                </div>
+                <div className="bg-gradient-to-r from-yellow-500 to-yellow-600 rounded-xl p-4 text-white shadow-lg">
+                    <div className="text-2xl font-bold">{stats.pending}</div>
+                    <div className="text-sm font-medium opacity-90">Pending</div>
+                </div>
+                <div className="bg-gradient-to-r from-orange-500 to-orange-600 rounded-xl p-4 text-white shadow-lg">
+                    <div className="text-2xl font-bold">{stats.inProgress}</div>
+                    <div className="text-sm font-medium opacity-90">In Progress</div>
+                </div>
+                <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-4 text-white shadow-lg">
+                    <div className="text-2xl font-bold">{stats.completed}</div>
+                    <div className="text-sm font-medium opacity-90">Completed</div>
+                </div>
+                <div className="bg-gradient-to-r from-red-500 to-red-600 rounded-xl p-4 text-white shadow-lg">
+                    <div className="text-2xl font-bold">{stats.overdue}</div>
+                    <div className="text-sm font-medium opacity-90">Overdue</div>
+                </div>
+            </div>
+
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    {/* Search Input - Full width on mobile, 2 cols on desktop */}
+                    <div className="md:col-span-2">
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                        <div className="relative">
+                            <input
+                                type="text"
+                                placeholder="Search by audit ID, supplier, auditor..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="form-input w-full pl-10"
+                            />
+                            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                                <IconSearch className="w-4 h-4" />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Status Filter */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                        <Select
+                            value={statusFilter}
+                            onChange={setStatusFilter}
+                            options={statusOptions}
+                            className="react-select-container"
+                            classNamePrefix="react-select"
+                            isClearable={false}
+                            styles={{
+                                control: (base) => ({
+                                    ...base,
+                                    minHeight: '42px',
+                                }),
+                            }}
+                        />
+                    </div>
+
+                    {/* Supplier Filter */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Supplier</label>
+                        <Select
+                            value={supplierFilter}
+                            onChange={setSupplierFilter}
+                            options={[
+                                { value: 'all', label: 'All Suppliers' },
+                                ...suppliers.map((supplier) => ({
+                                    value: supplier.id.toString(),
+                                    label: `${supplier.name} (${supplier.auditCount} audits)`,
+                                })),
+                            ]}
+                            className="react-select-container"
+                            classNamePrefix="react-select"
+                            isClearable={false}
+                            styles={{
+                                control: (base) => ({
+                                    ...base,
+                                    minHeight: '42px',
+                                }),
+                            }}
+                        />
+                    </div>
+
+                    {/* Auditor Filter */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Auditor</label>
+                        <Select
+                            value={auditorFilter}
+                            onChange={setAuditorFilter}
+                            options={[
+                                { value: 'all', label: 'All Auditors' },
+                                ...auditors
+                                    .filter((auditor) => auditor.isActive === 1)
+                                    .map((auditor) => ({
+                                        value: auditor.id.toString(),
+                                        label: `${auditor.name} (${auditor.auditorId})`,
+                                    })),
+                            ]}
+                            className="react-select-container"
+                            classNamePrefix="react-select"
+                            isClearable={false}
+                            styles={{
+                                control: (base) => ({
+                                    ...base,
+                                    minHeight: '42px',
+                                }),
+                            }}
+                        />
+                    </div>
+
+                    {/* Clear Button - Full width on mobile, aligned to bottom */}
+                    <div className="flex items-end">
+                        <button
+                            onClick={() => {
+                                setSearchTerm('');
+                                setStatusFilter({ value: 'all', label: 'All Status' });
+                                setAuditorFilter({ value: 'all', label: 'All Auditors' });
+                                setSupplierFilter({ value: 'all', label: 'All Suppliers' });
+                            }}
+                            className="btn btn-outline-primary w-full h-[42px] flex items-center justify-center"
+                        >
+                            Clear Filters
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div className="datatables">
                 <Table
                     columns={columns}
-                    Title={'Check Items'}
-                    toggle={createModel}
+                    Title={'Audit Assignments'}
+                    toggle={openAssignModal}
                     data={getPaginatedData()}
                     pageSize={pageSize}
                     pageIndex={currentPage}
@@ -447,120 +964,248 @@ const SubChecklistAudit = () => {
                     totalPages={Math.ceil(getTotalCount() / pageSize)}
                     onPaginationChange={handlePaginationChange}
                     pagination={true}
-                    isSearchable={true}
+                    isSearchable={false}
                     isSortable={true}
-                    btnName="Add Check Item"
+                    btnName="Assign New Audit"
                     loadings={loading}
                 />
             </div>
 
-            <ModelViewBox
-                key={isEdit ? `edit-item-${selectedCheckItem?.id}` : 'create-item'}
-                modal={modal}
-                modelHeader={isEdit ? 'Edit Check Item' : 'Add Check Item'}
-                isEdit={isEdit}
-                setModel={closeModel}
-                handleSubmit={onFormSubmit}
-                modelSize="md"
-                submitBtnText={isEdit ? 'Update' : 'Create'}
-                loadings={loading}
-            >
-                <div className="grid grid-cols-1 gap-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Checklist</label>
-                        <div className="p-3 bg-gray-50 rounded border border-gray-200">
-                            <p className="font-medium">
-                                {checklist.order}. {checklist.title}
-                            </p>
-                        </div>
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Check Item Name <span className="text-red-500">*</span>
-                        </label>
-                        <input type="text" name="name" value={itemState.name} onChange={handleInputChange} placeholder="Enter check item name" className="form-input w-full" />
-                        {errors.includes('name') && <div className="text-danger text-sm mt-1">* Please enter check item name</div>}
-                    </div>
-
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Order Number <span className="text-red-500">*</span>
-                            <span className="text-xs text-gray-500 ml-2">(Determines display sequence within checklist)</span>
-                        </label>
-                        <div className="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="font-semibold text-blue-600">{itemState.order}</p>
-                                </div>
+            {auditAssignments.filter((a) => a.isActive === 0).length > 0 && (
+                <div className="mt-8">
+                    <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+                        <div className="flex">
+                            <div className="flex-shrink-0">
+                                <IconRefresh className="h-5 w-5 text-yellow-400" />
                             </div>
-                        </div>
-                        {errors.includes('order') && <div className="text-danger text-sm mt-1">* Please enter a valid order number</div>}
-                    </div>
-
-                    <div className="border-t pt-4">
-                        <h4 className="text-md font-semibold text-gray-700 mb-3">Check Item Configuration</h4>
-
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
-                                <div>
-                                    <label className="block font-medium text-gray-700 mb-1">Include Yes/No/Not Applicable Options</label>
-                                    <p className="text-sm text-gray-500">When checked, users must select one of these options</p>
-                                </div>
-                                <label className="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" name="hasOptions" checked={itemState.hasOptions} onChange={handleInputChange} className="sr-only peer" />
-                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                                </label>
+                            <div className="ml-3">
+                                <p className="text-sm text-yellow-700">You have {auditAssignments.filter((a) => a.isActive === 0).length} deleted assignments.</p>
                             </div>
-
-                            <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
-                                <div>
-                                    <label className="block font-medium text-gray-700 mb-1">Require Description Field</label>
-                                    <p className="text-sm text-gray-500">When checked, users must enter a description when filling the form</p>
-                                </div>
-                                <label className="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" name="hasDescription" checked={itemState.hasDescription} onChange={handleInputChange} className="sr-only peer" />
-                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                                </label>
-                            </div>
-
-                            <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
-                                <div>
-                                    <label className="block font-medium text-gray-700 mb-1">Require Image Upload</label>
-                                    <p className="text-sm text-gray-500">When checked, users must upload an image when selecting "Yes"</p>
-                                </div>
-                                <label className="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" name="hasImage" checked={itemState.hasImage} onChange={handleInputChange} className="sr-only peer" />
-                                    <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
-                                </label>
-                            </div>
-
-                            {itemState.hasOptions && (
-                                <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                                    <h5 className="font-medium text-blue-800 mb-2">Preview of Options:</h5>
-                                    <div className="flex space-x-3">
-                                        <div className="flex items-center space-x-1">
-                                            <div className="w-4 h-4 rounded-full bg-green-500"></div>
-                                            <span className="text-sm text-gray-700">Yes</span>
-                                        </div>
-                                        <div className="flex items-center space-x-1">
-                                            <div className="w-4 h-4 rounded-full bg-red-500"></div>
-                                            <span className="text-sm text-gray-700">No</span>
-                                        </div>
-                                        <div className="flex items-center space-x-1">
-                                            <div className="w-4 h-4 rounded-full bg-gray-500"></div>
-                                            <span className="text-sm text-gray-700">Not Applicable</span>
-                                        </div>
-                                    </div>
-                                    <p className="text-xs text-blue-600 mt-2">Users will be required to select one of these options in the form</p>
-                                </div>
-                            )}
                         </div>
                     </div>
                 </div>
+            )}
+
+            <ModelViewBox modal={assignModal} modelHeader="Assign New Audit" setModel={closeModal} handleSubmit={handleAssignSubmit} modelSize="lg" submitBtnText="Assign Audit" loadings={loading}>
+                <div className="space-y-4">
+                    <FormLayout
+                        dynamicForm={assignFormContain}
+                        handleSubmit={handleAssignSubmit}
+                        setState={setAssignmentForm}
+                        state={assignmentForm}
+                        onChangeCallBack={{
+                            handleInputChange: handleInputChange,
+                            handleSelectChange: handleSelectChange,
+                        }}
+                        errors={errors}
+                        setErrors={setErrors}
+                        loadings={loading}
+                        optionListState={{
+                            supplierList: supplierList,
+                            auditorList: auditorList,
+                        }}
+                    />
+
+                    <div className="text-sm text-gray-500 mt-4 p-3 bg-blue-50 rounded-lg">
+                        <p className="mb-2">
+                            <strong>Note:</strong>
+                        </p>
+                        <ul className="list-disc pl-5 space-y-1">
+                            <li>Audit will be marked as "Scheduled" upon assignment</li>
+                            <li>Click "Start Audit" to begin the audit process</li>
+                            <li>Next audit date should be set for future follow-up audits</li>
+                            <li>Only authenticated auditors can be assigned</li>
+                            <li>Supplier audit count will be incremented automatically</li>
+                        </ul>
+                    </div>
+                </div>
+            </ModelViewBox>
+
+            <ModelViewBox
+                modal={editModal}
+                modelHeader="Edit Audit Assignment"
+                setModel={closeModal}
+                handleSubmit={handleUpdateSubmit}
+                modelSize="lg"
+                submitBtnText="Update Assignment"
+                loadings={loading}
+            >
+                {selectedAssignment && (
+                    <div className="space-y-4">
+                        <div className="bg-gray-50 p-3 rounded-lg mb-4">
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <div className="text-sm text-gray-600">Current Status</div>
+                                    <div className="font-medium">{getStatusBadge(selectedAssignment.status)}</div>
+                                </div>
+                                <div className="text-sm text-gray-600">
+                                    Audit ID: <span className="font-mono">{selectedAssignment.auditId}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-yellow-50 p-3 rounded-lg mb-4">
+                            <div className="flex items-center">
+                                <IconList className="w-5 h-5 text-yellow-600 mr-2" />
+                                <div>
+                                    <div className="text-sm font-medium text-yellow-800">Audit Count Information</div>
+                                    <div className="text-sm text-yellow-700">
+                                        This supplier has completed <span className="font-bold">{selectedAssignment.supplierAuditCount}</span> audits
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <FormLayout
+                            dynamicForm={assignFormContain}
+                            handleSubmit={handleUpdateSubmit}
+                            setState={setAssignmentForm}
+                            state={assignmentForm}
+                            onChangeCallBack={{
+                                handleInputChange: handleInputChange,
+                                handleSelectChange: handleSelectChange,
+                            }}
+                            errors={errors}
+                            setErrors={setErrors}
+                            loadings={loading}
+                            optionListState={{
+                                supplierList: supplierList,
+                                auditorList: auditorList,
+                            }}
+                        />
+                    </div>
+                )}
+            </ModelViewBox>
+
+            <ModelViewBox modal={viewModal} modelHeader="Audit Assignment Details" setModel={closeModal} modelSize="lg" hideFooter={true} saveBtn={false}>
+                {selectedAssignment && (
+                    <div className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="md:col-span-2">
+                                <h3 className="text-lg font-semibold text-gray-800">{selectedAssignment.auditId}</h3>
+                                <p className="text-gray-600">{selectedAssignment.auditType}</p>
+                            </div>
+                            <div className="text-right">{getStatusBadge(selectedAssignment.status)}</div>
+                        </div>
+
+                        <div className="bg-gray-50 p-4 rounded-lg">
+                            <h4 className="font-medium text-gray-700 mb-2">Supplier Information</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <div>
+                                    <div className="text-sm text-gray-600">Name</div>
+                                    <div className="font-medium">{selectedAssignment.supplierName}</div>
+                                </div>
+                                <div>
+                                    <div className="text-sm text-gray-600">Type</div>
+                                    <div className="font-medium">{selectedAssignment.supplierType}</div>
+                                </div>
+                                <div className="md:col-span-2">
+                                    <div className="text-sm text-gray-600">Total Audits Completed</div>
+                                    <div className="flex items-center font-medium">
+                                        <IconList className="w-4 h-4 mr-2 text-gray-500" />
+                                        {selectedAssignment.supplierAuditCount} audits
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="bg-blue-50 p-4 rounded-lg">
+                            <h4 className="font-medium text-gray-700 mb-2">Assigned Auditor</h4>
+                            <div className="flex items-center">
+                                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                    <IconUser className="w-5 h-5 text-blue-600" />
+                                </div>
+                                <div>
+                                    <div className="font-medium">{selectedAssignment.assignedAuditorName}</div>
+                                    <div className="text-sm text-gray-600">{selectedAssignment.assignedAuditorIdCode}</div>
+                                    <div className="text-xs text-gray-500">
+                                        Designation:{' '}
+                                        {selectedAssignment.assignedAuditorName.includes('John')
+                                            ? 'Senior Auditor'
+                                            : selectedAssignment.assignedAuditorName.includes('Sarah')
+                                              ? 'Lead Auditor'
+                                              : 'Junior Auditor'}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="space-y-4">
+                            <h4 className="font-medium text-gray-700">Timeline</h4>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="text-center">
+                                    <div className="text-sm text-gray-600">Assignment Date</div>
+                                    <div className="font-medium">{new Date(selectedAssignment.assignmentDate).toLocaleDateString()}</div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-sm text-gray-600">Due Date</div>
+                                    <div className={`font-medium ${new Date(selectedAssignment.dueDate) < new Date() && selectedAssignment.status !== 'Completed' ? 'text-red-600' : ''}`}>
+                                        {new Date(selectedAssignment.dueDate).toLocaleDateString()}
+                                    </div>
+                                </div>
+                                <div className="text-center">
+                                    <div className="text-sm text-gray-600">Next Audit Date</div>
+                                    <div className="font-medium">{new Date(selectedAssignment.nextAuditDate).toLocaleDateString()}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {selectedAssignment.status !== 'Scheduled' && selectedAssignment.status !== 'Pending' && (
+                            <div className="bg-gray-50 p-4 rounded-lg">
+                                <h4 className="font-medium text-gray-700 mb-3">Progress Statistics</h4>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div className="text-center">
+                                        <div className="text-2xl font-bold text-gray-800">{getProgressPercentage(selectedAssignment)}%</div>
+                                        <div className="text-sm text-gray-600">Progress</div>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="text-2xl font-bold text-gray-800">
+                                            {selectedAssignment.completedChecklistItems}/{selectedAssignment.totalChecklistItems}
+                                        </div>
+                                        <div className="text-sm text-gray-600">Checklist Items</div>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="text-2xl font-bold text-gray-800">{selectedAssignment.workerInterviews}</div>
+                                        <div className="text-sm text-gray-600">Interviews</div>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="text-2xl font-bold text-gray-800">{selectedAssignment.score ? `${selectedAssignment.score}%` : 'N/A'}</div>
+                                        <div className="text-sm text-gray-600">Final Score</div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {selectedAssignment.remarks && (
+                            <div>
+                                <h4 className="font-medium text-gray-700 mb-2">Remarks</h4>
+                                <div className="bg-gray-50 p-3 rounded">
+                                    <p className="text-gray-700">{selectedAssignment.remarks}</p>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="flex justify-end space-x-3 pt-4 border-t">
+                            <button onClick={() => navigateToAuditForm(selectedAssignment)} className="btn btn-primary">
+                                {selectedAssignment.status === 'Completed' ? 'View Audit Report' : 'Open Audit Form'}
+                            </button>
+                            {selectedAssignment.status !== 'Completed' && (
+                                <button
+                                    onClick={() => {
+                                        closeModal();
+                                        openEditModal(selectedAssignment);
+                                    }}
+                                    className="btn btn-outline-primary"
+                                >
+                                    Edit Assignment
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                )}
             </ModelViewBox>
         </div>
     );
 };
 
-export default SubChecklistAudit;
+export default AuditAssignToAuditor;
