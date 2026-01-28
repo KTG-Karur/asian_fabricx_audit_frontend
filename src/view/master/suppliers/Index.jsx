@@ -28,6 +28,7 @@ import IconFilter from '../../../components/Icon/IconAirplay';
 import IconX from '../../../components/Icon/IconX';
 import IconChevronDown from '../../../components/Icon/IconChevronDown';
 import IconChevronUp from '../../../components/Icon/IconChevronUp';
+import IconChevronLeft from '../../../components/Icon/IconChevronLeft';
 import IconSave from '../../../components/Icon/IconSave';
 import IconCancel from '../../../components/Icon/IconX';
 import IconBank from '../../../components/Icon/IconCreditCard';
@@ -36,9 +37,12 @@ import IconTools from '../../../components/Icon/IconCpuBolt';
 import IconClockIcon from '../../../components/Icon/IconClock';
 import IconLicense from '../../../components/Icon/IconFile';
 import IconCalendar from '../../../components/Icon/IconCalendar';
+import IconShield from '../../../components/Icon/IconShield';
+import IconClipboardList from '../../../components/Icon/IconChartBar';
+import IconCheck from '../../../components/Icon/IconCheck';
 
 // Import supplier configuration
-import { supplierTabs, optionLists, staticSuppliersData, getStatusBadge, getKycBadge, getAuditBadge } from './SupplierFormContainer';
+import { supplierTabs, optionLists, masterStandards, masterAssessmentItems, staticSuppliersData, getStatusBadge, getKycBadge, getAuditBadge } from './SupplierFormContainer';
 
 function Suppliers() {
     const navigate = useNavigate();
@@ -71,19 +75,31 @@ function Suppliers() {
     const [arrVal, setArrVal] = useState({
         machinery_details: [],
         manpower_details: [],
+        customer_standards: [],
+        self_assessment: [],
     });
     const [deletedItems, setDeletedItems] = useState({
         machinery_details: [],
         manpower_details: [],
+        customer_standards: [],
+        self_assessment: [],
     });
     const [temporarilyHidden, setTemporarilyHidden] = useState({
         machinery_details: [],
         manpower_details: [],
+        customer_standards: [],
+        self_assessment: [],
     });
     const [tabIndex, setTabIndex] = useState(0);
     const [errors, setErrors] = useState([]);
     const [validationErrors, setValidationErrors] = useState({});
     const [activeMultiAddTab, setActiveMultiAddTab] = useState(null);
+
+    // Selection states for standards and assessments
+    const [selectedStandardIds, setSelectedStandardIds] = useState([]);
+    const [selectedAssessmentIds, setSelectedAssessmentIds] = useState([]);
+    const [isSelectingStandards, setIsSelectingStandards] = useState(false);
+    const [isSelectingAssessments, setIsSelectingAssessments] = useState(false);
 
     // Pagination
     const [paginationState, setPaginationState] = useState({
@@ -136,19 +152,29 @@ function Suppliers() {
         setArrVal({
             machinery_details: [],
             manpower_details: [],
+            customer_standards: [],
+            self_assessment: [],
         });
         setDeletedItems({
             machinery_details: [],
             manpower_details: [],
+            customer_standards: [],
+            self_assessment: [],
         });
         setTemporarilyHidden({
             machinery_details: [],
             manpower_details: [],
+            customer_standards: [],
+            self_assessment: [],
         });
         setErrors([]);
         setValidationErrors({});
         setTabIndex(0);
         setActiveMultiAddTab(null);
+        setSelectedStandardIds([]);
+        setSelectedAssessmentIds([]);
+        setIsSelectingStandards(false);
+        setIsSelectingAssessments(false);
     };
 
     // Handle cancel
@@ -190,7 +216,17 @@ function Suppliers() {
         setArrVal({
             machinery_details: supplierData.machineryDetails || [],
             manpower_details: supplierData.manpowerDetails || [],
+            customer_standards: supplierData.customerStandards || [],
+            self_assessment: supplierData.selfAssessment || [],
         });
+
+        // Set selected IDs for standards and assessments
+        if (supplierData.customerStandards) {
+            setSelectedStandardIds(supplierData.customerStandards.map((item) => item.standard_id));
+        }
+        if (supplierData.selfAssessment) {
+            setSelectedAssessmentIds(supplierData.selfAssessment.map((item) => item.item_id));
+        }
     };
 
     // Get static supplier data for demo
@@ -294,6 +330,24 @@ function Suppliers() {
                     { id: 2, category: 'Quality Check', male_count: 10, female_count: 15, total_numbers: 25 },
                     { id: 3, category: 'Supervision', male_count: 5, female_count: 2, total_numbers: 7 },
                 ],
+                customerStandards: [
+                    { id: 1, standard_id: 1, standard_name: 'IWAY Standard 6.0', customer_type: 'ASIAN', acceptance_date: '2024-01-15', status: 'accepted', version: '6.0' },
+                    {
+                        id: 2,
+                        standard_id: 2,
+                        standard_name: 'BSCI Code of Conduct',
+                        customer_type: 'Other',
+                        customer_name: 'Brand X',
+                        acceptance_date: '2024-02-20',
+                        status: 'pending',
+                        version: '2.0',
+                    },
+                ],
+                selfAssessment: [
+                    { id: 1, item_id: 1, particulars: 'Factory has proper fire safety equipment', details: 'All fire extinguishers are checked monthly', status: 'yes' },
+                    { id: 2, item_id: 2, particulars: 'Emergency exits are clearly marked and accessible', details: 'Exits marked with glow signs', status: 'yes' },
+                    { id: 3, item_id: 8, particulars: 'No child labor employed', details: 'All employees above 18 years', status: 'yes' },
+                ],
             },
         };
         return dataMap[supplierId] || {};
@@ -359,6 +413,8 @@ function Suppliers() {
                     total_male_count: totalMale,
                     total_female_count: totalFemale,
                     total_employees: totalEmployees,
+                    customer_standards: arrVal.customer_standards,
+                    self_assessment: arrVal.self_assessment,
                     last_updated: moment().format('YYYY-MM-DD HH:mm:ss'),
                 };
                 setSuppliers((prev) => prev.map((supplier) => (supplier.id === selectedSupplier.id ? updatedSupplier : supplier)));
@@ -372,6 +428,8 @@ function Suppliers() {
                     total_male_count: totalMale,
                     total_female_count: totalFemale,
                     total_employees: totalEmployees,
+                    customer_standards: arrVal.customer_standards,
+                    self_assessment: arrVal.self_assessment,
                     status: 'active',
                     kyc_status: 'pending',
                     created_date: moment().format('YYYY-MM-DD'),
@@ -446,6 +504,99 @@ function Suppliers() {
             [tabName]: (prev[tabName] || []).filter((itemId) => itemId !== id),
         }));
         showMessage('success', 'Item restored successfully');
+    };
+
+    // Standards Selection Functions
+    const handleSelectStandards = () => {
+        setIsSelectingStandards(true);
+    };
+
+    const handleSaveSelectedStandards = () => {
+        const selectedStandards = masterStandards.filter((standard) => selectedStandardIds.includes(standard.id));
+
+        // Filter out already added standards
+        const existingStandardIds = arrVal.customer_standards.map((item) => item.standard_id);
+        const newStandards = selectedStandards
+            .filter((standard) => !existingStandardIds.includes(standard.id))
+            .map((standard) => ({
+                id: uuidv4(),
+                standard_id: standard.id,
+                standard_name: standard.name,
+                version: standard.version,
+                customer_type: '',
+                customer_name: '',
+                acceptance_date: '',
+                status: 'pending',
+                details: '',
+            }));
+
+        setArrVal((prev) => ({
+            ...prev,
+            customer_standards: [...prev.customer_standards, ...newStandards],
+        }));
+
+        setIsSelectingStandards(false);
+        setSelectedStandardIds([]);
+        showMessage('success', `${newStandards.length} standards added successfully`);
+    };
+
+    const handleUpdateStandard = (id, updates) => {
+        setArrVal((prev) => ({
+            ...prev,
+            customer_standards: prev.customer_standards.map((item) => (item.id === id ? { ...item, ...updates } : item)),
+        }));
+    };
+
+    const handleDeleteStandard = (id) => {
+        setArrVal((prev) => ({
+            ...prev,
+            customer_standards: prev.customer_standards.filter((item) => item.id !== id),
+        }));
+    };
+
+    // Assessment Selection Functions
+    const handleSelectAssessments = () => {
+        setIsSelectingAssessments(true);
+    };
+
+    const handleSaveSelectedAssessments = () => {
+        const selectedAssessments = masterAssessmentItems.filter((item) => selectedAssessmentIds.includes(item.id));
+
+        // Filter out already added assessments
+        const existingItemIds = arrVal.self_assessment.map((item) => item.item_id);
+        const newAssessments = selectedAssessments
+            .filter((item) => !existingItemIds.includes(item.id))
+            .map((item) => ({
+                id: uuidv4(),
+                item_id: item.id,
+                particulars: item.particulars,
+                category: item.category,
+                details: '',
+                status: '',
+            }));
+
+        setArrVal((prev) => ({
+            ...prev,
+            self_assessment: [...prev.self_assessment, ...newAssessments],
+        }));
+
+        setIsSelectingAssessments(false);
+        setSelectedAssessmentIds([]);
+        showMessage('success', `${newAssessments.length} assessment items added successfully`);
+    };
+
+    const handleUpdateAssessment = (id, updates) => {
+        setArrVal((prev) => ({
+            ...prev,
+            self_assessment: prev.self_assessment.map((item) => (item.id === id ? { ...item, ...updates } : item)),
+        }));
+    };
+
+    const handleDeleteAssessment = (id) => {
+        setArrVal((prev) => ({
+            ...prev,
+            self_assessment: prev.self_assessment.filter((item) => item.id !== id),
+        }));
     };
 
     // Wizard navigation
@@ -583,7 +734,193 @@ function Suppliers() {
         </div>
     );
 
-    // Multi-add table component for machinery and manpower
+    // Customer Standards Component
+    const CustomerStandardsComponent = () => {
+        return (
+            <div className="space-y-6">
+                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <div className="p-4 border-b border-gray-200 bg-gray-50">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-800">Customer Standards</h3>
+                                <p className="text-sm text-gray-600">Select standards from master and fill supplier-specific details</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={handleSelectStandards}
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                            >
+                                <IconPlus className="w-4 h-4" />
+                                Select Standards
+                            </button>
+                        </div>
+                    </div>
+
+                    {arrVal.customer_standards.length > 0 ? (
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-100">
+                                    <tr>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Standard Name</th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Version</th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer Type</th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer Name</th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acceptance Date</th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {arrVal.customer_standards.map((item) => (
+                                        <tr key={item.id} className="hover:bg-gray-50">
+                                            <td className="px-4 py-3 text-sm font-medium text-gray-900">{item.standard_name}</td>
+                                            <td className="px-4 py-3 text-sm text-gray-500">{item.version}</td>
+                                            <td className="px-4 py-3">
+                                                <select
+                                                    value={item.customer_type}
+                                                    onChange={(e) => handleUpdateStandard(item.id, { customer_type: e.target.value })}
+                                                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                                >
+                                                    <option value="">Select Type</option>
+                                                    <option value="ASIAN">ASIAN</option>
+                                                    <option value="Other">Other</option>
+                                                </select>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <input
+                                                    type="text"
+                                                    value={item.customer_name || ''}
+                                                    onChange={(e) => handleUpdateStandard(item.id, { customer_name: e.target.value })}
+                                                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                                    placeholder={item.customer_type === 'Other' ? 'Enter customer name' : 'ASIAN'}
+                                                    disabled={item.customer_type !== 'Other'}
+                                                />
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <input
+                                                    type="date"
+                                                    value={item.acceptance_date || ''}
+                                                    onChange={(e) => handleUpdateStandard(item.id, { acceptance_date: e.target.value })}
+                                                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                                />
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <select
+                                                    value={item.status}
+                                                    onChange={(e) => handleUpdateStandard(item.id, { status: e.target.value })}
+                                                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                                >
+                                                    <option value="pending">Pending</option>
+                                                    <option value="accepted">Accepted</option>
+                                                    <option value="rejected">Rejected</option>
+                                                </select>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <button type="button" onClick={() => handleDeleteStandard(item.id)} className="text-rose-600 hover:text-rose-900" title="Delete">
+                                                    <IconTrashLines className="w-4 h-4" />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : (
+                        <div className="p-8 text-center">
+                            <div className="text-gray-400 mb-2">
+                                <IconShield className="w-12 h-12 mx-auto opacity-50" />
+                            </div>
+                            <p className="text-gray-500 text-sm">No customer standards added yet</p>
+                            <p className="text-gray-400 text-xs mt-1">Click "Select Standards" to add from master list</p>
+                        </div>
+                    )}
+                </div>
+
+                {/* Standards Selection Modal */}
+                {isSelectingStandards && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                            <div className="p-6">
+                                <div className="flex items-center justify-between mb-6">
+                                    <div>
+                                        <h3 className="text-lg font-semibold text-gray-900">Select Customer Standards</h3>
+                                        <p className="text-sm text-gray-600">Choose standards from master list</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setIsSelectingStandards(false);
+                                            setSelectedStandardIds([]);
+                                        }}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <IconX className="w-5 h-5" />
+                                    </button>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        {masterStandards.map((standard) => (
+                                            <div key={standard.id} className="border border-gray-200 rounded-lg p-4 hover:border-blue-300 transition-colors">
+                                                <div className="flex items-start justify-between">
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center gap-2 mb-2">
+                                                            <input
+                                                                type="checkbox"
+                                                                id={`standard-${standard.id}`}
+                                                                checked={selectedStandardIds.includes(standard.id)}
+                                                                onChange={(e) => {
+                                                                    if (e.target.checked) {
+                                                                        setSelectedStandardIds((prev) => [...prev, standard.id]);
+                                                                    } else {
+                                                                        setSelectedStandardIds((prev) => prev.filter((id) => id !== standard.id));
+                                                                    }
+                                                                }}
+                                                                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                                                            />
+                                                            <label htmlFor={`standard-${standard.id}`} className="text-sm font-medium text-gray-900">
+                                                                {standard.name}
+                                                            </label>
+                                                        </div>
+                                                        <div className="text-xs text-gray-500 mb-1">Version: {standard.version}</div>
+                                                        <p className="text-xs text-gray-600">{standard.description}</p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className="flex justify-between items-center pt-4 border-t border-gray-200">
+                                        <div className="text-sm text-gray-600">{selectedStandardIds.length} standard(s) selected</div>
+                                        <div className="flex gap-3">
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setIsSelectingStandards(false);
+                                                    setSelectedStandardIds([]);
+                                                }}
+                                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={handleSaveSelectedStandards}
+                                                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                                            >
+                                                Add Selected Standards
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     const MultiAddTable = ({ tabName, fields, data }) => {
         const currentData = arrVal[tabName] || [];
         const hiddenItems = temporarilyHidden[tabName] || [];
@@ -679,7 +1016,6 @@ function Suppliers() {
             </div>
         );
     };
-
     // Multi-add form modal
     const MultiAddForm = ({ tabName, fields }) => {
         const handleSubmit = (e) => {
@@ -775,6 +1111,187 @@ function Suppliers() {
         );
     };
 
+    // Self Assessment Component
+    const SelfAssessmentComponent = () => {
+        return (
+            <div className="space-y-6">
+                <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <div className="p-4 border-b border-gray-200 bg-gray-50">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <h3 className="text-lg font-semibold text-gray-800">Self Assessment Checklist</h3>
+                                <p className="text-sm text-gray-600">Select items from master and fill supplier-specific details</p>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={handleSelectAssessments}
+                                className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors text-sm font-medium"
+                            >
+                                <IconPlus className="w-4 h-4" />
+                                Select Assessment Items
+                            </button>
+                        </div>
+                    </div>
+
+                    {arrVal.self_assessment.length > 0 ? (
+                        <div className="overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-200">
+                                <thead className="bg-gray-100">
+                                    <tr>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Particulars</th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Details</th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="bg-white divide-y divide-gray-200">
+                                    {arrVal.self_assessment.map((item) => (
+                                        <tr key={item.id} className="hover:bg-gray-50">
+                                            <td className="px-4 py-3 text-sm font-medium text-gray-900">{item.particulars}</td>
+                                            <td className="px-4 py-3 text-sm text-gray-500">
+                                                <span className="px-2 py-1 bg-gray-100 rounded text-xs">{item.category}</span>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <textarea
+                                                    value={item.details || ''}
+                                                    onChange={(e) => handleUpdateAssessment(item.id, { details: e.target.value })}
+                                                    className="w-full px-2 py-1 border border-gray-300 rounded text-sm"
+                                                    placeholder="Enter details..."
+                                                    rows={2}
+                                                />
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <div className="flex items-center gap-3">
+                                                    <label className="inline-flex items-center">
+                                                        <input
+                                                            type="radio"
+                                                            name={`status-${item.id}`}
+                                                            value="yes"
+                                                            checked={item.status === 'yes'}
+                                                            onChange={(e) => handleUpdateAssessment(item.id, { status: e.target.value })}
+                                                            className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300"
+                                                        />
+                                                        <span className="ml-2 text-sm text-gray-700">Yes</span>
+                                                    </label>
+                                                    <label className="inline-flex items-center">
+                                                        <input
+                                                            type="radio"
+                                                            name={`status-${item.id}`}
+                                                            value="no"
+                                                            checked={item.status === 'no'}
+                                                            onChange={(e) => handleUpdateAssessment(item.id, { status: e.target.value })}
+                                                            className="h-4 w-4 text-rose-600 focus:ring-rose-500 border-gray-300"
+                                                        />
+                                                        <span className="ml-2 text-sm text-gray-700">No</span>
+                                                    </label>
+                                                </div>
+                                            </td>
+                                            <td className="px-4 py-3">
+                                                <button type="button" onClick={() => handleDeleteAssessment(item.id)} className="text-rose-600 hover:text-rose-900" title="Delete">
+                                                    <IconTrashLines className="w-4 h-4" />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    ) : (
+                        <div className="p-8 text-center">
+                            <div className="text-gray-400 mb-2">
+                                <IconClipboardList className="w-12 h-12 mx-auto opacity-50" />
+                            </div>
+                            <p className="text-gray-500 text-sm">No assessment items added yet</p>
+                            <p className="text-gray-400 text-xs mt-1">Click "Select Assessment Items" to add from master list</p>
+                        </div>
+                    )}
+                </div>
+
+                {/* Assessment Selection Modal */}
+                {isSelectingAssessments && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                        <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                            <div className="p-6">
+                                <div className="flex items-center justify-between mb-6">
+                                    <div>
+                                        <h3 className="text-lg font-semibold text-gray-900">Select Self Assessment Items</h3>
+                                        <p className="text-sm text-gray-600">Choose assessment items from master list</p>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            setIsSelectingAssessments(false);
+                                            setSelectedAssessmentIds([]);
+                                        }}
+                                        className="text-gray-400 hover:text-gray-600"
+                                    >
+                                        <IconX className="w-5 h-5" />
+                                    </button>
+                                </div>
+
+                                <div className="space-y-4">
+                                    <div className="grid grid-cols-1 gap-4">
+                                        {masterAssessmentItems.map((item) => (
+                                            <div key={item.id} className="border border-gray-200 rounded-lg p-4 hover:border-emerald-300 transition-colors">
+                                                <div className="flex items-start justify-between">
+                                                    <div className="flex-1">
+                                                        <div className="flex items-center gap-2 mb-2">
+                                                            <input
+                                                                type="checkbox"
+                                                                id={`assessment-${item.id}`}
+                                                                checked={selectedAssessmentIds.includes(item.id)}
+                                                                onChange={(e) => {
+                                                                    if (e.target.checked) {
+                                                                        setSelectedAssessmentIds((prev) => [...prev, item.id]);
+                                                                    } else {
+                                                                        setSelectedAssessmentIds((prev) => prev.filter((id) => id !== item.id));
+                                                                    }
+                                                                }}
+                                                                className="h-4 w-4 text-emerald-600 focus:ring-emerald-500 border-gray-300 rounded"
+                                                            />
+                                                            <label htmlFor={`assessment-${item.id}`} className="text-sm font-medium text-gray-900">
+                                                                {item.particulars}
+                                                            </label>
+                                                            <span className="px-2 py-1 bg-gray-100 rounded text-xs">{item.category}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className="flex justify-between items-center pt-4 border-t border-gray-200">
+                                        <div className="text-sm text-gray-600">{selectedAssessmentIds.length} item(s) selected</div>
+                                        <div className="flex gap-3">
+                                            <button
+                                                type="button"
+                                                onClick={() => {
+                                                    setIsSelectingAssessments(false);
+                                                    setSelectedAssessmentIds([]);
+                                                }}
+                                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                                            >
+                                                Cancel
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={handleSaveSelectedAssessments}
+                                                className="px-4 py-2 text-sm font-medium text-white bg-emerald-600 hover:bg-emerald-700 rounded-lg transition-colors"
+                                            >
+                                                Add Selected Items
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
+        );
+    };
+
     // Production capacity table component
     const ProductionCapacityTable = () => {
         const articles = [
@@ -859,7 +1376,6 @@ function Suppliers() {
             </div>
         );
     };
-
     // Checkbox group component
     const CheckboxGroup = ({ name, label, options, require }) => {
         const currentValues = state[name] || [];
@@ -1105,6 +1621,10 @@ function Suppliers() {
                                                     </div>
                                                 </div>
                                             </>
+                                        ) : currentTab.name === 'customerStandards' ? (
+                                            <CustomerStandardsComponent />
+                                        ) : currentTab.name === 'selfAssessment' ? (
+                                            <SelfAssessmentComponent />
                                         ) : (
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                                 {section.formFields.map((field, fieldIndex) => {
@@ -1213,7 +1733,7 @@ function Suppliers() {
                                             onClick={handlePrevious}
                                             className="inline-flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors text-sm font-medium"
                                         >
-                                            <IconChevronUp className="w-4 h-4 rotate-90" />
+                                            <IconChevronLeft className="w-4 h-4" />
                                             Previous
                                         </button>
                                     )}

@@ -622,129 +622,50 @@ const supplierTabs = [
             },
         ],
     },
-  {
-    label: 'Customer Standards',
-    name: 'customerStandards',
-    icon: <IconShield className="w-5 h-5 text-blue-600" />,
-    accordianStyle: responsiveClass(getModernGrid(1)),
-    children: [
-      {
-        title: 'List of Customer Standards Communicated',
-        subtitle: 'Standards communicated by ASIAN and other customers',
-        formFields: [
-          {
-            label: 'Customer Standards',
-            name: 'customer_standards',
-            inputType: 'multiAdd',
-            fields: [
-              {
-                label: 'Standard Name',
-                name: 'standard_name',
-                inputType: 'text',
-                placeholder: 'e.g., IWAY Standard 6.0',
-                require: true,
-              },
-              {
-                label: 'Customer Type',
-                name: 'customer_type',
-                inputType: 'select',
-                options: [
-                  { value: 'ASIAN', label: 'ASIAN' },
-                  { value: 'Other', label: 'Other' },
+    {
+        label: 'Customer Standards',
+        name: 'customerStandards',
+        icon: <IconShield className="w-5 h-5 text-blue-600" />,
+        accordianStyle: responsiveClass(getModernGrid(1)),
+        children: [
+            {
+                title: 'List of Customer Standards Communicated',
+                subtitle: 'Select from master list and fill acceptance details',
+                formFields: [
+                    {
+                        label: 'Customer Standards Selection',
+                        name: 'selected_standards',
+                        inputType: 'standardSelection',
+                        placeholder: 'Select standards from master list',
+                        require: false,
+                        classStyle: 'col-span-2',
+                    },
                 ],
-                require: true,
-              },
-              {
-                label: 'Customer Name',
-                name: 'customer_name',
-                inputType: 'text',
-                placeholder: 'Enter customer name if other',
-                require: false,
-                condition: (item) => item.customer_type === 'Other',
-              },
-              {
-                label: 'Date of Acceptance',
-                name: 'acceptance_date',
-                inputType: 'date',
-                require: true,
-              },
-              {
-                label: 'Status',
-                name: 'status',
-                inputType: 'select',
-                options: [
-                  { value: 'pending', label: 'Pending' },
-                  { value: 'accepted', label: 'Accepted' },
-                  { value: 'rejected', label: 'Rejected' },
-                ],
-                require: true,
-              },
-              {
-                label: 'Version',
-                name: 'version',
-                inputType: 'text',
-                placeholder: 'e.g., 6.0',
-                require: false,
-              },
-            ],
-            require: false,
-            classStyle: 'col-span-2',
-            tableHeaders: ['Standard Name', 'Customer Type', 'Acceptance Date', 'Status', 'Actions'],
-          },
+            },
         ],
-      },
-    ],
-  },
-  
-  {
-    label: 'Self Assessment',
-    name: 'selfAssessment',
-    icon: <IconClipboardList className="w-5 h-5 text-emerald-600" />,
-    accordianStyle: responsiveClass(getModernGrid(1)),
-    children: [
-      {
-        title: 'Supplier General Self Assessment',
-        subtitle: 'Self-assessment checklist for supplier compliance',
-        formFields: [
-          {
-            label: 'Self Assessment Items',
-            name: 'self_assessment_items',
-            inputType: 'multiAdd',
-            fields: [
-              {
-                label: 'Particulars',
-                name: 'particulars',
-                inputType: 'text',
-                placeholder: 'e.g., Factory has proper fire safety equipment',
-                require: true,
-              },
-              {
-                label: 'Details',
-                name: 'details',
-                inputType: 'textarea',
-                placeholder: 'Enter details or description',
-                require: false,
-                rows: 2,
-              },
-              {
-                label: 'Status',
-                name: 'status',
-                inputType: 'radio',
-                options: [
-                  { value: 'yes', label: 'Yes' },
-                  { value: 'no', label: 'No' },
+    },
+    {
+        label: 'Self Assessment',
+        name: 'selfAssessment',
+        icon: <IconClipboardList className="w-5 h-5 text-emerald-600" />,
+        accordianStyle: responsiveClass(getModernGrid(1)),
+        children: [
+            {
+                title: 'Supplier General Self Assessment',
+                subtitle: 'Self-assessment checklist for supplier compliance',
+                formFields: [
+                    {
+                        label: 'Self Assessment Items',
+                        name: 'self_assessment_items',
+                        inputType: 'assessmentSelection',
+                        placeholder: 'Select and fill self-assessment items',
+                        require: false,
+                        classStyle: 'col-span-2',
+                    },
                 ],
-                require: true,
-              },
-            ],
-            require: false,
-            classStyle: 'col-span-2',
-            tableHeaders: ['Particulars', 'Details', 'Status', 'Actions'],
-          },
+            },
         ],
-      },
-    ],
-  },
+    },
 ];
 
 // Enhanced option lists with categories
@@ -786,7 +707,50 @@ const optionLists = {
         { value: 'yes', label: 'Yes' },
         { value: 'no', label: 'No' },
     ],
+
+    customerTypes: [
+        { value: 'ASIAN', label: 'ASIAN' },
+        { value: 'Other', label: 'Other' },
+    ],
+
+    statusOptions: [
+        { value: 'pending', label: 'Pending' },
+        { value: 'accepted', label: 'Accepted' },
+        { value: 'rejected', label: 'Rejected' },
+    ],
 };
+
+// Mock data for standards from master
+const masterStandards = [
+    { id: 1, name: 'IWAY Standard 6.0', version: '6.0', description: 'IKEA Way on Social and Environmental Responsibility' },
+    { id: 2, name: 'BSCI Code of Conduct', version: '2.0', description: 'Business Social Compliance Initiative' },
+    { id: 3, name: 'Sedex Members Ethical Trade Audit', version: '6.0', description: 'Supplier Ethical Data Exchange' },
+    { id: 4, name: 'WRAP Certification', version: '12.0', description: 'Worldwide Responsible Accredited Production' },
+    { id: 5, name: 'ISO 9001:2015', version: '2015', description: 'Quality Management Systems' },
+    { id: 6, name: 'ISO 14001:2015', version: '2015', description: 'Environmental Management Systems' },
+    { id: 7, name: 'OHSAS 18001', version: '2007', description: 'Occupational Health and Safety' },
+    { id: 8, name: 'SA8000:2014', version: '2014', description: 'Social Accountability' },
+];
+
+// Mock data for assessment items from master
+const masterAssessmentItems = [
+    { id: 1, particulars: 'Factory has proper fire safety equipment', category: 'Safety' },
+    { id: 2, particulars: 'Emergency exits are clearly marked and accessible', category: 'Safety' },
+    { id: 3, particulars: 'First aid kits available and accessible', category: 'Safety' },
+    { id: 4, particulars: 'All employees have proper PPE', category: 'Safety' },
+    { id: 5, particulars: 'Factory maintains proper ventilation', category: 'Health' },
+    { id: 6, particulars: 'Drinking water available for all employees', category: 'Health' },
+    { id: 7, particulars: 'Clean and hygienic toilets available', category: 'Health' },
+    { id: 8, particulars: 'No child labor employed', category: 'Labor' },
+    { id: 9, particulars: 'No forced labor employed', category: 'Labor' },
+    { id: 10, particulars: 'Minimum wage compliance', category: 'Labor' },
+    { id: 11, particulars: 'Proper working hours maintained', category: 'Labor' },
+    { id: 12, particulars: 'Overtime is voluntary and paid properly', category: 'Labor' },
+    { id: 13, particulars: 'Anti-discrimination policy in place', category: 'Policy' },
+    { id: 14, particulars: 'Grievance mechanism available', category: 'Policy' },
+    { id: 15, particulars: 'Environmental compliance certificates', category: 'Environment' },
+    { id: 16, particulars: 'Waste management system in place', category: 'Environment' },
+];
 
 // Modern static supplier data
 const staticSuppliersData = [
@@ -829,6 +793,15 @@ const staticSuppliersData = [
         next_audit_date: '2026-06-15',
         branch_name: 'Main Branch',
         branch_id: 'BR-001',
+        customer_standards: [
+            { id: 1, standard_id: 1, standard_name: 'IWAY Standard 6.0', customer_type: 'ASIAN', acceptance_date: '2024-01-15', status: 'accepted', version: '6.0' },
+            { id: 2, standard_id: 2, standard_name: 'BSCI Code of Conduct', customer_type: 'Other', customer_name: 'Brand X', acceptance_date: '2024-02-20', status: 'pending', version: '2.0' },
+        ],
+        self_assessment: [
+            { id: 1, item_id: 1, particulars: 'Factory has proper fire safety equipment', details: 'All fire extinguishers are checked monthly', status: 'yes' },
+            { id: 2, item_id: 2, particulars: 'Emergency exits are clearly marked and accessible', details: 'Exits marked with glow signs', status: 'yes' },
+            { id: 3, item_id: 8, particulars: 'No child labor employed', details: 'All employees above 18 years', status: 'yes' },
+        ],
     },
 ];
 
@@ -884,4 +857,4 @@ const getAuditBadge = (score) => {
     return { text: 'Poor', color: 'bg-rose-100 text-rose-800 border-rose-200' };
 };
 
-export { supplierTabs, optionLists, staticSuppliersData, getStatusBadge, getKycBadge, getAuditBadge };
+export { supplierTabs, optionLists, masterStandards, masterAssessmentItems, staticSuppliersData, getStatusBadge, getKycBadge, getAuditBadge };
