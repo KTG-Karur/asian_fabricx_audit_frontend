@@ -10,7 +10,7 @@ function Header(props) {
                     <h4 className="text-lg font-semibold leading-none">{`${isEdit ? 'Update' : isTitleOnly ? '' : 'Add'} ${Title}`}</h4>
                     <button
                         type="button"
-                        className="flex items-center gap-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium px-4 py-2 rounded shadow self-start md:self-auto"
+                        classNamae="flex items-center gap-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-medium px-4 py-2 rounded shadow self-start md:self-auto"
                         onClick={() => {
                             // setMultiStateValue([{}]);
                             // setState({});

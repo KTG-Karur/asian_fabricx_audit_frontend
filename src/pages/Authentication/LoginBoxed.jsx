@@ -13,6 +13,7 @@ import IconEye from '../../components/Icon/IconEye';
 import IconEyeOff from '../../components/Icon/IconEyeOff';
 import { getLogin, resetLoginStatus } from '../../redux/loginSlice';
 import { showMessage } from '../../util/AllFunction';
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 const LoginBoxed = () => {
     const dispatch = useDispatch();
@@ -157,7 +158,7 @@ const LoginBoxed = () => {
                     {/* Mobile SVG - Smaller for mobile */}
                     <div className="flex justify-center mb-6">
                         <div className="w-64 h-52 flex items-center justify-center">
-                            <img src="/assets/images/auth/6840024_27641.svg" alt="Event Management Illustration" className="w-full h-full object-contain filter brightness-110 drop-shadow-2xl" />
+                            <DotLottieReact src="/Data Management.lottie" loop autoplay />
                         </div>
                     </div>
 
@@ -284,15 +285,9 @@ const LoginBoxed = () => {
                                 Event Management <br />
                                 <span className="text-blue-300">ERP Platform</span>
                             </h2>
-                            {/* Larger SVG Image */}
-                            <div className="flex justify-center my-4">
-                                <div className="w-96 h-80 flex items-center justify-center">
-                                    <img
-                                        src="/assets/images/auth/6840024_27641.svg"
-                                        alt="Event Management Illustration"
-                                        className="w-full h-full object-contain filter brightness-110 drop-shadow-2xl"
-                                    />
-                                </div>
+                            {/* Larger Lottie Image */}
+                            <div className="flex justify-center mb-6">
+                                    <DotLottieReact src="/Data Management.lottie" loop autoplay className="w-full h-full" />
                             </div>
 
                             <p className="text-md text-blue-100 leading-relaxed text-center">
