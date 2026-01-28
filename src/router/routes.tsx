@@ -10,11 +10,13 @@ import {
     Role,
     CompanyInfo,
     SubChecklistAudit,
+    SubChecklistSupplier,
     AuditForm,
     //new asf - ev
     Auditor,
     //new VMS
-    Checklist,
+    ChecklistAudit,
+    ChecklistSupplier,
     Staff,
     Department,
     Designation,
@@ -244,8 +246,16 @@ const routes = [
         element: <SubChecklistAudit />,
     },
     {
-        path: '/master/checklist',
-        element: <Checklist />,
+        path: '/master/checklist-audit',
+        element: <ChecklistAudit />,
+    },
+    {
+        path: '/master/sub-checklist-supplier',
+        element: <SubChecklistSupplier />,
+    },
+    {
+        path: '/master/checklist-supplier',
+        element: <ChecklistSupplier />,
     },
     {
         path: '/reports/enquiry-report',
@@ -354,6 +364,10 @@ const dontCkeckRouts = [
     {
         path: '/master/sub-checklist-audit',
         element: <SubChecklistAudit />,
+    },
+    {
+        path: '/master/sub-checklist-supplier',
+        element: <SubChecklistSupplier />,
     },
     {
         path: '/audit/external-provider/form',

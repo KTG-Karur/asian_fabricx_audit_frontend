@@ -107,7 +107,8 @@ export const Role = lazy(() => import('../view/master/role'));
 export const CompanyInfo = lazy(() => import('../view/company-info'));
 
 //new for the VMS
-export const Checklist = lazy(() => import('../view/master/checklist'));
+export const ChecklistAudit = lazy(() => import('../view/master/checklistAudit'));
+export const ChecklistSupplier = lazy(() => import('../view/master/checklistSupplier'));
 export const Staff = lazy(() => import('../view/master/employee'));
 export const Department = lazy(() => import('../view/master/department'));
 export const Designation = lazy(() => import('../view/master/designation'));
@@ -119,5 +120,6 @@ export const Suppliers = lazy(() => import('../view/master/suppliers/Index'));
 export const Auditor = lazy(() => import('../view/master/auditor'));
 export const EnquiryReport = lazy(() => import('../view/report/enquiry'));
 export const PrintEnquiry = lazy(() => import('../view/documents/enquiry-report-pdf'));
-export const SubChecklistAudit = lazy(() => import('../view/master/subChecklist'));
+export const SubChecklistAudit = lazy(() => import('../view/master/subChecklistAudit'));
+export const SubChecklistSupplier = lazy(() => import('../view/master/subChecklistSupplier'));
 export const AuditForm = lazy(() => import('../view/auditForm'));

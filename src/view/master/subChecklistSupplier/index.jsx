@@ -6,15 +6,16 @@ import IconPlus from '../../../components/Icon/IconPlus';
 import IconChevronUp from '../../../components/Icon/IconChevronUp';
 import IconChevronDown from '../../../components/Icon/IconChevronDown';
 import IconArrowLeft from '../../../components/Icon/IconArrowLeft';
-import IconCheck from '../../../components/Icon/IconX';
-import IconFile from '../../../components/Icon/IconFile';
-import IconCamera from '../../../components/Icon/IconPlus';
+import IconCalendar from '../../../components/Icon/IconCalendar';
+import IconFileText from '../../../components/Icon/IconCalendar';
+import IconCheckCircle from '../../../components/Icon/IconXCircle';
+import IconXCircle from '../../../components/Icon/IconXCircle';
 import Table from '../../../util/Table';
 import Tippy from '@tippyjs/react';
 import ModelViewBox from '../../../util/ModelViewBox';
 import { showMessage } from '../../../util/AllFunction';
 
-const SubChecklistAudit = () => {
+const SupplierSubChecklistAudit = () => {
     const location = useLocation();
     const navigate = useNavigate();
 
@@ -25,9 +26,9 @@ const SubChecklistAudit = () => {
         checklistId: '',
         name: '',
         order: 0,
-        hasOptions: false,
-        hasDescription: false,
-        hasImage: false,
+        hasDate: false,
+        hasDetails: false,
+        hasYesNo: false,
     });
     const [checklists, setChecklists] = useState([]);
     const [checklist, setChecklist] = useState(null);
@@ -120,12 +121,13 @@ const SubChecklistAudit = () => {
             width: 100,
         },
     ];
+
     useEffect(() => {
         if (location.state?.checklist && location.state?.checklists) {
             setChecklist(location.state.checklist);
             setChecklists(location.state.checklists);
         } else {
-            navigate('/master/checklist');
+            navigate('/master/checklist-supplier');
         }
     }, [location.state, navigate]);
 
@@ -140,9 +142,9 @@ const SubChecklistAudit = () => {
             checklistId: checklist?.id || '',
             name: '',
             order: 0,
-            hasOptions: false,
-            hasDescription: false,
-            hasImage: false,
+            hasDate: false,
+            hasDetails: false,
+            hasYesNo: false,
         });
         setSelectedCheckItem(null);
         setErrors([]);
@@ -158,9 +160,9 @@ const SubChecklistAudit = () => {
             checklistId: checklist?.id || '',
             name: '',
             order: maxItemOrder + 1,
-            hasOptions: false,
-            hasDescription: false,
-            hasImage: false,
+            hasDate: false,
+            hasDetails: false,
+            hasYesNo: false,
         });
         setModal(true);
         setErrors([]);
@@ -171,9 +173,9 @@ const SubChecklistAudit = () => {
             checklistId: checklist?.id || '',
             name: item.name || '',
             order: item.order || 0,
-            hasOptions: item.hasOptions || false,
-            hasDescription: item.hasDescription || false,
-            hasImage: item.hasImage || false,
+            hasDate: item.hasDate || false,
+            hasDetails: item.hasDetails || false,
+            hasYesNo: item.hasYesNo || false,
         });
         setIsEdit(true);
         setSelectedCheckItem(item);
@@ -216,16 +218,15 @@ const SubChecklistAudit = () => {
                     ...selectedCheckItem,
                     name: itemState.name.trim(),
                     order: itemState.order,
-                    hasOptions: itemState.hasOptions,
-                    hasDescription: itemState.hasDescription,
-                    hasImage: itemState.hasImage,
+                    hasDate: itemState.hasDate,
+                    hasDetails: itemState.hasDetails,
+                    hasYesNo: itemState.hasYesNo,
                 };
 
-                if (itemState.hasOptions) {
+                if (itemState.hasYesNo) {
                     updatedItem.options = [
                         { id: 1, label: 'Yes', value: 'yes' },
                         { id: 2, label: 'No', value: 'no' },
-                        { id: 3, label: 'Not Applicable', value: 'na' },
                     ];
                 } else {
                     delete updatedItem.options;
@@ -241,16 +242,15 @@ const SubChecklistAudit = () => {
                     name: itemState.name.trim(),
                     order: itemState.order,
                     isActive: 1,
-                    hasOptions: itemState.hasOptions,
-                    hasDescription: itemState.hasDescription,
-                    hasImage: itemState.hasImage,
+                    hasDate: itemState.hasDate,
+                    hasDetails: itemState.hasDetails,
+                    hasYesNo: itemState.hasYesNo,
                 };
 
-                if (itemState.hasOptions) {
+                if (itemState.hasYesNo) {
                     newCheckItem.options = [
                         { id: 1, label: 'Yes', value: 'yes' },
                         { id: 2, label: 'No', value: 'no' },
-                        { id: 3, label: 'Not Applicable', value: 'na' },
                     ];
                 }
 
@@ -362,34 +362,37 @@ const SubChecklistAudit = () => {
     const renderItemIndicators = (item) => {
         const indicators = [];
 
-        if (item.hasOptions) {
+        if (item.hasDate) {
             indicators.push(
-                <Tippy key="options" content="Has Yes/No/NA options">
-                    <div className="flex items-center space-x-1 bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
-                        <IconCheck className="w-3 h-3" />
-                        <span>Options</span>
-                    </div>
-                </Tippy>,
-            );
-        }
-
-        if (item.hasDescription) {
-            indicators.push(
-                <Tippy key="desc" content="Requires description">
+                <Tippy key="date" content="Has date field">
                     <div className="flex items-center space-x-1 bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs">
-                        <IconFile className="w-3 h-3" />
-                        <span>Desc</span>
+                        <IconCalendar className="w-3 h-3" />
+                        <span>Date</span>
                     </div>
                 </Tippy>,
             );
         }
 
-        if (item.hasImage) {
+        if (item.hasDetails) {
             indicators.push(
-                <Tippy key="image" content="Requires image upload">
+                <Tippy key="desc" content="Has details field">
+                    <div className="flex items-center space-x-1 bg-green-100 text-green-800 px-2 py-1 rounded text-xs">
+                        <IconFileText className="w-3 h-3" />
+                        <span>Details</span>
+                    </div>
+                </Tippy>,
+            );
+        }
+
+        if (item.hasYesNo) {
+            indicators.push(
+                <Tippy key="yesno" content="Has Yes/No field">
                     <div className="flex items-center space-x-1 bg-purple-100 text-purple-800 px-2 py-1 rounded text-xs">
-                        <IconCamera className="w-3 h-3" />
-                        <span>Image</span>
+                        <div className="flex items-center">
+                            <IconCheckCircle className="w-3 h-3 text-green-500" />
+                            <IconXCircle className="w-3 h-3 text-red-500" />
+                        </div>
+                        <span>Yes/No</span>
                     </div>
                 </Tippy>,
             );
@@ -400,7 +403,7 @@ const SubChecklistAudit = () => {
 
     const handleBack = () => {
         // Navigate back to main page with updated checklists
-        navigate('/master/checklist', {
+        navigate('/master/checklist-supplier', {
             state: { checklists: checklists },
         });
     };
@@ -429,16 +432,18 @@ const SubChecklistAudit = () => {
                         </p>
                     </div>
                 </div>
-                <button onClick={handleBack} className="flex items-center text-gray-600 hover:text-gray-900">
+                <div className="flex items-center space-x-2">
+                    <button onClick={handleBack} className="flex items-center text-gray-600 hover:text-gray-900">
                         <IconArrowLeft className="w-5 h-5 mr-2" />
                         Back to Checklists
                     </button>
+                </div>
             </div>
 
             <div>
                 <Table
                     columns={columns}
-                    Title={'Check Items'}
+                    Title={'Supplier Check Items'}
                     toggle={createModel}
                     data={getPaginatedData()}
                     pageSize={pageSize}
@@ -504,40 +509,40 @@ const SubChecklistAudit = () => {
                         <div className="space-y-4">
                             <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
                                 <div>
-                                    <label className="block font-medium text-gray-700 mb-1">Include Yes/No/Not Applicable Options</label>
-                                    <p className="text-sm text-gray-500">When checked, users must select one of these options</p>
+                                    <label className="block font-medium text-gray-700 mb-1">Include Date Field</label>
+                                    <p className="text-sm text-gray-500">When checked, users can select a date for this item</p>
                                 </div>
                                 <label className="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" name="hasOptions" checked={itemState.hasOptions} onChange={handleInputChange} className="sr-only peer" />
+                                    <input type="checkbox" name="hasDate" checked={itemState.hasDate} onChange={handleInputChange} className="sr-only peer" />
                                     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                                 </label>
                             </div>
 
                             <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
                                 <div>
-                                    <label className="block font-medium text-gray-700 mb-1">Require Description Field</label>
-                                    <p className="text-sm text-gray-500">When checked, users must enter a description when filling the form</p>
+                                    <label className="block font-medium text-gray-700 mb-1">Include Details Field</label>
+                                    <p className="text-sm text-gray-500">When checked, users can enter detailed information for this item</p>
                                 </div>
                                 <label className="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" name="hasDescription" checked={itemState.hasDescription} onChange={handleInputChange} className="sr-only peer" />
+                                    <input type="checkbox" name="hasDetails" checked={itemState.hasDetails} onChange={handleInputChange} className="sr-only peer" />
                                     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                                 </label>
                             </div>
 
                             <div className="flex items-center justify-between p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
                                 <div>
-                                    <label className="block font-medium text-gray-700 mb-1">Require Image Upload</label>
-                                    <p className="text-sm text-gray-500">When checked, users must upload an image when selecting "Yes"</p>
+                                    <label className="block font-medium text-gray-700 mb-1">Include Yes/No Field</label>
+                                    <p className="text-sm text-gray-500">When checked, users must select Yes or No for this item</p>
                                 </div>
                                 <label className="relative inline-flex items-center cursor-pointer">
-                                    <input type="checkbox" name="hasImage" checked={itemState.hasImage} onChange={handleInputChange} className="sr-only peer" />
+                                    <input type="checkbox" name="hasYesNo" checked={itemState.hasYesNo} onChange={handleInputChange} className="sr-only peer" />
                                     <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
                                 </label>
                             </div>
 
-                            {itemState.hasOptions && (
-                                <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                                    <h5 className="font-medium text-blue-800 mb-2">Preview of Options:</h5>
+                            {itemState.hasYesNo && (
+                                <div className="mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                                    <h5 className="font-medium text-green-800 mb-2">Yes/No Options:</h5>
                                     <div className="flex space-x-3">
                                         <div className="flex items-center space-x-1">
                                             <div className="w-4 h-4 rounded-full bg-green-500"></div>
@@ -547,12 +552,8 @@ const SubChecklistAudit = () => {
                                             <div className="w-4 h-4 rounded-full bg-red-500"></div>
                                             <span className="text-sm text-gray-700">No</span>
                                         </div>
-                                        <div className="flex items-center space-x-1">
-                                            <div className="w-4 h-4 rounded-full bg-gray-500"></div>
-                                            <span className="text-sm text-gray-700">Not Applicable</span>
-                                        </div>
                                     </div>
-                                    <p className="text-xs text-blue-600 mt-2">Users will be required to select one of these options in the form</p>
+                                    <p className="text-xs text-green-600 mt-2">Users will be required to select one of these options in the form</p>
                                 </div>
                             )}
                         </div>
@@ -563,4 +564,4 @@ const SubChecklistAudit = () => {
     );
 };
 
-export default SubChecklistAudit;
+export default SupplierSubChecklistAudit;
