@@ -1,6 +1,7 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import themeConfigSlice from './themeConfigSlice';
 import DepartmentSlice from '../departmentSlice';
+import DesignationSlice from '../designationSlice';
 import EmployeeSlice from '../employeeSlice';
 import RoleSlice from '../roleSlice';
 import PageSlice from '../pageSlice';
@@ -19,6 +20,7 @@ import DashboardSlice from '../dashboardSlice';
 const rootReducer = combineReducers({
     themeConfig: themeConfigSlice,
     DepartmentSlice,
+    DesignationSlice,
     EmployeeSlice,
     RoleSlice,
     PageSlice,

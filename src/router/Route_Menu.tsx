@@ -110,6 +110,8 @@ export const CompanyInfo = lazy(() => import('../view/company-info'));
 export const Checklist = lazy(() => import('../view/master/checklist'));
 export const Staff = lazy(() => import('../view/master/employee'));
 export const Department = lazy(() => import('../view/master/department'));
+export const Designation = lazy(() => import('../view/master/designation'));
+export const AuditAssignToAuditor = lazy(() => import('../view/master/auditAssignToAuditor'));
 export const Audit = lazy(() => import('../view/audit'));
 export const Suppliers = lazy(() => import('../view/master/suppliers/Index'));
 

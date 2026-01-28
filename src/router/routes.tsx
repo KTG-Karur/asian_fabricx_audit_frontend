@@ -17,6 +17,7 @@ import {
     Checklist,
     Staff,
     Department,
+    Designation,
     //old
     ContactUsBoxed,
     ContactUsCover,
@@ -31,6 +32,7 @@ import {
     Suppliers,
     PrintEnquiry,
     EnquiryReport,
+    AuditAssignToAuditor,
 } from './Route_Menu';
 
 const loading = () => <div className=""></div>;
@@ -257,6 +259,14 @@ const routes = [
     {
         path: '/master/department',
         element: <Department />,
+    },
+    {
+        path: '/master/designation',
+        element: <Designation />,
+    },
+    {
+        path: '/master/audit-assign-to-auditor',
+        element: <AuditAssignToAuditor />,
     },
     {
         path: '/master/suppliers',
