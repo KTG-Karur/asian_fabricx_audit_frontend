@@ -35,6 +35,7 @@ import {
     PrintEnquiry,
     EnquiryReport,
     AuditAssignToAuditor,
+    AuditFormPdf,
 } from './Route_Menu';
 
 const loading = () => <div className=""></div>;
@@ -373,6 +374,10 @@ const dontCkeckRouts = [
         path: '/audit/external-provider/form',
         element: <AuditForm />,
     },
+    {
+        path: '/audit/report-pdf',
+        element: <AuditFormPdf />,
+    },
     //old
     {
         path: '/documents/print-enquiry',
@@ -428,6 +433,10 @@ const dontCkeckRouts = [
         path: '/auth/boxed-signin',
         element: <LoginBoxed />,
         layout: 'blank',
+    },
+    {
+        path: '/audit/report-pdf',
+        element: <AuditFormPdf />,
     },
 ];
 

@@ -441,13 +441,13 @@ const ChecklistAudit = () => {
     return (
         <div className="p-6">
             <div className="p-6 text-center">
-                <h1 className="text-3xl font-extrabold text-gray-800">Checklist Management</h1>
+                <h1 className="text-3xl font-extrabold text-gray-800">Audit Checklist Management</h1>
             </div>
 
             <div className="datatables">
                 <Table
                     columns={column}
-                    Title={'Checklist Management'}
+                    Title={'Audit Checklist Management'}
                     toggle={createModel}
                     data={getPaginatedData()}
                     pageSize={pageSize}

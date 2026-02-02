@@ -6,6 +6,9 @@ import IconTrashLines from '../../../components/Icon/IconTrashLines';
 import IconRestore from '../../../components/Icon/IconRestore';
 import IconEye from '../../../components/Icon/IconEye';
 import IconPlus from '../../../components/Icon/IconPlus';
+import IconX from '../../../components/Icon/IconX';
+import IconSave from '../../../components/Icon/IconSave';
+import IconRotate from '../../../components/Icon/IconRestore';
 import Table from '../../../util/Table';
 import Tippy from '@tippyjs/react';
 import ModelViewBox from '../../../util/ModelViewBox';
@@ -77,9 +80,9 @@ const Index = () => {
     error: designationError = null,
   } = designationState;
 
-  const [modal, setModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const [state, setState] = useState({
     name: '',
     auditorId: '',
@@ -165,13 +168,10 @@ const Index = () => {
     return `AUD${String(maxId + 1).padStart(3, '0')}`;
   };
 
-  const closeModel = () => {
+  const closeForm = () => {
     setIsEdit(false);
+    setShowForm(false);
     onFormClear();
-    setModal(false);
-    setCertificationFiles([]);
-    setShowAddDesignation(false);
-    setNewDesignation('');
   };
 
   const onFormClear = () => {
@@ -192,16 +192,17 @@ const Index = () => {
     setIsPasswordChanged(false);
     setShowAddDesignation(false);
     setNewDesignation('');
+    setCertificationFiles([]);
   };
 
-  const createModel = () => {
+  const createForm = () => {
     onFormClear();
     setIsEdit(false);
     setState(prev => ({
       ...prev,
       auditorId: generateNextAuditorId()
     }));
-    setModal(true);
+    setShowForm(true);
     setErrors([]);
   };
 
@@ -214,6 +215,16 @@ const Index = () => {
     const selectedDesignation = designationOptions.find(d => 
       d.value === data.designationId || d.label === data.designation
     );
+
+    // Prepare certification files for editing
+    const certFiles = (data.certifications || []).map(cert => ({
+      id: cert.id,
+      file: null,
+      name: cert.name,
+      url: cert.url,
+      type: cert.type || 'image/jpeg',
+      isNew: false
+    }));
 
     const newState = {
       name: data.name || '',
@@ -228,9 +239,10 @@ const Index = () => {
     };
 
     setState(newState);
+    setCertificationFiles(certFiles);
     setIsEdit(true);
     setSelectedItem(data);
-    setModal(true);
+    setShowForm(true);
     setErrors([]);
     setIsPasswordChanged(false);
   };
@@ -312,6 +324,7 @@ const Index = () => {
     }
 
     try {
+      setLoading(true);
       let finalPassword = '';
       if (isEdit) {
         finalPassword = isPasswordChanged ? state.password : state.existingPassword;
@@ -351,9 +364,15 @@ const Index = () => {
         showMessage('success', 'Auditor created successfully');
       }
 
-      closeModel();
+      // Auto-hide form after successful save
+      setTimeout(() => {
+        closeForm();
+      }, 1000);
+      
     } catch (error) {
       showMessage('error', 'Failed to save auditor data');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -585,11 +604,437 @@ const Index = () => {
 
   return (
     <div>
+      {/* Auditor Form Section */}
+      {showForm && (
+        <div className="panel mb-6 animate-fade-in">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-bold text-gray-800">
+              {isEdit ? 'Edit Auditor' : 'Add New Auditor'}
+            </h3>
+            <button
+              type="button"
+              onClick={closeForm}
+              className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+              title="Close form"
+            >
+              <IconX className="w-5 h-5 text-gray-500" />
+            </button>
+          </div>
+          
+          <form onSubmit={onFormSubmit} className="space-y-6">
+            {/* Certifications Section */}
+            <div className="grid grid-cols-1 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Certifications <span className="text-red-500">*</span>
+                  <span className="text-xs text-gray-500 ml-2">(Max 5 files, JPG/PNG/PDF)</span>
+                </label>
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors">
+                  <input
+                    type="file"
+                    multiple
+                    accept=".jpg,.jpeg,.png,.pdf"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    id="certification-upload"
+                  />
+                  <label
+                    htmlFor="certification-upload"
+                    className="cursor-pointer inline-flex items-center px-4 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all shadow-md hover:shadow-lg"
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                    </svg>
+                    Upload Certifications
+                  </label>
+                  <p className="text-sm text-gray-500 mt-2">Click to upload or drag and drop</p>
+                  
+                  {/* File List */}
+                  {certificationFiles.length > 0 && (
+                    <div className="mt-6">
+                      <h4 className="text-sm font-medium text-gray-700 mb-3">Uploaded Files ({certificationFiles.length}/5):</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        {certificationFiles.map((file) => (
+                          <div key={file.id} className="flex items-center justify-between bg-gray-50 p-3 rounded-lg border hover:bg-white transition-colors">
+                            <div className="flex items-center">
+                              {file.type.includes('image') ? (
+                                <div className="w-12 h-12 rounded overflow-hidden mr-3 border">
+                                  <img src={file.url} alt={file.name} className="w-full h-full object-cover" />
+                                </div>
+                              ) : (
+                                <div className="w-12 h-12 bg-red-50 border border-red-100 flex items-center justify-center rounded mr-3">
+                                  <span className="text-red-600 font-bold text-sm">PDF</span>
+                                </div>
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <p className="text-sm font-medium text-gray-900 truncate">{file.name}</p>
+                                <p className="text-xs text-gray-500">
+                                  {(file.file?.size ? (file.file.size / 1024).toFixed(2) : 'N/A')} KB
+                                  <span className="mx-2">•</span>
+                                  {file.type?.split('/')[1]?.toUpperCase() || 'FILE'}
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => removeFile(file.id)}
+                              className="ml-2 p-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded transition-colors"
+                              title="Remove file"
+                            >
+                              <IconX className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Basic Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Auditor ID */}
+              <div>
+                <label className="block mb-2 font-medium text-gray-700">
+                  Auditor ID <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="text"
+                    name="auditorId"
+                    value={state.auditorId}
+                    disabled
+                    className="form-input w-full bg-gray-50 border-gray-200 font-mono"
+                  />
+                  <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                    <span className="text-gray-400 text-sm">Auto-generated</span>
+                  </div>
+                </div>
+                {errors.includes('auditorId') && (
+                  <p className="mt-1 text-sm text-red-600">* Please enter Auditor ID</p>
+                )}
+              </div>
+
+              {/* Full Name */}
+              <div>
+                <label className="block mb-2 font-medium text-gray-700">
+                  Full Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  name="name"
+                  value={state.name}
+                  onChange={handleInputChange}
+                  placeholder="Enter auditor full name"
+                  className={`form-input w-full ${errors.includes('name') ? 'border-red-500' : ''}`}
+                />
+                {errors.includes('name') && (
+                  <p className="mt-1 text-sm text-red-600">* Please enter Name</p>
+                )}
+              </div>
+
+              {/* Designation */}
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block font-medium text-gray-700">
+                    Designation <span className="text-red-500">*</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={toggleAddDesignation}
+                    className="flex items-center text-sm text-blue-600 hover:text-blue-800 transition-colors"
+                    title={showAddDesignation ? "Hide Add Designation" : "Add New Designation"}
+                  >
+                    <IconPlus className={`w-4 h-4 mr-1 transition-transform ${showAddDesignation ? 'rotate-45' : ''}`} />
+                    {showAddDesignation ? 'Cancel' : 'Add New'}
+                  </button>
+                </div>
+                
+                <Select
+                  menuPortalTarget={document.body}
+                  menuPosition="fixed"
+                  isMulti={false}
+                  required={true}
+                  onChange={handleDesignationChange}
+                  getOptionLabel={(option) => option.label}
+                  getOptionValue={(option) => option.value}
+                  value={state.designation}
+                  className={`react-select react-select-container ${errors.includes('designation') ? 'border-red-500' : ''}`}
+                  classNamePrefix="react-select"
+                  isSearchable
+                  options={designationOptions}
+                  isLoading={designationLoading}
+                  placeholder="Select designation"
+                  styles={{
+                    option: (provided, state) => ({
+                      ...provided,
+                      fontSize: '14px',
+                      backgroundColor: state.isSelected ? '#e6f7ff' : state.isFocused ? '#f0f9ff' : '#fff',
+                      cursor: 'pointer',
+                      ':active': {
+                        backgroundColor: '#e6f7ff',
+                      },
+                    }),
+                    menuPortal: (base) => ({
+                      ...base,
+                      zIndex: 9999,
+                    }),
+                    control: (provided, state) => ({
+                      ...provided,
+                      borderColor: errors.includes('designation') ? '#ef4444' : state.isFocused ? '#3b82f6' : '#d1d5db',
+                      '&:hover': {
+                        borderColor: errors.includes('designation') ? '#ef4444' : '#9ca3af',
+                      },
+                      boxShadow: state.isFocused && !errors.includes('designation') ? '0 0 0 2px rgba(59, 130, 246, 0.2)' : 'none',
+                      minHeight: '42px',
+                    }),
+                  }}
+                />
+                {errors.includes('designation') && (
+                  <p className="mt-1 text-sm text-red-600">* Please select Designation</p>
+                )}
+              </div>
+
+              {/* Authentication Checkbox */}
+              <div className="md:col-span-2">
+                <label className="inline-flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer">
+                  <input
+                    type="checkbox"
+                    name="isAuthenticated"
+                    checked={state.isAuthenticated}
+                    onChange={handleInputChange}
+                    className="form-checkbox h-5 w-5 text-blue-600 rounded"
+                  />
+                  <div>
+                    <span className="font-medium text-gray-700">Enable Authentication</span>
+                    <p className="text-sm text-gray-500 mt-1">
+                      Enable username/password authentication for this auditor
+                    </p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            {/* Add Designation Form */}
+            {showAddDesignation && (
+              <div className="border rounded-lg p-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-blue-100 animate-fade-in">
+                <div className="flex items-center justify-between mb-3">
+                  <label className="block text-sm font-medium text-gray-700">
+                    Add New Designation
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setShowAddDesignation(false);
+                      setNewDesignation('');
+                    }}
+                    className="text-gray-500 hover:text-gray-700 transition-colors"
+                    title="Close"
+                  >
+                    <IconX className="w-4 h-4" />
+                  </button>
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newDesignation}
+                    onChange={(e) => setNewDesignation(e.target.value)}
+                    placeholder="Enter designation name"
+                    className="form-input flex-1"
+                    disabled={addingDesignation}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddDesignation}
+                    disabled={addingDesignation}
+                    className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow hover:shadow-md"
+                  >
+                    {addingDesignation ? (
+                      <span className="flex items-center">
+                        <IconRotate className="w-4 h-4 mr-2 animate-spin" />
+                        Adding...
+                      </span>
+                    ) : 'Add'}
+                  </button>
+                </div>
+                <p className="text-xs text-gray-500 mt-2">
+                  Designation will be available in the dropdown after creation
+                </p>
+              </div>
+            )}
+
+            {/* Authentication Fields */}
+            {state.isAuthenticated && (
+              <div className="border-t pt-6 mt-6">
+                <h4 className="text-lg font-medium text-gray-800 mb-4">Authentication Settings</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Username */}
+                  <div>
+                    <label className="block mb-2 font-medium text-gray-700">
+                      Username <span className="text-red-500">*</span>
+                    </label>
+                    <input 
+                      type="text" 
+                      name="username" 
+                      value={state.username} 
+                      onChange={handleInputChange} 
+                      placeholder="Enter username" 
+                      className={`form-input w-full ${errors.includes('username') ? 'border-red-500' : ''}`}
+                    />
+                    {errors.includes('username') && (
+                      <p className="mt-1 text-sm text-red-600">* Please enter Username</p>
+                    )}
+                  </div>
+
+                  {/* Password */}
+                  <div>
+                    <label className="block mb-2 font-medium text-gray-700">
+                      Password {isEdit ? '' : <span className="text-red-500">*</span>}
+                      {isEdit && (
+                        <span className="text-xs text-gray-500 ml-2">
+                          (Leave blank to keep current)
+                        </span>
+                      )}
+                    </label>
+                    
+                    {isEdit && !isPasswordChanged && (
+                      <div className="mb-3 p-3 bg-gray-50 rounded-lg">
+                        <label className="block text-sm font-medium text-gray-600 mb-2">Current Password:</label>
+                        <div className="relative">
+                          <input
+                            type={showPassword ? 'text' : 'password'}
+                            value={state.existingPassword}
+                            readOnly
+                            className="form-input w-full pr-10 bg-white font-mono"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(prev => !prev)}
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+                          >
+                            {showPassword ? 'Hide' : 'Show'}
+                          </button>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setIsPasswordChanged(true)}
+                          className="mt-2 text-sm text-blue-600 hover:text-blue-800 font-medium"
+                        >
+                          Change Password
+                        </button>
+                      </div>
+                    )}
+                    
+                    {(isEdit && isPasswordChanged) || !isEdit ? (
+                      <div>
+                        <div className="relative">
+                          <input
+                            type={showPassword ? 'text' : 'password'}
+                            name="password"
+                            value={state.password}
+                            onChange={handleInputChange}
+                            placeholder={isEdit ? 'Enter new password' : 'Enter password'}
+                            className={`form-input w-full pr-10 ${errors.includes('password') ? 'border-red-500' : ''}`}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(prev => !prev)}
+                            className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500 hover:text-gray-700"
+                          >
+                            {showPassword ? 'Hide' : 'Show'}
+                          </button>
+                        </div>
+                        {isEdit && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsPasswordChanged(false);
+                              setState(prev => ({ ...prev, password: '' }));
+                            }}
+                            className="mt-2 text-sm text-red-600 hover:text-red-800 font-medium"
+                          >
+                            Cancel Password Change
+                          </button>
+                        )}
+                        
+                        {errors.includes('password') && (
+                          <p className="mt-1 text-sm text-red-600">* Please enter Password</p>
+                        )}
+                        
+                        {state.password && (
+                          <div className="mt-3">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-xs font-medium text-gray-600">Password Strength:</span>
+                              <span className={`text-xs font-bold ${
+                                state.password.length < 6 ? 'text-red-600' : 
+                                state.password.length < 8 ? 'text-yellow-600' : 
+                                'text-green-600'
+                              }`}>
+                                {state.password.length < 6 ? 'Weak' : 
+                                 state.password.length < 8 ? 'Medium' : 
+                                 'Strong'}
+                              </span>
+                            </div>
+                            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
+                              <div 
+                                className={`h-full rounded-full transition-all duration-500 ${
+                                  state.password.length < 6 ? 'bg-red-500 w-1/3' : 
+                                  state.password.length < 8 ? 'bg-yellow-500 w-2/3' : 
+                                  'bg-green-500 w-full'
+                                }`}
+                              ></div>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-2">
+                              Use at least 8 characters with a mix of letters, numbers & symbols
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Form Actions */}
+            <div className="flex justify-end space-x-3 pt-6 border-t">
+              <button
+                type="button"
+                onClick={closeForm}
+                className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                disabled={loading}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading}
+                className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg font-medium flex items-center"
+              >
+                {loading ? (
+                  <>
+                    <IconRotate className="w-4 h-4 mr-2 animate-spin" />
+                    {isEdit ? 'Updating...' : 'Creating...'}
+                  </>
+                ) : (
+                  <>
+                    <IconSave className="w-4 h-4 mr-2" />
+                    {isEdit ? 'Update Auditor' : 'Create Auditor'}
+                  </>
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* Table Section */}
       <div className="datatables">
         <Table
           columns={columns}
           Title={'Auditor Management - All Records'}
-          toggle={createModel}
+          toggle={createForm}
           data={getPaginatedData()}
           pageSize={pageSize}
           pageIndex={currentPage}
@@ -599,356 +1044,12 @@ const Index = () => {
           pagination={true}
           isSearchable={true}
           isSortable={true}
-          btnName="Add Auditor"
+          btnName={showForm ? null : "Add Auditor"}
           loadings={loading}
         />
       </div>
 
-      <ModelViewBox
-        key={isEdit ? `edit-${selectedItem?.id}` : 'create'}
-        modal={modal}
-        modelHeader={isEdit ? 'Edit Auditor' : 'Add Auditor'}
-        isEdit={isEdit}
-        setModel={closeModel}
-        handleSubmit={onFormSubmit}
-        modelSize="lg"
-        submitBtnText={isEdit ? 'Update' : 'Create'}
-        loadings={loading}
-      >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-          <div className="col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Certifications <span className="text-red-500">*</span>
-              <span className="text-xs text-gray-500 ml-2">(Max 5 files, JPG/PNG/PDF)</span>
-            </label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
-              <input
-                type="file"
-                multiple
-                accept=".jpg,.jpeg,.png,.pdf"
-                onChange={handleFileUpload}
-                className="hidden"
-                id="certification-upload"
-              />
-              <label
-                htmlFor="certification-upload"
-                className="cursor-pointer inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary-dark transition"
-              >
-                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                </svg>
-                Upload Certifications
-              </label>
-              <p className="text-sm text-gray-500 mt-2">Click to upload or drag and drop</p>
-              
-              {/* File List */}
-              {certificationFiles.length > 0 && (
-                <div className="mt-4">
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Uploaded Files:</h4>
-                  <div className="space-y-2">
-                    {certificationFiles.map((file) => (
-                      <div key={file.id} className="flex items-center justify-between bg-gray-50 p-3 rounded">
-                        <div className="flex items-center">
-                          {file.type.includes('image') ? (
-                            <img src={file.url} alt={file.name} className="w-10 h-10 object-cover rounded mr-3" />
-                          ) : (
-                            <div className="w-10 h-10 bg-red-100 flex items-center justify-center rounded mr-3">
-                              <span className="text-red-600 font-bold">PDF</span>
-                            </div>
-                          )}
-                          <div>
-                            <p className="text-sm font-medium text-gray-900">{file.name}</p>
-                            <p className="text-xs text-gray-500">
-                              {(file.file?.size / 1024).toFixed(2)} KB
-                            </p>
-                          </div>
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => removeFile(file.id)}
-                          className="text-red-600 hover:text-red-800"
-                        >
-                          Remove
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Custom Form Fields */}
-        <div className="grid grid-cols-12 gap-4 mt-5">
-          {/* Auditor ID */}
-          <div className="col-span-6 mb-2">
-            <label className="block mb-1 font-medium text-gray-700">
-              Auditor ID <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="auditorId"
-              value={state.auditorId}
-              disabled
-              className="form-input w-full bg-gray-50 cursor-not-allowed"
-            />
-            {errors.includes('auditorId') && <p className="text-red-600 text-sm mt-1">* Please enter Auditor ID</p>}
-          </div>
-
-          {/* Full Name */}
-          <div className="col-span-6 mb-2">
-            <label className="block mb-1 font-medium text-gray-700">
-              Full Name <span className="text-red-500">*</span>
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={state.name}
-              onChange={handleInputChange}
-              placeholder="Enter auditor full name"
-              className="form-input w-full"
-            />
-            {errors.includes('name') && <p className="text-red-600 text-sm mt-1">* Please enter Name</p>}
-          </div>
-
-          {/* Designation with Add Button */}
-          <div className="col-span-6 mb-2">
-            <div className="flex items-center mb-1">
-              <label className="block font-medium text-gray-700 mr-2">
-                Designation <span className="text-red-500">*</span>
-              </label>
-              <button
-                type="button"
-                onClick={toggleAddDesignation}
-                className="flex items-center text-green-600 hover:text-green-800"
-                title={showAddDesignation ? "Hide Add Designation" : "Add New Designation"}
-              >
-                <IconPlus className={`w-4 h-4 transition-transform ${showAddDesignation ? 'rotate-45' : ''}`} />
-              </button>
-            </div>
-            
-            <Select
-              menuPortalTarget={document.body}
-              menuPosition="fixed"
-              isMulti={false}
-              required={true}
-              onChange={handleDesignationChange}
-              getOptionLabel={(option) => option.label}
-              getOptionValue={(option) => option.value}
-              value={state.designation}
-              className="react-select react-select-container"
-              classNamePrefix="react-select"
-              isSearchable
-              onFocus={() => {
-                if (errors.includes('designation')) {
-                  setErrors(prev => prev.filter(error => error !== 'designation'));
-                }
-              }}
-              options={designationOptions}
-              isLoading={designationLoading}
-              placeholder="Select designation"
-              styles={{
-                option: (provided, state) => ({
-                  ...provided,
-                  fontSize: '16px',
-                  color: '#000',
-                  backgroundColor: state.isSelected ? '#e6f7ff' : state.isFocused ? '#71b6f98a' : '#fff',
-                  cursor: 'pointer',
-                }),
-                menuPortal: (base) => ({
-                  ...base,
-                  zIndex: 9999,
-                }),
-                menu: (provided) => ({
-                  ...provided,
-                  fontSize: '16px',
-                  color: '#000',
-                }),
-                singleValue: (provided) => ({
-                  ...provided,
-                  fontSize: '16px',
-                  color: '#000',
-                }),
-                control: (provided, state) => ({
-                  ...provided,
-                  borderColor: errors.includes('designation') ? '#ef4444' : '#d1d5db',
-                  '&:hover': {
-                    borderColor: errors.includes('designation') ? '#ef4444' : '#9ca3af',
-                  },
-                  boxShadow: state.isFocused && !errors.includes('designation') ? '0 0 0 2px rgba(59, 130, 246, 0.5)' : 'none',
-                }),
-                input: (provided) => ({
-                  ...provided,
-                  fontSize: '16px',
-                  color: '#000',
-                }),
-              }}
-            />
-            {errors.includes('designation') && <p className="text-red-600 text-sm mt-1">* Please select Designation</p>}
-          </div>
-
-          {/* Enable Authentication Checkbox */}
-          <div className="col-span-12 mb-2">
-            <label className="inline-flex items-center">
-              <input
-                type="checkbox"
-                name="isAuthenticated"
-                checked={state.isAuthenticated}
-                onChange={handleInputChange}
-                className="form-checkbox"
-              />
-              <span className="ml-2">Enable Authentication</span>
-            </label>
-          </div>
-        </div>
-
-        {/* Add Designation Form - Collapsible */}
-        {showAddDesignation && (
-          <div className="border rounded-lg p-4 bg-gray-50 mt-4 mb-4 animate-fade-in">
-            <div className="flex items-center justify-between mb-2">
-              <label className="block text-sm font-medium text-gray-700">
-                Add New Designation
-              </label>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowAddDesignation(false);
-                  setNewDesignation('');
-                }}
-                className="text-gray-500 hover:text-gray-700"
-              >
-                ✕
-              </button>
-            </div>
-            <div className="flex gap-2">
-              <input
-                type="text"
-                value={newDesignation}
-                onChange={(e) => setNewDesignation(e.target.value)}
-                placeholder="Enter designation name"
-                className="form-input flex-1"
-                disabled={addingDesignation}
-              />
-              <button
-                type="button"
-                onClick={handleAddDesignation}
-                disabled={addingDesignation}
-                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {addingDesignation ? 'Adding...' : 'Add'}
-              </button>
-            </div>
-            <p className="text-xs text-gray-500 mt-2">
-              Designation will be available in the dropdown after creation
-            </p>
-          </div>
-        )}
-
-        <div className="grid grid-cols-12 gap-4 mt-4">
-          {state.isAuthenticated ? (
-            <>
-              <div className="col-span-6">
-                <label className="block">Username <span className="text-red-500">*</span></label>
-                <input 
-                  type="text" 
-                  name="username" 
-                  value={state.username} 
-                  onChange={handleInputChange} 
-                  placeholder="Enter Username" 
-                  className="form-input w-full" 
-                />
-                {errors.includes('username') && <div className="text-danger text-sm mt-1">* Please enter Username</div>}
-              </div>
-
-              <div className="col-span-6">
-                <label className="block">
-                  Password {isEdit ? '' : <span className="text-red-500">*</span>}
-                  {isEdit && (
-                    <span className="text-xs text-gray-500 ml-2">
-                      (Leave blank to keep current)
-                    </span>
-                  )}
-                </label>
-                
-                {isEdit && !isPasswordChanged && (
-                  <div className="mb-2">
-                    <label className="block text-sm text-gray-600 mb-1">Current Password:</label>
-                    <div className="relative">
-                      <input
-                        type={showPassword ? 'text' : 'password'}
-                        value={state.existingPassword}
-                        readOnly
-                        className="form-input w-full pr-10 bg-gray-50 cursor-not-allowed"
-                      />
-                      <span 
-                        onClick={() => setShowPassword(prev => !prev)} 
-                        className="absolute inset-y-0 right-3 flex items-center cursor-pointer text-gray-500 text-sm"
-                      >
-                        {showPassword ? 'hide' : 'show'}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setIsPasswordChanged(true)}
-                      className="mt-1 text-sm text-blue-600 hover:text-blue-800"
-                    >
-                      Change Password
-                    </button>
-                  </div>
-                )}
-                
-                {(isEdit && isPasswordChanged) || !isEdit ? (
-                  <div className="relative">
-                    <input
-                      type={showPassword ? 'text' : 'password'}
-                      name="password"
-                      value={state.password}
-                      onChange={handleInputChange}
-                      placeholder={isEdit ? 'Enter new password (leave blank to keep current)' : 'Enter Password'}
-                      className="form-input w-full pr-10"
-                    />
-                    <span 
-                      onClick={() => setShowPassword(prev => !prev)} 
-                      className="absolute inset-y-0 right-3 flex items-center cursor-pointer text-gray-500 text-sm"
-                    >
-                      {showPassword ? 'hide' : 'show'}
-                    </span>
-                    {isEdit && (
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsPasswordChanged(false);
-                          setState(prev => ({ ...prev, password: '' }));
-                        }}
-                        className="mt-1 text-sm text-red-600 hover:text-red-800"
-                      >
-                        Cancel Password Change
-                      </button>
-                    )}
-                  </div>
-                ) : null}
-                
-                {errors.includes('password') && <div className="text-danger text-sm mt-1">* Please enter Password</div>}
-                
-                {state.password && (
-                  <div className="mt-2">
-                    <div className="flex items-center space-x-2 mb-1">
-                      <div className={`h-1 flex-1 rounded ${state.password.length < 6 ? 'bg-red-500' : state.password.length < 8 ? 'bg-yellow-500' : 'bg-green-500'}`}></div>
-                      <div className={`h-1 flex-1 rounded ${state.password.length < 6 ? 'bg-gray-300' : state.password.length < 8 ? 'bg-yellow-500' : 'bg-green-500'}`}></div>
-                      <div className={`h-1 flex-1 rounded ${state.password.length < 8 ? 'bg-gray-300' : 'bg-green-500'}`}></div>
-                    </div>
-                    <p className="text-xs text-gray-600">
-                      {state.password.length < 6 ? 'Weak' : state.password.length < 8 ? 'Medium' : 'Strong'} password
-                    </p>
-                  </div>
-                )}
-              </div>
-            </>
-          ) : null}
-        </div>
-      </ModelViewBox>
-
+      {/* Certifications View Modal */}
       <ModelViewBox
         modal={viewCertModal}
         modelHeader="Certifications"
@@ -959,25 +1060,52 @@ const Index = () => {
       >
         <div className="overflow-y-auto max-h-[calc(90vh-120px)]">
           {selectedCertifications.length === 0 ? (
-            <p className="text-center text-gray-500 py-8">No certifications uploaded</p>
+            <div className="text-center py-12">
+              <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No Certifications</h3>
+              <p className="text-gray-500">No certification files have been uploaded for this auditor.</p>
+            </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {selectedCertifications.map((cert, index) => (
-                <div key={index} className="border rounded-lg overflow-hidden">
-                  {cert.type?.includes('image') || cert.url?.includes('image') ? (
-                    <img
-                      src={cert.url || '/placeholder-image.jpg'}
-                      alt={cert.name}
-                      className="w-full h-48 object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-48 bg-red-50 flex flex-col items-center justify-center">
-                      <div className="text-red-600 text-4xl mb-2">PDF</div>
-                      <p className="text-sm text-gray-600">PDF Document</p>
+                <div key={index} className="border rounded-xl overflow-hidden hover:shadow-lg transition-shadow">
+                  <div className="h-48 bg-gray-100 flex items-center justify-center overflow-hidden">
+                    {cert.type?.includes('image') || cert.url?.includes('image') ? (
+                      <img
+                        src={cert.url || '/placeholder-image.jpg'}
+                        alt={cert.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="text-center p-6">
+                        <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+                          <span className="text-red-600 text-2xl font-bold">PDF</span>
+                        </div>
+                        <p className="text-sm font-medium text-gray-700">PDF Document</p>
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4 bg-white">
+                    <div className="flex items-center justify-between">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 truncate">{cert.name}</p>
+                        <p className="text-xs text-gray-500 mt-1">
+                          {cert.type?.split('/')[1]?.toUpperCase() || 'FILE'}
+                        </p>
+                      </div>
+                      <a
+                        href={cert.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="ml-2 px-3 py-1 text-sm bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors"
+                      >
+                        View
+                      </a>
                     </div>
-                  )}
-                  <div className="p-3 bg-gray-50">
-                    <p className="text-sm font-medium truncate">{cert.name}</p>
                   </div>
                 </div>
               ))}

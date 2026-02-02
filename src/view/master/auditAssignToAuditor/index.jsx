@@ -13,6 +13,11 @@ import IconUser from '../../../components/Icon/IconUser';
 import IconBuilding from '../../../components/Icon/IconHome';
 import IconSearch from '../../../components/Icon/IconSearch';
 import IconList from '../../../components/Icon/IconCircleCheck';
+import IconFilter from '../../../components/Icon/IconInfoCircle';
+import IconX from '../../../components/Icon/IconX';
+import IconPlus from '../../../components/Icon/IconPlus';
+import IconSave from '../../../components/Icon/IconSave';
+import IconRotate from '../../../components/Icon/IconRefresh';
 import Table from '../../../util/Table';
 import Tippy from '@tippyjs/react';
 import ModelViewBox from '../../../util/ModelViewBox';
@@ -217,11 +222,10 @@ const AuditAssignToAuditor = () => {
     const [currentPage, setCurrentPage] = useState(0);
     const [pageSize, setPageSize] = useState(10);
     const [loading, setLoading] = useState(false);
-
-    const [assignModal, setAssignModal] = useState(false);
-    const [editModal, setEditModal] = useState(false);
-    const [viewModal, setViewModal] = useState(false);
-
+    const [showFilters, setShowFilters] = useState(true);
+    const [showForm, setShowForm] = useState(false);
+    const [isEdit, setIsEdit] = useState(false);
+    
     const [assignmentForm, setAssignmentForm] = useState({
         supplierId: '',
         supplierAuditCount: 0,
@@ -338,7 +342,7 @@ const AuditAssignToAuditor = () => {
         return `AUDIT-${year}-${String(maxId + 1).padStart(3, '0')}`;
     };
 
-    const openAssignModal = () => {
+    const openForm = () => {
         const tomorrow = new Date();
         tomorrow.setDate(tomorrow.getDate() + 1);
         const nextAudit = new Date();
@@ -354,10 +358,28 @@ const AuditAssignToAuditor = () => {
             remarks: '',
         });
         setErrors([]);
-        setAssignModal(true);
+        setIsEdit(false);
+        setSelectedAssignment(null);
+        setShowForm(true);
     };
 
-    const openEditModal = (assignment) => {
+    const closeForm = () => {
+        setShowForm(false);
+        setIsEdit(false);
+        setSelectedAssignment(null);
+        setErrors([]);
+        setAssignmentForm({
+            supplierId: '',
+            supplierAuditCount: 0,
+            assignedAuditorId: '',
+            assignmentDate: new Date().toISOString().split('T')[0],
+            dueDate: '',
+            nextAuditDate: '',
+            remarks: '',
+        });
+    };
+
+    const openEditForm = (assignment) => {
         setSelectedAssignment(assignment);
         setAssignmentForm({
             supplierId: assignment.supplierId.toString(),
@@ -369,23 +391,11 @@ const AuditAssignToAuditor = () => {
             remarks: assignment.remarks || '',
         });
         setErrors([]);
-        setEditModal(true);
+        setIsEdit(true);
+        setShowForm(true);
     };
 
-    const openViewModal = (assignment) => {
-        setSelectedAssignment(assignment);
-        setViewModal(true);
-    };
-
-    const closeModal = () => {
-        setAssignModal(false);
-        setEditModal(false);
-        setViewModal(false);
-        setSelectedAssignment(null);
-        setErrors([]);
-    };
-
-    const handleAssignSubmit = () => {
+    const handleFormSubmit = () => {
         if (!validateForm()) {
             showMessage('error', 'Please fill all required fields');
             return;
@@ -399,83 +409,75 @@ const AuditAssignToAuditor = () => {
             return;
         }
 
-        const newAssignment = {
-            id: auditAssignments.length + 1,
-            auditId: generateNextAuditId(),
-            auditType: 'External Provider Audit',
-            supplierId: parseInt(assignmentForm.supplierId),
-            supplierName: selectedSupplier.name,
-            supplierType: selectedSupplier.type,
-            supplierAuditCount: selectedSupplier.auditCount + 1,
-            assignedAuditorId: parseInt(assignmentForm.assignedAuditorId),
-            assignedAuditorName: selectedAuditor.name,
-            assignedAuditorIdCode: selectedAuditor.auditorId,
-            assignmentDate: assignmentForm.assignmentDate,
-            dueDate: assignmentForm.dueDate,
-            nextAuditDate: assignmentForm.nextAuditDate,
-            status: 'Scheduled',
-            completionDate: null,
-            score: null,
-            totalChecklistItems: 280,
-            completedChecklistItems: 0,
-            workerInterviews: 0,
-            lastUpdated: new Date().toISOString(),
-            remarks: assignmentForm.remarks.trim(),
-            isActive: 1,
-        };
+        if (isEdit && selectedAssignment) {
+            // Update existing assignment
+            const updatedAssignments = auditAssignments.map((assignment) => {
+                if (assignment.id === selectedAssignment.id) {
+                    return {
+                        ...assignment,
+                        supplierId: parseInt(assignmentForm.supplierId),
+                        supplierName: selectedSupplier.name,
+                        supplierType: selectedSupplier.type,
+                        supplierAuditCount: selectedSupplier.auditCount,
+                        assignedAuditorId: parseInt(assignmentForm.assignedAuditorId),
+                        assignedAuditorName: selectedAuditor.name,
+                        assignedAuditorIdCode: selectedAuditor.auditorId,
+                        assignmentDate: assignmentForm.assignmentDate,
+                        dueDate: assignmentForm.dueDate,
+                        nextAuditDate: assignmentForm.nextAuditDate,
+                        remarks: assignmentForm.remarks.trim(),
+                        lastUpdated: new Date().toISOString(),
+                    };
+                }
+                return assignment;
+            });
 
-        setAuditAssignments((prev) => [...prev, newAssignment]);
+            setAuditAssignments(updatedAssignments);
+            showMessage('success', 'Assignment updated successfully');
+        } else {
+            // Create new assignment
+            const newAssignment = {
+                id: auditAssignments.length + 1,
+                auditId: generateNextAuditId(),
+                auditType: 'External Provider Audit',
+                supplierId: parseInt(assignmentForm.supplierId),
+                supplierName: selectedSupplier.name,
+                supplierType: selectedSupplier.type,
+                supplierAuditCount: selectedSupplier.auditCount + 1,
+                assignedAuditorId: parseInt(assignmentForm.assignedAuditorId),
+                assignedAuditorName: selectedAuditor.name,
+                assignedAuditorIdCode: selectedAuditor.auditorId,
+                assignmentDate: assignmentForm.assignmentDate,
+                dueDate: assignmentForm.dueDate,
+                nextAuditDate: assignmentForm.nextAuditDate,
+                status: 'Scheduled',
+                completionDate: null,
+                score: null,
+                totalChecklistItems: 280,
+                completedChecklistItems: 0,
+                workerInterviews: 0,
+                lastUpdated: new Date().toISOString(),
+                remarks: assignmentForm.remarks.trim(),
+                isActive: 1,
+            };
 
-        const updatedSuppliers = suppliers.map((supplier) => {
-            if (supplier.id === parseInt(assignmentForm.supplierId)) {
-                return { ...supplier, auditCount: supplier.auditCount + 1 };
-            }
-            return supplier;
-        });
-        setSuppliers(updatedSuppliers);
+            setAuditAssignments((prev) => [...prev, newAssignment]);
 
-        showMessage('success', 'Audit assigned successfully');
-        closeModal();
-    };
+            const updatedSuppliers = suppliers.map((supplier) => {
+                if (supplier.id === parseInt(assignmentForm.supplierId)) {
+                    return { ...supplier, auditCount: supplier.auditCount + 1 };
+                }
+                return supplier;
+            });
+            setSuppliers(updatedSuppliers);
 
-    const handleUpdateSubmit = () => {
-        if (!validateForm()) {
-            showMessage('error', 'Please fill all required fields');
-            return;
+            showMessage('success', 'Audit assigned successfully');
         }
 
-        const selectedAuditor = auditors.find((a) => a.id === parseInt(assignmentForm.assignedAuditorId));
-        const selectedSupplier = suppliers.find((s) => s.id === parseInt(assignmentForm.supplierId));
-
-        if (!selectedAuditor || !selectedSupplier) {
-            showMessage('error', 'Invalid auditor or supplier selected');
-            return;
-        }
-
-        const updatedAssignments = auditAssignments.map((assignment) => {
-            if (assignment.id === selectedAssignment.id) {
-                return {
-                    ...assignment,
-                    supplierId: parseInt(assignmentForm.supplierId),
-                    supplierName: selectedSupplier.name,
-                    supplierType: selectedSupplier.type,
-                    supplierAuditCount: selectedSupplier.auditCount,
-                    assignedAuditorId: parseInt(assignmentForm.assignedAuditorId),
-                    assignedAuditorName: selectedAuditor.name,
-                    assignedAuditorIdCode: selectedAuditor.auditorId,
-                    assignmentDate: assignmentForm.assignmentDate,
-                    dueDate: assignmentForm.dueDate,
-                    nextAuditDate: assignmentForm.nextAuditDate,
-                    remarks: assignmentForm.remarks.trim(),
-                    lastUpdated: new Date().toISOString(),
-                };
-            }
-            return assignment;
-        });
-
-        setAuditAssignments(updatedAssignments);
-        showMessage('success', 'Assignment updated successfully');
-        closeModal();
+        // Auto-hide form after successful save
+        setTimeout(() => {
+            closeForm();
+        }, 1000);
     };
 
     const handleStartAudit = (assignment) => {
@@ -755,25 +757,14 @@ const AuditAssignToAuditor = () => {
                 return (
                     <div className="flex flex-col space-y-2">
                         <div className="flex space-x-2">
-                            <Tippy content="View Details">
+                            <Tippy content="Edit Assignment">
                                 <button
-                                    onClick={() => openViewModal(assignment)}
-                                    className="flex-1 flex items-center justify-center px-3 py-1.5 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg transition-colors text-sm"
+                                    onClick={() => openEditForm(assignment)}
+                                    className="flex-1 flex items-center justify-center px-3 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 rounded-lg transition-colors text-sm"
                                 >
-                                    <IconEye className="w-4 h-4" />
+                                    <IconEdit className="w-4 h-4" />
                                 </button>
                             </Tippy>
-
-                            {assignment.status !== 'Completed' && (
-                                <Tippy content="Edit Assignment">
-                                    <button
-                                        onClick={() => openEditModal(assignment)}
-                                        className="flex-1 flex items-center justify-center px-3 py-1.5 bg-green-50 text-green-700 hover:bg-green-100 rounded-lg transition-colors text-sm"
-                                    >
-                                        <IconEdit className="w-4 h-4" />
-                                    </button>
-                                </Tippy>
-                            )}
 
                             <Tippy content="Delete Assignment">
                                 <button
@@ -813,12 +804,231 @@ const AuditAssignToAuditor = () => {
 
     return (
         <div className="p-6 space-y-6">
+            {/* Header */}
             <div className="text-center mb-8">
                 <h1 className="text-3xl font-extrabold text-gray-800">Audit Assignment Management</h1>
                 <p className="text-gray-600 mt-2">Assign and manage audits to auditors, track progress and completion</p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
+            {/* Assignment Form Section */}
+            {showForm && (
+                <div className="panel mb-6 animate-fade-in">
+                    <div className="flex items-center justify-between mb-6">
+                        <h3 className="text-xl font-bold text-gray-800">
+                            {isEdit ? 'Edit Audit Assignment' : 'Assign New Audit'}
+                        </h3>
+                        <button
+                            type="button"
+                            onClick={closeForm}
+                            className="p-2 rounded-full hover:bg-gray-100 transition-colors"
+                            title="Close form"
+                        >
+                            <IconX className="w-5 h-5 text-gray-500" />
+                        </button>
+                    </div>
+                    
+                    <div className="space-y-4">
+                        {isEdit && selectedAssignment && (
+                            <div className="bg-gray-50 p-4 rounded-lg mb-4">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <div className="text-sm text-gray-600">Current Status</div>
+                                        <div className="font-medium">{getStatusBadge(selectedAssignment.status)}</div>
+                                    </div>
+                                    <div className="text-sm text-gray-600">
+                                        Audit ID: <span className="font-mono font-bold">{selectedAssignment.auditId}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        <FormLayout
+                            dynamicForm={assignFormContain}
+                            handleSubmit={handleFormSubmit}
+                            setState={setAssignmentForm}
+                            state={assignmentForm}
+                            onChangeCallBack={{
+                                handleInputChange: handleInputChange,
+                                handleSelectChange: handleSelectChange,
+                            }}
+                            errors={errors}
+                            setErrors={setErrors}
+                            loadings={loading}
+                            optionListState={{
+                                supplierList: supplierList,
+                                auditorList: auditorList,
+                            }}
+                        />
+
+                        <div className="text-sm text-gray-500 mt-4 p-3 bg-blue-50 rounded-lg">
+                            <p className="mb-2">
+                                <strong>Note:</strong>
+                            </p>
+                            <ul className="list-disc pl-5 space-y-1">
+                                <li>Audit will be marked as "Scheduled" upon assignment</li>
+                                <li>Click "Start Audit" to begin the audit process</li>
+                                <li>Next audit date should be set for future follow-up audits</li>
+                                <li>Only authenticated auditors can be assigned</li>
+                                <li>Supplier audit count will be incremented automatically</li>
+                            </ul>
+                        </div>
+
+                        {/* Form Actions */}
+                        <div className="flex justify-end space-x-3 pt-6 border-t">
+                            <button
+                                type="button"
+                                onClick={closeForm}
+                                className="px-6 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                                disabled={loading}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                type="button"
+                                onClick={handleFormSubmit}
+                                disabled={loading}
+                                className="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg font-medium flex items-center"
+                            >
+                                {loading ? (
+                                    <>
+                                        <IconRotate className="w-4 h-4 mr-2 animate-spin" />
+                                        {isEdit ? 'Updating...' : 'Assigning...'}
+                                    </>
+                                ) : (
+                                    <>
+                                        <IconSave className="w-4 h-4 mr-2" />
+                                        {isEdit ? 'Update Assignment' : 'Assign Audit'}
+                                    </>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Filter Toggle Button */}
+            <div className="mb-6">
+                <button
+                    onClick={() => setShowFilters(!showFilters)}
+                    className="flex items-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+                >
+                    <IconFilter className="w-4 h-4 mr-2" />
+                    {showFilters ? 'Hide Filters' : 'Show Filters'}
+                </button>
+            </div>
+
+            {/* Filters Section - Collapsible */}
+            {showFilters && (
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6 animate-fade-in">
+                    <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                        {/* Search Input */}
+                        <div className="md:col-span-2">
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    placeholder="Search by audit ID, supplier, auditor..."
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    className="form-input w-full pl-10"
+                                />
+                                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+                                    <IconSearch className="w-4 h-4" />
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Status Filter */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+                            <Select
+                                value={statusFilter}
+                                onChange={setStatusFilter}
+                                options={statusOptions}
+                                className="react-select-container"
+                                classNamePrefix="react-select"
+                                isClearable={false}
+                                styles={{
+                                    control: (base) => ({
+                                        ...base,
+                                        minHeight: '42px',
+                                    }),
+                                }}
+                            />
+                        </div>
+
+                        {/* Supplier Filter */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Supplier</label>
+                            <Select
+                                value={supplierFilter}
+                                onChange={setSupplierFilter}
+                                options={[
+                                    { value: 'all', label: 'All Suppliers' },
+                                    ...suppliers.map((supplier) => ({
+                                        value: supplier.id.toString(),
+                                        label: `${supplier.name} (${supplier.auditCount} audits)`,
+                                    })),
+                                ]}
+                                className="react-select-container"
+                                classNamePrefix="react-select"
+                                isClearable={false}
+                                styles={{
+                                    control: (base) => ({
+                                        ...base,
+                                        minHeight: '42px',
+                                    }),
+                                }}
+                            />
+                        </div>
+
+                        {/* Auditor Filter */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">Auditor</label>
+                            <Select
+                                value={auditorFilter}
+                                onChange={setAuditorFilter}
+                                options={[
+                                    { value: 'all', label: 'All Auditors' },
+                                    ...auditors
+                                        .filter((auditor) => auditor.isActive === 1)
+                                        .map((auditor) => ({
+                                            value: auditor.id.toString(),
+                                            label: `${auditor.name} (${auditor.auditorId})`,
+                                        })),
+                                ]}
+                                className="react-select-container"
+                                classNamePrefix="react-select"
+                                isClearable={false}
+                                styles={{
+                                    control: (base) => ({
+                                        ...base,
+                                        minHeight: '42px',
+                                    }),
+                                }}
+                            />
+                        </div>
+
+                        {/* Clear Button */}
+                        <div className="flex items-end">
+                            <button
+                                onClick={() => {
+                                    setSearchTerm('');
+                                    setStatusFilter({ value: 'all', label: 'All Status' });
+                                    setAuditorFilter({ value: 'all', label: 'All Auditors' });
+                                    setSupplierFilter({ value: 'all', label: 'All Suppliers' });
+                                }}
+                                className="w-full px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors flex items-center justify-center h-[42px]"
+                            >
+                                Clear Filters
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Statistics Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
                 <div className="bg-gradient-to-r from-blue-500 to-blue-600 rounded-xl p-4 text-white shadow-lg">
                     <div className="text-2xl font-bold">{stats.total}</div>
                     <div className="text-sm font-medium opacity-90">Total Assignments</div>
@@ -845,118 +1055,12 @@ const AuditAssignToAuditor = () => {
                 </div>
             </div>
 
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
-                <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                    {/* Search Input - Full width on mobile, 2 cols on desktop */}
-                    <div className="md:col-span-2">
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
-                        <div className="relative">
-                            <input
-                                type="text"
-                                placeholder="Search by audit ID, supplier, auditor..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="form-input w-full pl-10"
-                            />
-                            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
-                                <IconSearch className="w-4 h-4" />
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Status Filter */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
-                        <Select
-                            value={statusFilter}
-                            onChange={setStatusFilter}
-                            options={statusOptions}
-                            className="react-select-container"
-                            classNamePrefix="react-select"
-                            isClearable={false}
-                            styles={{
-                                control: (base) => ({
-                                    ...base,
-                                    minHeight: '42px',
-                                }),
-                            }}
-                        />
-                    </div>
-
-                    {/* Supplier Filter */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Supplier</label>
-                        <Select
-                            value={supplierFilter}
-                            onChange={setSupplierFilter}
-                            options={[
-                                { value: 'all', label: 'All Suppliers' },
-                                ...suppliers.map((supplier) => ({
-                                    value: supplier.id.toString(),
-                                    label: `${supplier.name} (${supplier.auditCount} audits)`,
-                                })),
-                            ]}
-                            className="react-select-container"
-                            classNamePrefix="react-select"
-                            isClearable={false}
-                            styles={{
-                                control: (base) => ({
-                                    ...base,
-                                    minHeight: '42px',
-                                }),
-                            }}
-                        />
-                    </div>
-
-                    {/* Auditor Filter */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">Auditor</label>
-                        <Select
-                            value={auditorFilter}
-                            onChange={setAuditorFilter}
-                            options={[
-                                { value: 'all', label: 'All Auditors' },
-                                ...auditors
-                                    .filter((auditor) => auditor.isActive === 1)
-                                    .map((auditor) => ({
-                                        value: auditor.id.toString(),
-                                        label: `${auditor.name} (${auditor.auditorId})`,
-                                    })),
-                            ]}
-                            className="react-select-container"
-                            classNamePrefix="react-select"
-                            isClearable={false}
-                            styles={{
-                                control: (base) => ({
-                                    ...base,
-                                    minHeight: '42px',
-                                }),
-                            }}
-                        />
-                    </div>
-
-                    {/* Clear Button - Full width on mobile, aligned to bottom */}
-                    <div className="flex items-end">
-                        <button
-                            onClick={() => {
-                                setSearchTerm('');
-                                setStatusFilter({ value: 'all', label: 'All Status' });
-                                setAuditorFilter({ value: 'all', label: 'All Auditors' });
-                                setSupplierFilter({ value: 'all', label: 'All Suppliers' });
-                            }}
-                            className="btn btn-outline-primary w-full h-[42px] flex items-center justify-center"
-                        >
-                            Clear Filters
-                        </button>
-                    </div>
-                </div>
-            </div>
-
+            {/* Table Section */}
             <div className="datatables">
                 <Table
                     columns={columns}
                     Title={'Audit Assignments'}
-                    toggle={openAssignModal}
+                    toggle={openForm}
                     data={getPaginatedData()}
                     pageSize={pageSize}
                     pageIndex={currentPage}
@@ -966,11 +1070,12 @@ const AuditAssignToAuditor = () => {
                     pagination={true}
                     isSearchable={false}
                     isSortable={true}
-                    btnName="Assign New Audit"
+                    btnName={showForm ? null : "Assign New Audit"}
                     loadings={loading}
                 />
             </div>
 
+            {/* Deleted Assignments Notice */}
             {auditAssignments.filter((a) => a.isActive === 0).length > 0 && (
                 <div className="mt-8">
                     <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
@@ -985,225 +1090,6 @@ const AuditAssignToAuditor = () => {
                     </div>
                 </div>
             )}
-
-            <ModelViewBox modal={assignModal} modelHeader="Assign New Audit" setModel={closeModal} handleSubmit={handleAssignSubmit} modelSize="lg" submitBtnText="Assign Audit" loadings={loading}>
-                <div className="space-y-4">
-                    <FormLayout
-                        dynamicForm={assignFormContain}
-                        handleSubmit={handleAssignSubmit}
-                        setState={setAssignmentForm}
-                        state={assignmentForm}
-                        onChangeCallBack={{
-                            handleInputChange: handleInputChange,
-                            handleSelectChange: handleSelectChange,
-                        }}
-                        errors={errors}
-                        setErrors={setErrors}
-                        loadings={loading}
-                        optionListState={{
-                            supplierList: supplierList,
-                            auditorList: auditorList,
-                        }}
-                    />
-
-                    <div className="text-sm text-gray-500 mt-4 p-3 bg-blue-50 rounded-lg">
-                        <p className="mb-2">
-                            <strong>Note:</strong>
-                        </p>
-                        <ul className="list-disc pl-5 space-y-1">
-                            <li>Audit will be marked as "Scheduled" upon assignment</li>
-                            <li>Click "Start Audit" to begin the audit process</li>
-                            <li>Next audit date should be set for future follow-up audits</li>
-                            <li>Only authenticated auditors can be assigned</li>
-                            <li>Supplier audit count will be incremented automatically</li>
-                        </ul>
-                    </div>
-                </div>
-            </ModelViewBox>
-
-            <ModelViewBox
-                modal={editModal}
-                modelHeader="Edit Audit Assignment"
-                setModel={closeModal}
-                handleSubmit={handleUpdateSubmit}
-                modelSize="lg"
-                submitBtnText="Update Assignment"
-                loadings={loading}
-            >
-                {selectedAssignment && (
-                    <div className="space-y-4">
-                        <div className="bg-gray-50 p-3 rounded-lg mb-4">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <div className="text-sm text-gray-600">Current Status</div>
-                                    <div className="font-medium">{getStatusBadge(selectedAssignment.status)}</div>
-                                </div>
-                                <div className="text-sm text-gray-600">
-                                    Audit ID: <span className="font-mono">{selectedAssignment.auditId}</span>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="bg-yellow-50 p-3 rounded-lg mb-4">
-                            <div className="flex items-center">
-                                <IconList className="w-5 h-5 text-yellow-600 mr-2" />
-                                <div>
-                                    <div className="text-sm font-medium text-yellow-800">Audit Count Information</div>
-                                    <div className="text-sm text-yellow-700">
-                                        This supplier has completed <span className="font-bold">{selectedAssignment.supplierAuditCount}</span> audits
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <FormLayout
-                            dynamicForm={assignFormContain}
-                            handleSubmit={handleUpdateSubmit}
-                            setState={setAssignmentForm}
-                            state={assignmentForm}
-                            onChangeCallBack={{
-                                handleInputChange: handleInputChange,
-                                handleSelectChange: handleSelectChange,
-                            }}
-                            errors={errors}
-                            setErrors={setErrors}
-                            loadings={loading}
-                            optionListState={{
-                                supplierList: supplierList,
-                                auditorList: auditorList,
-                            }}
-                        />
-                    </div>
-                )}
-            </ModelViewBox>
-
-            <ModelViewBox modal={viewModal} modelHeader="Audit Assignment Details" setModel={closeModal} modelSize="lg" hideFooter={true} saveBtn={false}>
-                {selectedAssignment && (
-                    <div className="space-y-6">
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="md:col-span-2">
-                                <h3 className="text-lg font-semibold text-gray-800">{selectedAssignment.auditId}</h3>
-                                <p className="text-gray-600">{selectedAssignment.auditType}</p>
-                            </div>
-                            <div className="text-right">{getStatusBadge(selectedAssignment.status)}</div>
-                        </div>
-
-                        <div className="bg-gray-50 p-4 rounded-lg">
-                            <h4 className="font-medium text-gray-700 mb-2">Supplier Information</h4>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <div>
-                                    <div className="text-sm text-gray-600">Name</div>
-                                    <div className="font-medium">{selectedAssignment.supplierName}</div>
-                                </div>
-                                <div>
-                                    <div className="text-sm text-gray-600">Type</div>
-                                    <div className="font-medium">{selectedAssignment.supplierType}</div>
-                                </div>
-                                <div className="md:col-span-2">
-                                    <div className="text-sm text-gray-600">Total Audits Completed</div>
-                                    <div className="flex items-center font-medium">
-                                        <IconList className="w-4 h-4 mr-2 text-gray-500" />
-                                        {selectedAssignment.supplierAuditCount} audits
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="bg-blue-50 p-4 rounded-lg">
-                            <h4 className="font-medium text-gray-700 mb-2">Assigned Auditor</h4>
-                            <div className="flex items-center">
-                                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                                    <IconUser className="w-5 h-5 text-blue-600" />
-                                </div>
-                                <div>
-                                    <div className="font-medium">{selectedAssignment.assignedAuditorName}</div>
-                                    <div className="text-sm text-gray-600">{selectedAssignment.assignedAuditorIdCode}</div>
-                                    <div className="text-xs text-gray-500">
-                                        Designation:{' '}
-                                        {selectedAssignment.assignedAuditorName.includes('John')
-                                            ? 'Senior Auditor'
-                                            : selectedAssignment.assignedAuditorName.includes('Sarah')
-                                              ? 'Lead Auditor'
-                                              : 'Junior Auditor'}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="space-y-4">
-                            <h4 className="font-medium text-gray-700">Timeline</h4>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                <div className="text-center">
-                                    <div className="text-sm text-gray-600">Assignment Date</div>
-                                    <div className="font-medium">{new Date(selectedAssignment.assignmentDate).toLocaleDateString()}</div>
-                                </div>
-                                <div className="text-center">
-                                    <div className="text-sm text-gray-600">Due Date</div>
-                                    <div className={`font-medium ${new Date(selectedAssignment.dueDate) < new Date() && selectedAssignment.status !== 'Completed' ? 'text-red-600' : ''}`}>
-                                        {new Date(selectedAssignment.dueDate).toLocaleDateString()}
-                                    </div>
-                                </div>
-                                <div className="text-center">
-                                    <div className="text-sm text-gray-600">Next Audit Date</div>
-                                    <div className="font-medium">{new Date(selectedAssignment.nextAuditDate).toLocaleDateString()}</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        {selectedAssignment.status !== 'Scheduled' && selectedAssignment.status !== 'Pending' && (
-                            <div className="bg-gray-50 p-4 rounded-lg">
-                                <h4 className="font-medium text-gray-700 mb-3">Progress Statistics</h4>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                    <div className="text-center">
-                                        <div className="text-2xl font-bold text-gray-800">{getProgressPercentage(selectedAssignment)}%</div>
-                                        <div className="text-sm text-gray-600">Progress</div>
-                                    </div>
-                                    <div className="text-center">
-                                        <div className="text-2xl font-bold text-gray-800">
-                                            {selectedAssignment.completedChecklistItems}/{selectedAssignment.totalChecklistItems}
-                                        </div>
-                                        <div className="text-sm text-gray-600">Checklist Items</div>
-                                    </div>
-                                    <div className="text-center">
-                                        <div className="text-2xl font-bold text-gray-800">{selectedAssignment.workerInterviews}</div>
-                                        <div className="text-sm text-gray-600">Interviews</div>
-                                    </div>
-                                    <div className="text-center">
-                                        <div className="text-2xl font-bold text-gray-800">{selectedAssignment.score ? `${selectedAssignment.score}%` : 'N/A'}</div>
-                                        <div className="text-sm text-gray-600">Final Score</div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {selectedAssignment.remarks && (
-                            <div>
-                                <h4 className="font-medium text-gray-700 mb-2">Remarks</h4>
-                                <div className="bg-gray-50 p-3 rounded">
-                                    <p className="text-gray-700">{selectedAssignment.remarks}</p>
-                                </div>
-                            </div>
-                        )}
-
-                        <div className="flex justify-end space-x-3 pt-4 border-t">
-                            <button onClick={() => navigateToAuditForm(selectedAssignment)} className="btn btn-primary">
-                                {selectedAssignment.status === 'Completed' ? 'View Audit Report' : 'Open Audit Form'}
-                            </button>
-                            {selectedAssignment.status !== 'Completed' && (
-                                <button
-                                    onClick={() => {
-                                        closeModal();
-                                        openEditModal(selectedAssignment);
-                                    }}
-                                    className="btn btn-outline-primary"
-                                >
-                                    Edit Assignment
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                )}
-            </ModelViewBox>
         </div>
     );
 };
