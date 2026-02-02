@@ -358,6 +358,10 @@ const routes = [
         element: <LoginBoxed />,
         layout: 'blank',
     },
+    {
+        path: '/audit/report-pdf',
+        element: <AuditFormPdf />,
+    },
 ];
 
 const dontCkeckRouts = [
@@ -373,10 +377,6 @@ const dontCkeckRouts = [
     {
         path: '/audit/external-provider/form',
         element: <AuditForm />,
-    },
-    {
-        path: '/audit/report-pdf',
-        element: <AuditFormPdf />,
     },
     //old
     {
