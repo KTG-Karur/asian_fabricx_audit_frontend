@@ -236,11 +236,10 @@ const ExternalProviderAudit = () => {
     };
 
     const handleViewAudit = (audit) => {
-        navigate('/audit/external-provider/form', { 
-            state: { 
-                mode: 'view', 
-                auditData: audit 
-            }
+        navigate('/audit/report-pdf', { 
+            // state: { 
+            //     auditData: audit 
+            // }
         });
     };
 
@@ -668,7 +667,7 @@ const ExternalProviderAudit = () => {
                     </div>
                 </div>
             )}
-            
+
             {/* Statistics Cards */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="bg-gradient-to-r from-green-500 to-green-600 rounded-xl p-6 text-white shadow-lg">

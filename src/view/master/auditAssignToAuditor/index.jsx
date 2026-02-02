@@ -513,6 +513,14 @@ const AuditAssignToAuditor = () => {
         showMessage('success', 'Assignment restored successfully');
     };
 
+    const handleReportAudit = (assignment) => {
+        navigate('/audit/report-pdf', { 
+            // state: { 
+            //     auditData: audit 
+            // }
+        });
+    };
+
     const navigateToAuditForm = (assignment) => {
         const mode = assignment.status === 'Completed' ? 'view' : 'edit';
 
@@ -790,7 +798,7 @@ const AuditAssignToAuditor = () => {
                             )}
 
                             {assignment.status === 'Completed' && (
-                                <button onClick={() => navigateToAuditForm(assignment)} className="flex-1 px-3 py-1.5 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg text-sm font-medium">
+                                <button onClick={() => handleReportAudit(assignment)} className="flex-1 px-3 py-1.5 bg-gray-100 text-gray-700 hover:bg-gray-200 rounded-lg text-sm font-medium">
                                     View Report
                                 </button>
                             )}
