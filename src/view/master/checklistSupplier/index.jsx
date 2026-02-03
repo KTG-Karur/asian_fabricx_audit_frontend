@@ -22,14 +22,14 @@ const SupplierStandardsMaster = () => {
 
     // Standards state
     const [standards, setStandards] = useState([
-        { id: 1, name: 'IWAY Standard 6.0', version: '6.0', description: 'IKEA Way on Social and Environmental Responsibility' },
-        { id: 2, name: 'BSCI Code of Conduct', version: '2.0', description: 'Business Social Compliance Initiative' },
-        { id: 3, name: 'Sedex Members Ethical Trade Audit', version: '6.0', description: 'Supplier Ethical Data Exchange' },
-        { id: 4, name: 'WRAP Certification', version: '12.0', description: 'Worldwide Responsible Accredited Production' },
-        { id: 5, name: 'ISO 9001:2015', version: '2015', description: 'Quality Management Systems' },
-        { id: 6, name: 'ISO 14001:2015', version: '2015', description: 'Environmental Management Systems' },
-        { id: 7, name: 'OHSAS 18001', version: '2007', description: 'Occupational Health and Safety' },
-        { id: 8, name: 'SA8000:2014', version: '2014', description: 'Social Accountability' },
+        { id: 1, name: 'IWAY Standard 6.0' },
+        { id: 2, name: 'BSCI Code of Conduct' },
+        { id: 3, name: 'Sedex Members Ethical Trade Audit' },
+        { id: 4, name: 'WRAP Certification' },
+        { id: 5, name: 'ISO 9001:2015' },
+        { id: 6, name: 'ISO 14001:2015'},
+        { id: 7, name: 'OHSAS 18001'},
+        { id: 8, name: 'SA8000:2014'},
     ]);
 
     // Assessment items state
@@ -54,8 +54,6 @@ const SupplierStandardsMaster = () => {
 
     const [formState, setFormState] = useState({
         name: '',
-        version: '',
-        description: '',
         particulars: '',
         category: '',
     });
@@ -75,16 +73,6 @@ const SupplierStandardsMaster = () => {
             Header: 'Standard Name',
             accessor: 'name',
             Cell: ({ value }) => <div className="font-medium">{value}</div>,
-        },
-        {
-            Header: 'Version',
-            accessor: 'version',
-            width: 100,
-        },
-        {
-            Header: 'Description',
-            accessor: 'description',
-            Cell: ({ value }) => <div className="text-gray-600">{value}</div>,
         },
         {
             Header: 'Actions',
@@ -181,16 +169,12 @@ const SupplierStandardsMaster = () => {
         if (type === 'standards') {
             setFormState({
                 name: item.name,
-                version: item.version,
-                description: item.description,
                 particulars: '',
                 category: '',
             });
         } else {
             setFormState({
                 name: '',
-                version: '',
-                description: '',
                 particulars: item.particulars,
                 category: item.category,
             });
@@ -216,7 +200,6 @@ const SupplierStandardsMaster = () => {
 
         if (selectedTab === 'standards') {
             if (!formState.name.trim()) newErrors.push('name');
-            if (!formState.version.trim()) newErrors.push('version');
         } else {
             if (!formState.particulars.trim()) newErrors.push('particulars');
             if (!formState.category.trim()) newErrors.push('category');
@@ -245,7 +228,6 @@ const SupplierStandardsMaster = () => {
                     const newItem = {
                         id: Math.max(...standards.map((s) => s.id)) + 1,
                         name: formState.name,
-                        version: formState.version,
                         description: formState.description,
                     };
                     setStandards((prev) => [...prev, newItem]);
@@ -380,32 +362,7 @@ const SupplierStandardsMaster = () => {
                                 {errors.includes('name') && <p className="text-red-500 text-sm mt-1">Standard name is required</p>}
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Version <span className="text-red-500">*</span>
-                                </label>
-                                <input
-                                    type="text"
-                                    name="version"
-                                    value={formState.version}
-                                    onChange={handleInputChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    placeholder="e.g., 6.0, 2023, etc."
-                                />
-                                {errors.includes('version') && <p className="text-red-500 text-sm mt-1">Version is required</p>}
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                                <textarea
-                                    name="description"
-                                    value={formState.description}
-                                    onChange={handleInputChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                    rows={3}
-                                    placeholder="Description of the standard"
-                                />
-                            </div>
+                            
                         </>
                     ) : (
                         <>
