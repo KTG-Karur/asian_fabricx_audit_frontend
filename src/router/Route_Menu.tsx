@@ -124,3 +124,4 @@ export const SubChecklistAudit = lazy(() => import('../view/master/subChecklistA
 export const SubChecklistSupplier = lazy(() => import('../view/master/subChecklistSupplier'));
 export const AuditForm = lazy(() => import('../view/auditForm'));
 export const AuditFormPdf = lazy(() => import('../view/documents/audit-pdf'));
+export const AuditReSchedule = lazy(() => import('../view/reasignAudit'));

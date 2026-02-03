@@ -36,6 +36,7 @@ import {
     EnquiryReport,
     AuditAssignToAuditor,
     AuditFormPdf,
+    AuditReSchedule,
 } from './Route_Menu';
 
 const loading = () => <div className=""></div>;
@@ -361,6 +362,10 @@ const routes = [
     {
         path: '/audit/report-pdf',
         element: <AuditFormPdf />,
+    },
+    {
+        path: '/audit/re-schedule',
+        element: <AuditReSchedule />,
     },
 ];
 
