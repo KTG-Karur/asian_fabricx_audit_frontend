@@ -9,13 +9,6 @@ const AuditPrintPage = () => {
     const navigate = useNavigate();
 
     const [auditData, setAuditData] = useState(null);
-    const [companyInfo] = useState({
-        companyName: 'Asian Fabrics Private Limited',
-        companyAddress: 'S/F No. 746/1&2. 751/1&2, Manmangalam Village,Semmadai, Karur – 639 006, Tamilnadu, India.',
-        companyPhone: '9787799935',
-        companyEmail: 'asian@asianfab.com',
-        companyWebsite: 'www.asianfab.com',
-    });
 
     // Static audit data for demonstration
     const staticAuditData = {
@@ -245,7 +238,7 @@ const AuditPrintPage = () => {
 
     return (
         <div className="p-4 bg-gray-100 min-h-screen">
-            {/* Printable Area */}
+            {/* Printable Area - PAPER FORM STYLE */}
             <div
                 id="audit-report-to-print"
                 className="bg-white mx-auto"
@@ -254,350 +247,328 @@ const AuditPrintPage = () => {
                     minHeight: '297mm',
                     height: 'auto',
                     padding: '15mm',
+                    fontFamily: '"Times New Roman", serif',
                 }}
             >
-                {/* Header */}
-                <div className="mb-6 pb-4 border-b border-gray-300">
-                    <table width="100%" cellPadding="0" cellSpacing="0">
-                        <tr>
-                            <td width="60%" valign="top">
-                                <div style={{ fontSize: '20pt', fontWeight: 'bold', color: '#1e40af' }}>{companyInfo.companyName}</div>
-                                <div style={{ fontSize: '9pt', color: '#4b5563', marginTop: '2px' }}>{companyInfo.companyAddress}</div>
-                                <div style={{ fontSize: '9pt', color: '#4b5563' }}>
-                                    Tel: {companyInfo.companyPhone} | Email: {companyInfo.companyEmail} | Web: {companyInfo.companyWebsite}
-                                </div>
-                            </td>
-                            <td width="40%" valign="top" align="right">
-                                <div style={{ fontSize: '16pt', fontWeight: 'bold', color: '#1f2937' }}>SUPPLIER COMPLIANCE AUDIT REPORT</div>
-                                <div style={{ fontSize: '10pt', color: '#6b7280', marginTop: '4px' }}>
-                                    Audit ID: <span style={{ fontWeight: 'bold' }}>{data.auditId}</span>
-                                </div>
-                                <div style={{ fontSize: '10pt', color: '#6b7280' }}>Date: {formatDate(data.auditDate)}</div>
-                            </td>
-                        </tr>
-                    </table>
-                </div>
+                {/* HEADER - PAPER FORM STYLE */}
+                <table width="100%" cellPadding="2" cellSpacing="0" style={{ border: '1px solid #000', borderCollapse: 'collapse', marginBottom: '5mm' }}>
+                    <tr>
+                        <td style={{ border: '1px solid #000', padding: '4px 8px', textAlign: 'center', verticalAlign: 'middle' }}>
+                            <div style={{ fontSize: '14pt', fontWeight: 'bold' }}>ASIAN FABRICS PRIVATE LIMITED</div>
+                            <div style={{ fontSize: '10pt', marginTop: '2px' }}>S/F No. 746/1&2. 751/1&2, Manmangalam Village,Semmadai, Karur – 639 006, Tamilnadu, India.</div>
+                            <div style={{ fontSize: '9pt', marginTop: '2px' }}>Tel: 9787799935 | Email: asian@asianfab.com | Web: www.asianfab.com</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style={{ border: '1px solid #000', padding: '4px 8px', textAlign: 'center', verticalAlign: 'middle', borderTop: 'none' }}>
+                            <div style={{ fontSize: '12pt', fontWeight: 'bold', textTransform: 'uppercase' }}>SUPPLIER COMPLIANCE AUDIT REPORT</div>
+                        </td>
+                    </tr>
+                </table>
 
-                {/* Supplier Information - Single Table */}
-                <div className="mb-6">
-                    <div style={{ fontSize: '12pt', fontWeight: 'bold', color: '#1f2937', marginBottom: '10px', borderBottom: '2px solid #3b82f6', paddingBottom: '4px' }}>SUPPLIER INFORMATION</div>
+                {/* AUDIT INFORMATION SECTION */}
+                <table width="100%" cellPadding="2" cellSpacing="0" style={{ border: '1px solid #000', borderCollapse: 'collapse', marginBottom: '5mm' }}>
+                    <tr>
+                        <td colspan="2" style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '11pt', fontWeight: 'bold', textAlign: 'center', backgroundColor: '#fff' }}>
+                            AUDIT INFORMATION
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="50%" style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt', fontWeight: 'bold' }}>Audit ID:</td>
+                        <td width="50%" style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt' }}>{data.auditId}</td>
+                    </tr>
+                    <tr>
+                        <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt', fontWeight: 'bold' }}>Audit Date:</td>
+                        <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt' }}>{formatDate(data.auditDate)}</td>
+                    </tr>
+                    <tr>
+                        <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt', fontWeight: 'bold' }}>Visit Date:</td>
+                        <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt' }}>{formatDate(data.visitDate)}</td>
+                    </tr>
+                    <tr>
+                        <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt', fontWeight: 'bold' }}>Audit Status:</td>
+                        <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt' }}>{data.status}</td>
+                    </tr>
+                    <tr>
+                        <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt', fontWeight: 'bold' }}>Asian Auditor:</td>
+                        <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt' }}>{data.asianAuditorName}</td>
+                    </tr>
+                </table>
 
-                    <table width="100%" cellPadding="4" cellSpacing="0" border="1" style={{ borderColor: '#d1d5db', fontSize: '10pt', borderCollapse: 'collapse' }}>
-                        <tbody>
-                            {/* Row 1: Full width for supplier name */}
+                {/* SUPPLIER INFORMATION SECTION */}
+                <table width="100%" cellPadding="2" cellSpacing="0" style={{ border: '1px solid #000', borderCollapse: 'collapse', marginBottom: '5mm' }}>
+                    <tr>
+                        <td colspan="4" style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '11pt', fontWeight: 'bold', textAlign: 'center', backgroundColor: '#fff' }}>
+                            SUPPLIER INFORMATION
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="25%" style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt', fontWeight: 'bold' }}>Supplier Name:</td>
+                        <td width="25%" style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt' }}>{data.supplierName}</td>
+                        <td width="25%" style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt', fontWeight: 'bold' }}>Supplier Type:</td>
+                        <td width="25%" style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt' }}>{data.supplierType}</td>
+                    </tr>
+                    <tr>
+                        <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt', fontWeight: 'bold' }}>No. of Employees:</td>
+                        <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt' }}>{data.employeeCount}</td>
+                        <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt', fontWeight: 'bold' }}>No. of Machines:</td>
+                        <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt' }}>{data.machineCount}</td>
+                    </tr>
+                    <tr>
+                        <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt', fontWeight: 'bold' }}>Production Capacity:</td>
+                        <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt' }}>{data.productionCapacity}</td>
+                        <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt', fontWeight: 'bold' }}>Products:</td>
+                        <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt' }}>{data.products}</td>
+                    </tr>
+                    <tr>
+                        <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt', fontWeight: 'bold' }}>Last Audit Date:</td>
+                        <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt' }}>{formatDate(data.lastAuditDate)}</td>
+                        <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt', fontWeight: 'bold' }}>Supplier Representative:</td>
+                        <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt' }}>{data.supplierRepresentative}</td>
+                    </tr>
+                    <tr>
+                        <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt', fontWeight: 'bold' }}>Last Audit Score:</td>
+                        <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt' }}>{data.lastAuditScore}%</td>
+                        <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt', fontWeight: 'bold' }}>Current Score:</td>
+                        <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt' }}>{data.currentScore}%</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt', fontWeight: 'bold', textAlign: 'center' }}>Facility Features:</td>
+                        <td colspan="2" style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '9pt', textAlign: 'center' }}>
+                            Transport: {data.transportAvailable ? 'YES' : 'NO'} | 
+                            Accommodation: {data.accommodationAvailable ? 'YES' : 'NO'} | 
+                            Animals: {data.animalsAllowed ? 'YES' : 'NO'}
+                        </td>
+                    </tr>
+                </table>
+
+                {/* AUDIT CHECKLIST TABLE */}
+                <table width="100%" cellPadding="2" cellSpacing="0" style={{ border: '1px solid #000', borderCollapse: 'collapse', marginBottom: '5mm', fontSize: '8pt' }}>
+                    <tr>
+                        <td colspan="7" style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '11pt', fontWeight: 'bold', textAlign: 'center', backgroundColor: '#fff' }}>
+                            AUDIT CHECKLIST RESULTS
+                        </td>
+                    </tr>
+                    <tr>
+                        <th width="5%" style={{ border: '1px solid #000', padding: '3px 4px', textAlign: 'center', fontWeight: 'bold', fontSize: '9pt' }}>S.No</th>
+                        <th width="45%" style={{ border: '1px solid #000', padding: '3px 4px', textAlign: 'left', fontWeight: 'bold', fontSize: '9pt' }}>Requirement / Activity</th>
+                        <th width="8%" style={{ border: '1px solid #000', padding: '3px 4px', textAlign: 'center', fontWeight: 'bold', fontSize: '9pt' }}>Yes</th>
+                        <th width="8%" style={{ border: '1px solid #000', padding: '3px 4px', textAlign: 'center', fontWeight: 'bold', fontSize: '9pt' }}>No</th>
+                        <th width="8%" style={{ border: '1px solid #000', padding: '3px 4px', textAlign: 'center', fontWeight: 'bold', fontSize: '9pt' }}>N/A</th>
+                        <th width="26%" style={{ border: '1px solid #000', padding: '3px 4px', textAlign: 'left', fontWeight: 'bold', fontSize: '9pt' }}>Observations</th>
+                    </tr>
+                    
+                    {allChecklistItems.map((item, index) => {
+                        const isNewChecklist = index === 0 || allChecklistItems[index - 1].checklistOrder !== item.checklistOrder;
+
+                        return (
+                            <React.Fragment key={item.id}>
+                                {isNewChecklist && (
+                                    <tr>
+                                        <td colspan="7" style={{ border: '1px solid #000', padding: '3px 4px', fontSize: '9pt', fontWeight: 'bold', backgroundColor: '#fff' }}>
+                                            {item.checklistTitle}
+                                        </td>
+                                    </tr>
+                                )}
+                                <tr>
+                                    <td style={{ border: '1px solid #000', padding: '2px 3px', textAlign: 'center', verticalAlign: 'top' }}>{item.id.toFixed(1)}</td>
+                                    <td style={{ border: '1px solid #000', padding: '2px 3px', verticalAlign: 'top' }}>{item.title}</td>
+                                    <td style={{ border: '1px solid #000', padding: '2px 3px', textAlign: 'center', verticalAlign: 'top' }}>{item.selectedValue === 'yes' ? '✓' : ''}</td>
+                                    <td style={{ border: '1px solid #000', padding: '2px 3px', textAlign: 'center', verticalAlign: 'top' }}>{item.selectedValue === 'no' ? '✓' : ''}</td>
+                                    <td style={{ border: '1px solid #000', padding: '2px 3px', textAlign: 'center', verticalAlign: 'top' }}>{item.selectedValue === 'na' ? '✓' : ''}</td>
+                                    <td style={{ border: '1px solid #000', padding: '2px 3px', verticalAlign: 'top' }}>{item.description}</td>
+                                </tr>
+                            </React.Fragment>
+                        );
+                    })}
+                    
+                    {/* SUMMARY ROW */}
+                    <tr>
+                        <td colspan="2" style={{ border: '1px solid #000', padding: '3px 4px', fontSize: '9pt', fontWeight: 'bold', textAlign: 'right' }}>TOTAL SUMMARY:</td>
+                        <td style={{ border: '1px solid #000', padding: '2px 3px', textAlign: 'center', fontWeight: 'bold' }}>{scores.yesCount}</td>
+                        <td style={{ border: '1px solid #000', padding: '2px 3px', textAlign: 'center', fontWeight: 'bold' }}>{scores.noCount}</td>
+                        <td style={{ border: '1px solid #000', padding: '2px 3px', textAlign: 'center', fontWeight: 'bold' }}>{scores.naCount}</td>
+                        <td style={{ border: '1px solid #000', padding: '2px 3px', textAlign: 'center', fontWeight: 'bold' }}>Total: {scores.totalItems}</td>
+                    </tr>
+                </table>
+
+                {/* WORKER INTERVIEWS SECTION */}
+                <table width="100%" cellPadding="2" cellSpacing="0" style={{ border: '1px solid #000', borderCollapse: 'collapse', marginBottom: '5mm' }}>
+                    <tr>
+                        <td colspan="4" style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '11pt', fontWeight: 'bold', textAlign: 'center', backgroundColor: '#fff' }}>
+                            WORKER INTERVIEWS
+                        </td>
+                    </tr>
+                    
+                    {data.workerInterviews.map((interview, interviewIndex) => (
+                        <React.Fragment key={interview.id}>
+                            {/* Interview Header */}
                             <tr>
-                                <td width="40%" style={{ fontWeight: 'bold', color: '#4b5563', padding: '8px', border: '1px solid #d1d5db' }}>
-                                    Name of Supplier/External Provider:
-                                </td>
-                                <td width="60%" style={{ padding: '8px', border: '1px solid #d1d5db' }}>
-                                    {data.supplierName}
-                                </td>
+                                <td width="15%" style={{ border: '1px solid #000', padding: '2px 4px', fontSize: '9pt', fontWeight: 'bold' }}>Interview #{interviewIndex + 1}:</td>
+                                <td width="35%" style={{ border: '1px solid #000', padding: '2px 4px', fontSize: '9pt' }}>Name: {interview.name}</td>
+                                <td width="25%" style={{ border: '1px solid #000', padding: '2px 4px', fontSize: '9pt' }}>Designation: {interview.designation}</td>
+                                <td width="25%" style={{ border: '1px solid #000', padding: '2px 4px', fontSize: '9pt' }}>Work: {interview.natureOfWork}</td>
                             </tr>
-
-                            {/* Combined Left and Right Columns in one row */}
+                            
+                            {/* Questions Table */}
                             <tr>
-                                <td colspan="2" style={{ padding: '0', border: '1px solid #d1d5db' }}>
-                                    {/* Using a single table with 4 columns */}
-                                    <table width="100%" cellPadding="8" cellSpacing="0" border="0" style={{ borderCollapse: 'collapse' }}>
-                                        <tbody>
-                                            {/* Row 1: Type of Supplier | Value | No. of Machines | Value */}
-                                            <tr>
-                                                {/* Left side - Type of Supplier */}
-                                                <td width="20%" style={{ fontWeight: 'bold', color: '#4b5563', borderRight: '1px solid #d1d5db' }}>
-                                                    Type of Supplier:
-                                                </td>
-                                                <td width="30%" style={{ borderRight: '1px solid #d1d5db' }}>
-                                                    {data.supplierType}
-                                                </td>
-
-                                                {/* Right side - No. of Machines */}
-                                                <td width="20%" style={{ fontWeight: 'bold', color: '#4b5563', borderRight: '1px solid #d1d5db' }}>
-                                                    No. of Machines:
-                                                </td>
-                                                <td width="30%">{data.machineCount}</td>
+                                <td colspan="4" style={{ border: '1px solid #000', padding: '0' }}>
+                                    <table width="100%" cellPadding="2" cellSpacing="0" style={{ border: 'none', borderCollapse: 'collapse', fontSize: '8pt' }}>
+                                        <tr>
+                                            <th width="10%" style={{ border: '1px solid #000', padding: '2px 3px', textAlign: 'center', fontWeight: 'bold' }}>Q.No</th>
+                                            <th width="45%" style={{ border: '1px solid #000', padding: '2px 3px', textAlign: 'left', fontWeight: 'bold' }}>Question</th>
+                                            <th width="45%" style={{ border: '1px solid #000', padding: '2px 3px', textAlign: 'left', fontWeight: 'bold' }}>Response</th>
+                                        </tr>
+                                        {interview.questions.map((question, qIndex) => (
+                                            <tr key={qIndex}>
+                                                <td style={{ border: '1px solid #000', padding: '2px 3px', textAlign: 'center', verticalAlign: 'top' }}>{qIndex + 1}</td>
+                                                <td style={{ border: '1px solid #000', padding: '2px 3px', verticalAlign: 'top' }}>{question.question}</td>
+                                                <td style={{ border: '1px solid #000', padding: '2px 3px', verticalAlign: 'top' }}>{question.response}</td>
                                             </tr>
-
-                                            {/* Row 2: No. of Employees | Value | Name of Products | Value */}
-                                            <tr>
-                                                <td style={{ fontWeight: 'bold', color: '#4b5563', borderRight: '1px solid #d1d5db', borderTop: '1px solid #e5e7eb' }}>No. of Employees:</td>
-                                                <td style={{ borderRight: '1px solid #d1d5db', borderTop: '1px solid #e5e7eb' }}>{data.employeeCount}</td>
-
-                                                <td style={{ fontWeight: 'bold', color: '#4b5563', borderRight: '1px solid #d1d5db', borderTop: '1px solid #e5e7eb' }}>Name of Products:</td>
-                                                <td style={{ borderTop: '1px solid #e5e7eb' }}>{data.products}</td>
-                                            </tr>
-
-                                            {/* Row 3: Production Capacity | Value | Date of Visit | Value */}
-                                            <tr>
-                                                <td style={{ fontWeight: 'bold', color: '#4b5563', borderRight: '1px solid #d1d5db', borderTop: '1px solid #e5e7eb' }}>Production Capacity:</td>
-                                                <td style={{ borderRight: '1px solid #d1d5db', borderTop: '1px solid #e5e7eb' }}>{data.productionCapacity}</td>
-
-                                                <td style={{ fontWeight: 'bold', color: '#4b5563', borderRight: '1px solid #d1d5db', borderTop: '1px solid #e5e7eb' }}>Date of Visit:</td>
-                                                <td style={{ borderTop: '1px solid #e5e7eb' }}>{formatDate(data.visitDate)}</td>
-                                            </tr>
-
-                                            {/* Row 4: Asian Auditor Name | Value | Supplier Representative | Value */}
-                                            <tr>
-                                                <td style={{ fontWeight: 'bold', color: '#4b5563', borderRight: '1px solid #d1d5db', borderTop: '1px solid #e5e7eb' }}>Asian Auditor Name:</td>
-                                                <td style={{ borderRight: '1px solid #d1d5db', borderTop: '1px solid #e5e7eb' }}>{data.asianAuditorName}</td>
-
-                                                <td style={{ fontWeight: 'bold', color: '#4b5563', borderRight: '1px solid #d1d5db', borderTop: '1px solid #e5e7eb' }}>Supplier Representative:</td>
-                                                <td style={{ borderTop: '1px solid #e5e7eb' }}>{data.supplierRepresentative}</td>
-                                            </tr>
-
-                                            {/* Row 5: Last Audit Date | Value | Audit Scores | Value */}
-                                            <tr>
-                                                <td style={{ fontWeight: 'bold', color: '#4b5563', borderRight: '1px solid #d1d5db', borderTop: '1px solid #e5e7eb' }}>Last Audit Date:</td>
-                                                <td style={{ borderRight: '1px solid #d1d5db', borderTop: '1px solid #e5e7eb' }}>{formatDate(data.lastAuditDate)}</td>
-
-                                                <td style={{ fontWeight: 'bold', color: '#4b5563', borderRight: '1px solid #d1d5db', borderTop: '1px solid #e5e7eb' }}>Audit Scores:</td>
-                                                <td style={{ borderTop: '1px solid #e5e7eb' }}>
-                                                    <span style={{ marginRight: '15px' }}>
-                                                        <span style={{ fontWeight: 'bold', color: '#4b5563', fontSize: '9pt' }}>Last: </span>
-                                                        {data.lastAuditScore}%
-                                                    </span>
-                                                    <span>
-                                                        <span style={{ fontWeight: 'bold', color: '#4b5563', fontSize: '9pt' }}>Current: </span>
-                                                        {data.currentScore}%
-                                                    </span>
-                                                </td>
-                                            </tr>
-                                        </tbody>
+                                        ))}
                                     </table>
                                 </td>
                             </tr>
-
-                            {/* Row 3: Facility Features - All in single line */}
-                            <tr>
-                                <td colSpan="2" style={{ padding: '12px', border: '1px solid #d1d5db', textAlign: 'center' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '40px' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            <span style={{ fontWeight: 'bold', color: '#4b5563' }}>Transportation</span>
-                                            <span style={{ fontSize: '11pt', fontWeight: 'bold' }}>{data.transportAvailable ? 'YES' : 'NO'}</span>
-                                        </div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            <span style={{ fontWeight: 'bold', color: '#4b5563' }}>Accommodation</span>
-                                            <span style={{ fontSize: '11pt', fontWeight: 'bold' }}>{data.accommodationAvailable ? 'YES' : 'NO'}</span>
-                                        </div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            <span style={{ fontWeight: 'bold', color: '#4b5563' }}>Animals Allowed</span>
-                                            <span style={{ fontSize: '11pt', fontWeight: 'bold' }}>{data.animalsAllowed ? 'YES' : 'NO'}</span>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                {/* Audit Checklist Results - Single Table */}
-                <div style={{ marginBottom: '20px' }}>
-                    <div style={{ fontSize: '14pt', fontWeight: 'bold', color: '#1f2937', marginBottom: '10px', borderBottom: '2px solid #ef4444', paddingBottom: '4px' }}>AUDIT CHECKLIST RESULTS</div>
-
-                    <table width="100%" cellPadding="3" cellSpacing="0" border="1" style={{ borderColor: '#d1d5db', fontSize: '9pt', borderCollapse: 'collapse' }}>
-                        <thead>
-                            <tr style={{ backgroundColor: '#f3f4f6' }}>
-                                <th width="5%" style={{ padding: '6px', textAlign: 'center', fontWeight: 'bold', border: '1px solid #9ca3af' }}>
-                                    S.No
-                                </th>
-                                <th width="50%" style={{ padding: '6px', textAlign: 'left', fontWeight: 'bold', border: '1px solid #9ca3af' }}>
-                                    Activity / Requirement
-                                </th>
-                                <th width="5%" style={{ padding: '6px', textAlign: 'center', fontWeight: 'bold', border: '1px solid #9ca3af' }}>
-                                    Yes
-                                </th>
-                                <th width="5%" style={{ padding: '6px', textAlign: 'center', fontWeight: 'bold', border: '1px solid #9ca3af' }}>
-                                    No
-                                </th>
-                                <th width="5%" style={{ padding: '6px', textAlign: 'center', fontWeight: 'bold', border: '1px solid #9ca3af' }}>
-                                    N/A
-                                </th>
-                                <th width="30%" style={{ padding: '6px', textAlign: 'left', fontWeight: 'bold', border: '1px solid #9ca3af' }}>
-                                    Details / Observations
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {allChecklistItems.map((item, index) => {
-                                const isNewChecklist = index === 0 || allChecklistItems[index - 1].checklistOrder !== item.checklistOrder;
-
-                                return (
-                                    <React.Fragment key={item.id}>
-                                        {/* Checklist Title Row */}
-                                        {isNewChecklist && (
-                                            <tr style={{ backgroundColor: '#e5e7eb', pageBreakInside: 'avoid' }}>
-                                                <td colSpan="6" style={{ padding: '8px', fontWeight: 'bold', fontSize: '11pt', border: '1px solid #9ca3af' }}>
-                                                    {item.checklistTitle}
-                                                </td>
-                                            </tr>
-                                        )}
-
-                                        {/* Item Row */}
-                                        <tr>
-                                            <td style={{ padding: '5px', textAlign: 'center', verticalAlign: 'top', border: '1px solid #d1d5db' }}>{item.id.toFixed(1)}</td>
-                                            <td style={{ padding: '5px', verticalAlign: 'top', border: '1px solid #d1d5db' }}>{item.title}</td>
-                                            <td style={{ padding: '5px', textAlign: 'center', verticalAlign: 'top', border: '1px solid #d1d5db' }}>{item.selectedValue === 'yes' ? '✓' : ''}</td>
-                                            <td style={{ padding: '5px', textAlign: 'center', verticalAlign: 'top', border: '1px solid #d1d5db' }}>{item.selectedValue === 'no' ? '✓' : ''}</td>
-                                            <td style={{ padding: '5px', textAlign: 'center', verticalAlign: 'top', border: '1px solid #d1d5db' }}>{item.selectedValue === 'na' ? '✓' : ''}</td>
-                                            <td style={{ padding: '5px', verticalAlign: 'top', border: '1px solid #d1d5db', fontSize: '8.5pt' }}>{item.description}</td>
-                                        </tr>
-                                    </React.Fragment>
-                                );
-                            })}
-                        </tbody>
-                    </table>
-                </div>
-
-                {/* Worker Interviews - Table Format */}
-                <div style={{ marginBottom: '15px', pageBreakInside: 'avoid' }}>
-                    <div style={{ fontSize: '12pt', fontWeight: 'bold', color: '#1f2937', marginBottom: '8px', borderBottom: '2px solid #8b5cf6', paddingBottom: '3px' }}>WORKER INTERVIEWS</div>
-
-                    {data.workerInterviews.map((interview, interviewIndex) => (
-                        <div key={interview.id} style={{ marginBottom: '15px', border: '1px solid #e5e7eb', padding: '10px', borderRadius: '4px' }}>
-                            <table width="100%" cellPadding="5" cellSpacing="0" style={{ fontSize: '10pt', marginBottom: '10px', borderBottom: '1px solid #e5e7eb', paddingBottom: '8px' }}>
-                                <tr>
-                                    <td width="25%" style={{ fontWeight: 'bold', color: '#4b5563' }}>
-                                        Interview No:
-                                    </td>
-                                    <td width="25%" style={{ fontWeight: 'bold' }}>
-                                        {interviewIndex + 1}
-                                    </td>
-                                    <td width="25%" style={{ fontWeight: 'bold', color: '#4b5563' }}>
-                                        Name:
-                                    </td>
-                                    <td width="25%" style={{ fontWeight: 'bold' }}>
-                                        {interview.name}
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td style={{ fontWeight: 'bold', color: '#4b5563' }}>Designation:</td>
-                                    <td>{interview.designation}</td>
-                                    <td style={{ fontWeight: 'bold', color: '#4b5563' }}>Nature of Work:</td>
-                                    <td>{interview.natureOfWork}</td>
-                                </tr>
-                            </table>
-
-                            {/* Questions & Answers Table */}
-                            <table width="100%" cellPadding="4" cellSpacing="0" border="1" style={{ borderColor: '#d1d5db', fontSize: '9pt', borderCollapse: 'collapse' }}>
-                                <thead>
-                                    <tr style={{ backgroundColor: '#f3f4f6' }}>
-                                        <th width="10%" style={{ padding: '5px', textAlign: 'center', fontWeight: 'bold', border: '1px solid #9ca3af' }}>
-                                            Q.No
-                                        </th>
-                                        <th width="45%" style={{ padding: '5px', textAlign: 'left', fontWeight: 'bold', border: '1px solid #9ca3af' }}>
-                                            Question
-                                        </th>
-                                        <th width="45%" style={{ padding: '5px', textAlign: 'left', fontWeight: 'bold', border: '1px solid #9ca3af' }}>
-                                            Response
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {interview.questions.map((question, qIndex) => (
-                                        <tr key={qIndex}>
-                                            <td style={{ padding: '5px', textAlign: 'center', verticalAlign: 'top', border: '1px solid #d1d5db' }}>{qIndex + 1}</td>
-                                            <td style={{ padding: '5px', verticalAlign: 'top', border: '1px solid #d1d5db' }}>{question.question}</td>
-                                            <td style={{ padding: '5px', verticalAlign: 'top', border: '1px solid #d1d5db' }}>{question.response}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                        </React.Fragment>
                     ))}
-                </div>
+                </table>
 
-                {/* Auditor Remarks - No background color */}
-                <div style={{ marginBottom: '15px', pageBreakInside: 'avoid' }}>
-                    <div style={{ fontSize: '12pt', fontWeight: 'bold', color: '#1f2937', marginBottom: '8px', borderBottom: '2px solid #10b981', paddingBottom: '3px' }}>
-                        AUDITOR REMARKS & OBSERVATIONS
-                    </div>
+                {/* AUDITOR REMARKS */}
+                <table width="100%" cellPadding="2" cellSpacing="0" style={{ border: '1px solid #000', borderCollapse: 'collapse', marginBottom: '5mm' }}>
+                    <tr>
+                        <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '11pt', fontWeight: 'bold', textAlign: 'center', backgroundColor: '#fff' }}>
+                            AUDITOR REMARKS & OBSERVATIONS
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style={{ border: '1px solid #000', padding: '6px 8px', fontSize: '9pt', lineHeight: '1.3', minHeight: '30mm' }}>
+                            {data.auditorRemarks}
+                        </td>
+                    </tr>
+                </table>
 
-                    <div style={{ padding: '12px' }}>
-                        <div style={{ fontSize: '10pt', color: '#1f2937', lineHeight: '1.5', textAlign: 'justify' }}>{data.auditorRemarks}</div>
-                    </div>
-                </div>
+                {/* EXTERNAL PROVIDER COMMENTS */}
+                <table width="100%" cellPadding="2" cellSpacing="0" style={{ border: '1px solid #000', borderCollapse: 'collapse', marginBottom: '5mm' }}>
+                    <tr>
+                        <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '11pt', fontWeight: 'bold', textAlign: 'center', backgroundColor: '#fff' }}>
+                            EXTERNAL PROVIDER COMMENTS
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style={{ border: '1px solid #000', padding: '6px 8px', fontSize: '9pt', lineHeight: '1.3', minHeight: '20mm' }}>
+                            {data.externalProviderComments}
+                        </td>
+                    </tr>
+                </table>
 
-                {/* External Provider Comments - No background color */}
-                <div style={{ marginBottom: '20px', pageBreakInside: 'avoid' }}>
-                    <div style={{ fontSize: '12pt', fontWeight: 'bold', color: '#1f2937', marginBottom: '8px', borderBottom: '2px solid #3b82f6', paddingBottom: '3px' }}>
-                        EXTERNAL PROVIDER COMMENTS
-                    </div>
+                {/* SIGNATURE SECTION */}
+                <table width="100%" cellPadding="2" cellSpacing="0" style={{ border: '1px solid #000', borderCollapse: 'collapse', marginBottom: '5mm' }}>
+                    <tr>
+                        <td colspan="3" style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '11pt', fontWeight: 'bold', textAlign: 'center', backgroundColor: '#fff' }}>
+                            AUDIT CONCLUSION & SIGNATURES
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="33%" style={{ border: '1px solid #000', padding: '10px 6px', textAlign: 'center', verticalAlign: 'top' }}>
+                            <div style={{ fontSize: '9pt', fontWeight: 'bold', marginBottom: '15px' }}>
+                                {scores.compliancePercentage >= 70
+                                    ? 'SATISFACTORY'
+                                    : scores.compliancePercentage >= 50
+                                      ? 'NEEDS IMPROVEMENT'
+                                      : 'UNSATISFACTORY'}
+                            </div>
+                            <div style={{ borderTop: '1px solid #000', width: '80%', margin: '0 auto', paddingTop: '15px' }}>
+                                <div style={{ fontSize: '9pt' }}>Audit Completion Date</div>
+                                <div style={{ fontSize: '9pt', fontWeight: 'bold', marginTop: '5px' }}>{formatDate(data.auditDate)}</div>
+                            </div>
+                        </td>
+                        <td width="34%" style={{ border: '1px solid #000', padding: '10px 6px', textAlign: 'center', verticalAlign: 'top' }}>
+                            <div style={{ fontSize: '9pt', fontWeight: 'bold', marginBottom: '5px' }}>AUDITOR SIGNATURE</div>
+                            <div style={{ borderTop: '1px solid #000', width: '80%', margin: '25px auto 0', paddingTop: '15px' }}>
+                                <div style={{ fontSize: '9pt' }}>{data.asianAuditorName}</div>
+                                <div style={{ fontSize: '8pt', marginTop: '2px' }}>Asian Fabrics Auditor</div>
+                            </div>
+                        </td>
+                        <td width="33%" style={{ border: '1px solid #000', padding: '10px 6px', textAlign: 'center', verticalAlign: 'top' }}>
+                            <div style={{ fontSize: '9pt', fontWeight: 'bold', marginBottom: '5px' }}>SUPPLIER ACKNOWLEDGEMENT</div>
+                            <div style={{ borderTop: '1px solid #000', width: '80%', margin: '25px auto 0', paddingTop: '15px' }}>
+                                <div style={{ fontSize: '9pt' }}>{data.supplierRepresentative}</div>
+                                <div style={{ fontSize: '8pt', marginTop: '2px' }}>Supplier Representative</div>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
 
-                    <div style={{ padding: '12px' }}>
-                        <div style={{ fontSize: '10pt', color: '#1f2937', lineHeight: '1.5', textAlign: 'justify' }}>{data.externalProviderComments}</div>
-                    </div>
-                </div>
-
-                {/* Footer */}
-                <div style={{ borderTop: '2px solid #1e40af', paddingTop: '10px', marginTop: '20px' }}>
-                    <table width="100%" cellPadding="4" cellSpacing="0" style={{ fontSize: '9pt' }}>
-                        <tr>
-                            <td width="33%" valign="top">
-                                <div style={{ fontWeight: 'bold', color: '#1e40af' }}>AUDIT CONCLUSION</div>
-                                <div style={{ fontWeight: 'bold', fontSize: '10pt', marginTop: '4px' }}>
-                                    {scores.compliancePercentage >= 70
-                                        ? 'SATISFACTORY - Supplier meets compliance requirements'
-                                        : scores.compliancePercentage >= 50
-                                          ? 'NEEDS IMPROVEMENT - Some areas require attention'
-                                          : 'UNSATISFACTORY - Major improvements needed'}
-                                </div>
-                            </td>
-                            <td width="34%" valign="top" align="center">
-                                <div style={{ fontWeight: 'bold', color: '#1e40af' }}>AUDITOR SIGNATURE</div>
-                                <div style={{ marginTop: '20px', borderTop: '1px solid #000', width: '60%', margin: '20px auto 0' }}>
-                                    <div style={{ textAlign: 'center', fontSize: '9pt', paddingTop: '4px' }}>{data.asianAuditorName}</div>
-                                </div>
-                            </td>
-                            <td width="33%" valign="top" align="right">
-                                <div style={{ fontWeight: 'bold', color: '#1e40af' }}>SUPPLIER ACKNOWLEDGEMENT</div>
-                                <div style={{ marginTop: '20px', borderTop: '1px solid #000', width: '60%', marginLeft: 'auto' }}>
-                                    <div style={{ textAlign: 'center', fontSize: '9pt', paddingTop: '4px' }}>{data.supplierRepresentative}</div>
-                                </div>
-                            </td>
-                        </tr>
-                    </table>
-
-                    <div style={{ textAlign: 'center', marginTop: '15px', fontSize: '8pt', color: '#6b7280', borderTop: '1px solid #e5e7eb', paddingTop: '8px' }}>
-                        <div>Computer Generated Audit Report • Document No: AUD-{data.auditId} • Version: 1.0</div>
-                        <div>Generated on: {moment().format('DD/MM/YYYY HH:mm:ss')} • Page 1 of 1</div>
-                        <div>
-                            Total Checklist Items: {scores.totalItems} • Yes: {scores.yesCount} • No: {scores.noCount} • N/A: {scores.naCount}
-                        </div>
-                    </div>
-                </div>
+                {/* FOOTER */}
+                <table width="100%" cellPadding="2" cellSpacing="0" style={{ border: '1px solid #000', borderCollapse: 'collapse' }}>
+                    <tr>
+                        <td style={{ border: '1px solid #000', padding: '3px 6px', fontSize: '8pt', textAlign: 'center' }}>
+                            <div>--- END OF AUDIT REPORT ---</div>
+                            <div style={{ marginTop: '2px' }}>
+                                Document ID: {data.auditId} | Generated on: {moment().format('DD/MM/YYYY HH:mm')} | Page 1 of 1
+                            </div>
+                            <div style={{ marginTop: '2px' }}>
+                                Items: {scores.totalItems} | Yes: {scores.yesCount} ({Math.round((scores.yesCount / scores.totalItems) * 100)}%) | 
+                                No: {scores.noCount} | N/A: {scores.naCount}
+                            </div>
+                        </td>
+                    </tr>
+                </table>
             </div>
 
             {/* Action Buttons */}
-            <div className="d-print-none mt-6 flex justify-center gap-4">
-                <button onClick={handleBack} className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-medium">
+            <div className="mt-6 flex justify-center gap-4">
+                <button 
+                    onClick={handleBack}
+                    style={{
+                        padding: '8px 20px',
+                        background: '#6b7280',
+                        color: 'white',
+                        border: '1px solid #4b5563',
+                        borderRadius: '2px',
+                        fontSize: '12px',
+                        cursor: 'pointer'
+                    }}
+                >
                     ← Back
                 </button>
-                <button onClick={handlePrint} className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium">
+                <button 
+                    onClick={handlePrint}
+                    style={{
+                        padding: '8px 20px',
+                        background: '#2563eb',
+                        color: 'white',
+                        border: '1px solid #1d4ed8',
+                        borderRadius: '2px',
+                        fontSize: '12px',
+                        cursor: 'pointer'
+                    }}
+                >
                     <IconPrinter className="inline w-4 h-4 mr-2" />
                     Print Report
                 </button>
             </div>
 
-            {/* Print Styles */}
-            <style jsx>{`
+            {/* Print Styles - PAPER FORM OPTIMIZED */}
+            <style>{`
                 @media print {
-                    body,
-                    html {
+                    body, html {
                         margin: 0 !important;
                         padding: 0 !important;
-                        background: white !important;
                         width: 210mm !important;
                         height: auto !important;
+                        background: white !important;
+                        font-family: "Times New Roman", serif !important;
+                        font-size: 9pt !important;
                     }
 
                     body * {
-                        visibility: hidden;
-                        margin: 0 !important;
-                        padding: 0 !important;
+                        visibility: hidden !important;
                     }
 
                     #audit-report-to-print,
                     #audit-report-to-print * {
-                        visibility: visible;
+                        visibility: visible !important;
                     }
 
                     #audit-report-to-print {
@@ -611,17 +582,46 @@ const AuditPrintPage = () => {
                         background: white !important;
                         box-shadow: none !important;
                         border: none !important;
+                        font-family: "Times New Roman", serif !important;
+                        font-size: 9pt !important;
                     }
 
-                    .d-print-none,
-                    header,
-                    nav,
-                    .navbar,
-                    .sidebar,
-                    .action-buttons {
+                    /* Remove all action buttons during print */
+                    .mt-6, button, .flex {
                         display: none !important;
                     }
 
+                    /* Table styling for print */
+                    table {
+                        width: 100% !important;
+                        border-collapse: collapse !important;
+                        font-size: 8pt !important;
+                        page-break-inside: avoid !important;
+                    }
+
+                    th, td {
+                        border: 1px solid #000 !important;
+                        padding: 2px 3px !important;
+                        font-size: 8pt !important;
+                        line-height: 1.1 !important;
+                        vertical-align: top !important;
+                    }
+
+                    th {
+                        font-weight: bold !important;
+                        text-align: center !important;
+                    }
+
+                    /* Force white background for print */
+                    tr[style*="background-color"] td,
+                    td[style*="background-color"] {
+                        background-color: #fff !important;
+                        -webkit-print-color-adjust: exact !important;
+                        print-color-adjust: exact !important;
+                        color-adjust: exact !important;
+                    }
+
+                    /* Page setup */
                     @page {
                         size: A4 portrait;
                         margin: 15mm;
@@ -635,56 +635,23 @@ const AuditPrintPage = () => {
                         }
                     }
 
-                    table {
-                        width: 100% !important;
-                        border-collapse: collapse !important;
-                        font-size: 9pt !important;
-                        line-height: 1.2 !important;
+                    /* Avoid page breaks inside important sections */
+                    .page-break-avoid {
+                        page-break-inside: avoid !important;
                     }
 
-                    th,
-                    td {
-                        padding: 3px 4px !important;
-                        border: 0.5px solid #000 !important;
-                        font-size: 9pt !important;
-                        line-height: 1.2 !important;
-                        vertical-align: top !important;
-                    }
-
-                    /* Force only table headers to have background color */
-                    tr[style*='background-color: #f3f4f6'] {
-                        background-color: #f3f4f6 !important;
-                    }
-
-                    tr[style*='background-color: #e5e7eb'] {
-                        background-color: #e5e7eb !important;
-                    }
-
-                    /* Remove all other background colors */
-                    td[style*='background-color'] {
-                        background-color: transparent !important;
-                    }
-
-                    div[style*='background-color'] {
-                        background-color: transparent !important;
-                    }
-
-                    #audit-report-to-print > div {
-                        margin-bottom: 8mm !important;
-                    }
-
-                    #audit-report-to-print > div:last-child {
-                        position: relative !important;
-                        bottom: 0 !important;
-                        margin-top: 10mm !important;
+                    /* Reduce spacing for print */
+                    #audit-report-to-print > table {
+                        margin-bottom: 3mm !important;
                     }
                 }
 
-                /* Screen styles */
+                /* Screen styles for preview */
                 @media screen {
                     #audit-report-to-print {
-                        border-radius: 4px;
-                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                        border: 1px solid #ccc;
+                        border-radius: 2px;
+                        box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
                         background: white;
                         overflow: auto;
                         max-height: calc(100vh - 150px);
@@ -692,22 +659,35 @@ const AuditPrintPage = () => {
                     }
 
                     #audit-report-to-print::-webkit-scrollbar {
-                        width: 8px;
+                        width: 6px;
+                        height: 6px;
                     }
 
                     #audit-report-to-print::-webkit-scrollbar-track {
                         background: #f1f1f1;
-                        border-radius: 4px;
                     }
 
                     #audit-report-to-print::-webkit-scrollbar-thumb {
-                        background: #c1c1c1;
-                        border-radius: 4px;
+                        background: #888;
                     }
 
                     #audit-report-to-print::-webkit-scrollbar-thumb:hover {
-                        background: #a1a1a1;
+                        background: #555;
                     }
+                }
+
+                /* Global styles for paper form look */
+                table {
+                    font-family: "Times New Roman", serif;
+                    font-size: 9pt;
+                }
+
+                th {
+                    background: #fff !important;
+                }
+
+                td {
+                    background: #fff !important;
                 }
             `}</style>
         </div>
