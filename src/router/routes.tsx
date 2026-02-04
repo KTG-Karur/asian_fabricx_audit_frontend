@@ -33,11 +33,12 @@ import {
     Audit,
     Capa,
     Suppliers,
-    PrintEnquiry,
-    EnquiryReport,
+    PdfSubAuditChecklist,
+    AuditReport,
     AuditAssignToAuditor,
     AuditFormPdf,
     AuditReSchedule,
+    PdfSubAuditChecklistBarChart,
 } from './Route_Menu';
 import path from 'path';
 
@@ -262,8 +263,8 @@ const routes = [
         element: <ChecklistSupplier />,
     },
     {
-        path: '/reports/enquiry-report',
-        element: <EnquiryReport />,
+        path: '/reports/audit-report',
+        element: <AuditReport />,
     },
     //old
     {
@@ -309,8 +310,12 @@ const routes = [
         element: <CompanyInfo />,
     },
     {
-        path: '/documents/print-enquiry',
-        element: <PrintEnquiry />,
+        path: '/documents/print-sub-checklist-sub-audit',
+        element: <PdfSubAuditChecklist />,
+    },
+    {
+        path: '/documents/print-sub-checklist-sub-audit-bar-chart',
+        element: <PdfSubAuditChecklistBarChart />,
     },
     // pages
 
@@ -391,8 +396,12 @@ const dontCkeckRouts = [
     },
     //old
     {
-        path: '/documents/print-enquiry',
-        element: <PrintEnquiry />,
+        path: '/documents/print-sub-checklist-sub-audit-bar-chart',
+        element: <PdfSubAuditChecklistBarChart />,
+    },
+    {
+        path: '/documents/print-sub-checklist-sub-audit',
+        element: <PdfSubAuditChecklist />,
     },
     {
         path: '/pages/contact-us-boxed',
