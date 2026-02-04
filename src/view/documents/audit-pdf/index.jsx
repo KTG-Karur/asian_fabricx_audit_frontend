@@ -696,32 +696,26 @@ const AuditPrintPage = () => {
                 </button>
             </div>
 
-            {/* Print Styles - PAPER FORM OPTIMIZED */}
-            <style>{`
-                /* OLD SCHOOL PAPER FORM STYLES */
+            {/* Print Styles */}
+            <style jsx>{`
                 @media print {
-                    /* Reset all modern styling */
                     body, html {
                         margin: 0 !important;
                         padding: 0 !important;
+                        background: white !important;
                         width: 210mm !important;
                         height: auto !important;
-                        background: white !important;
-                        font-family: "Times New Roman", serif !important;
-                        font-size: 10pt !important;
-                        line-height: 1.2 !important;
                     }
 
-                    /* Hide everything except print area */
                     body * {
-                        visibility: hidden !important;
+                        visibility: hidden;
+                        margin: 0 !important;
+                        padding: 0 !important;
                     }
 
                     #audit-report-to-print,
                     #audit-report-to-print * {
-                        visibility: visible !important;
-                        font-family: "Times New Roman", serif !important;
-                        line-height: 1.2 !important;
+                        visibility: visible;
                     }
 
                     #audit-report-to-print {
@@ -731,107 +725,133 @@ const AuditPrintPage = () => {
                         width: 210mm !important;
                         min-height: 297mm !important;
                         margin: 0 !important;
-                        padding: 15mm !important;
                         background: white !important;
                         box-shadow: none !important;
                         border: none !important;
                     }
 
-                    /* Remove all action buttons during print */
-                    .mt-6, button, .flex, .gap-4 {
+                    .d-print-none,
+                    header,
+                    nav,
+                    .navbar,
+                    .sidebar,
+                    .action-buttons {
                         display: none !important;
                     }
 
-                    /* Table styling for old school forms */
-                    table {
-                        width: 100% !important;
-                        border-collapse: collapse !important;
-                        border: 1px solid #000 !important;
-                        font-size: 9pt !important;
-                        page-break-inside: avoid !important;
-                        margin-bottom: 4mm !important;
-                    }
-
-                    th, td {
-                        border: 1px solid #000 !important;
-                        padding: 2px 3px !important;
-                        font-size: 9pt !important;
-                        line-height: 1.2 !important;
-                        vertical-align: top !important;
-                    }
-
-                    th {
-                        font-weight: bold !important;
-                        text-align: center !important;
-                        background: white !important;
-                    }
-
-                    /* Remove all modern colors and backgrounds */
-                    tr[style*="background-color"],
-                    td[style*="background-color"],
-                    th[style*="background-color"] {
-                        background-color: white !important;
-                        color: black !important;
-                    }
-
-                    /* Force plain white background for print */
-                    * {
-                        -webkit-print-color-adjust: exact !important;
-                        print-color-adjust: exact !important;
-                        color-adjust: exact !important;
-                        background: white !important;
-                    }
-
-                    /* Page setup for A4 paper */
                     @page {
                         size: A4 portrait;
                         margin: 15mm;
                     }
 
-                    /* Section headers - old school style */
-                    td[style*="text-transform: uppercase"] {
-                        font-weight: bold !important;
-                        letter-spacing: 0.5px !important;
+                    @media print and (color) {
+                        * {
+                            -webkit-print-color-adjust: exact !important;
+                            print-color-adjust: exact !important;
+                            color-adjust: exact !important;
+                        }
                     }
 
-                    /* Form field styling */
-                    td[style*="font-weight: bold"] {
-                        font-weight: bold !important;
+                    table {
+                        width: 100% !important;
+                        border-collapse: collapse !important;
+                        font-size: 9pt !important;
+                        line-height: 1.2 !important;
                     }
 
-                    /* Checkbox/mark styling */
-                    td[style*="text-align: center"] {
-                        font-family: "Times New Roman", serif !important;
+                    th, td {
+                        padding: 3px 4px !important;
+                        border: 0.5px solid #000 !important;
+                        font-size: 9pt !important;
+                        line-height: 1.2 !important;
+                        vertical-align: top !important;
                     }
 
-                    /* Signature lines */
-                    div[style*="border-top: 1px solid #000"] {
-                        border-top: 1px solid #000 !important;
+                    #audit-report-to-print > div {
+                        margin-bottom: 8mm !important;
                     }
 
-                    /* Ensure consistent spacing */
-                    #audit-report-to-print > table {
-                        margin-bottom: 4mm !important;
+                    #audit-report-to-print > div:last-child {
+                        position: relative !important;
+                        bottom: 0 !important;
+                        margin-top: 10mm !important;
                     }
 
-                    /* Supplier info table specific styling */
-                    #audit-report-to-print > table:nth-of-type(3) tr td {
-                        height: auto !important;
-                        min-height: auto !important;
-                        padding: 3px 6px !important;
+                    /* Table header colors */
+                    div[style*="background-color: #1e40af"] {
+                        background-color: #1e40af !important;
+                        color: white !important;
+                    }
+                    
+                    div[style*="background-color: #059669"] {
+                        background-color: #059669 !important;
+                        color: white !important;
+                    }
+                    
+                    div[style*="background-color: #7c3aed"] {
+                        background-color: #7c3aed !important;
+                        color: white !important;
+                    }
+                    
+                    div[style*="background-color: #dc2626"] {
+                        background-color: #dc2626 !important;
+                        color: white !important;
+                    }
+                    
+                    div[style*="background-color: #f59e0b"] {
+                        background-color: #f59e0b !important;
+                        color: white !important;
                     }
 
-                    /* Logo sizing for print */
-                    img {
-                        max-width: 140px !important;
-                        max-height: 40px !important;
+                    /* Background colors */
+                    tr[style*="background-color: #f3f4f6"] {
+                        background-color: #f3f4f6 !important;
+                    }
+                    
+                    div[style*="background-color: #f9fafb"] {
+                        background-color: #f9fafb !important;
+                    }
+                    
+                    div[style*="background-color: #f8fafc"] {
+                        background-color: #f8fafc !important;
+                    }
+                    
+                    div[style*="background-color: #ecfdf5"] {
+                        background-color: #ecfdf5 !important;
+                    }
+                    
+                    div[style*="background-color: #eff6ff"] {
+                        background-color: #eff6ff !important;
+                    }
+
+                    /* Border colors */
+                    div[style*="border: 1px solid #d1fae5"] {
+                        border: 1px solid #d1fae5 !important;
+                    }
+                    
+                    div[style*="border: 1px solid #dbeafe"] {
+                        border: 1px solid #dbeafe !important;
+                    }
+
+                    /* Text colors */
+                    div[style*="color: #065f46"] {
+                        color: #065f46 !important;
+                    }
+                    
+                    div[style*="color: #1e40af"] {
+                        color: #1e40af !important;
+                    }
+                    
+                    div[style*="color: #059669"] {
+                        color: #059669 !important;
                     }
                 }
 
-                /* Screen preview styles */
+                /* Screen styles */
                 @media screen {
                     #audit-report-to-print {
-                        border: 1px solid #ccc;
+                        border-radius: 4px;
+                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
                         background: white;
                         overflow: auto;
                         max-height: calc(100vh - 150px);
@@ -839,42 +859,22 @@ const AuditPrintPage = () => {
                     }
 
                     #audit-report-to-print::-webkit-scrollbar {
-                        width: 6px;
-                        height: 6px;
+                        width: 8px;
                     }
 
                     #audit-report-to-print::-webkit-scrollbar-track {
                         background: #f1f1f1;
+                        border-radius: 4px;
                     }
 
                     #audit-report-to-print::-webkit-scrollbar-thumb {
-                        background: #888;
+                        background: #c1c1c1;
+                        border-radius: 4px;
                     }
 
                     #audit-report-to-print::-webkit-scrollbar-thumb:hover {
-                        background: #555;
+                        background: #a1a1a1;
                     }
-                }
-
-                /* Global paper form styles */
-                #audit-report-to-print table {
-                    font-family: "Times New Roman", serif;
-                    font-size: 9pt;
-                    border-collapse: collapse;
-                }
-
-                #audit-report-to-print th,
-                #audit-report-to-print td {
-                    border: 1px solid #000;
-                }
-
-                #audit-report-to-print th {
-                    font-weight: bold;
-                    background: white;
-                }
-
-                #audit-report-to-print td {
-                    background: white;
                 }
             `}</style>
         </div>

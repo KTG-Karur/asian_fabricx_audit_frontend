@@ -1617,35 +1617,35 @@ const handlePrintSupplier = useCallback((supplier) => {
         </table>
         
         <!-- SECTION 6A: MIGRANT WORKERS & WAGES -->
-        <table class="section-table">
-          <tr>
-            <td colspan="6" class="section-title">MIGRANT WORKERS & WAGES INFORMATION</td>
-          </tr>
-          <tr>
-            <th colspan="3" class="text-center">Migrant Workers</th>
-            <th colspan="3" class="text-center">Wages & Insurance</th>
-          </tr>
-          <tr>
-            <td class="text-center"><strong>Male</strong></td>
-            <td class="text-center"><strong>Female</strong></td>
-            <td class="text-center"><strong>Total</strong></td>
-            <td class="field-label">Avg Wages/Month (₹)</td>
-            <td colspan="2" class="field-value">${fullData.average_wages_per_month ? fullData.average_wages_per_month.toLocaleString() : ''}</td>
-          </tr>
-          <tr>
-            <td class="text-center">${fullData.migrant_workers?.male_count || ''}</td>
-            <td class="text-center">${fullData.migrant_workers?.female_count || ''}</td>
-            <td class="text-center">${fullData.migrant_workers?.total_numbers || ''}</td>
-            <td class="field-label">Accident Insurance No</td>
-            <td class="field-value">${fullData.accident_insurance_number || ''}</td>
-            <td class="field-label">Validity</td>
-          </tr>
-          <tr>
-            <td colspan="3" rowspan="2"></td>
-            <td class="field-label"></td>
-            <td colspan="2" class="field-value">${fullData.insurance_validity_date || ''}</td>
-          </tr>
-        </table>
+    <!-- SECTION 6A: MIGRANT WORKERS & WAGES -->
+<table class="section-table">
+  <tr>
+    <td colspan="6" class="section-title">MIGRANT WORKERS & WAGES INFORMATION</td>
+  </tr>
+  <tr>
+    <th colspan="3" class="text-center">Migrant Workers</th>
+    <th colspan="3" class="text-center">Wages & Insurance</th>
+  </tr>
+  <tr>
+    <td class="text-center"><strong>Male</strong></td>
+    <td class="text-center"><strong>Female</strong></td>
+    <td class="text-center"><strong>Total</strong></td>
+    <td class="field-label">Avg Wages/Month (₹)</td>
+    <td colspan="2" class="field-value">${fullData.average_wages_per_month ? fullData.average_wages_per_month.toLocaleString() : ''}</td>
+  </tr>
+  <tr>
+    <td class="text-center">${fullData.migrant_workers?.male_count || ''}</td>
+    <td class="text-center">${fullData.migrant_workers?.female_count || ''}</td>
+    <td class="text-center">${fullData.migrant_workers?.total_numbers || ''}</td>
+    <td class="field-label">Accident Insurance No</td>
+    <td colspan="2" class="field-value">${fullData.accident_insurance_number || ''}</td>
+  </tr>
+  <tr>
+    <td colspan="3" rowspan="2" class="no-border"></td>
+    <td class="field-label">Validity</td>
+    <td colspan="2" class="field-value">${fullData.insurance_validity_date || ''}</td>
+  </tr>
+</table>
         
         <!-- SECTION 7: WORKING HOURS -->
         <table class="section-table">
@@ -1750,9 +1750,9 @@ const handlePrintSupplier = useCallback((supplier) => {
         <table class="section-table mt-10">
           <tr>
             <td colspan="3" style="border: 1px solid #000; padding: 20px 10px; text-align: center; font-size: 10px;">
-              <div style="margin-top: 5px;">Generated: ${moment().format('DD/MM/YYYY HH:mm')} | Form ID: ${fullData.supplier_id}</div>
-              <div style="margin-top: 20px; border-top: 1px solid #000; padding-top: 20px; width: 80%; margin-left: auto; margin-right: auto;">
-                <table style="width: 100%; border-collapse: collapse;">
+               <table style="width: 100%; border-collapse: collapse;">
+               <br>
+               <br>
                   <tr>
                     <td style="text-align: center; border-top: 1px solid #000; padding-top: 15px;">
                       <strong>Authorized Signatory</strong><br>
@@ -1767,7 +1767,11 @@ const handlePrintSupplier = useCallback((supplier) => {
                       <span style="font-size: 9px;">(Management)</span>
                     </td>
                   </tr>
+                  
                 </table>
+
+                <div style="margin-top: 5px;">Generated: ${moment().format('DD/MM/YYYY HH:mm')} | Form ID: ${fullData.supplier_id}</div>
+              
               </div>
             </td>
           </tr>
