@@ -487,6 +487,15 @@ const ExternalProviderAudit = () => {
                                     QR
                                 </button>
                             </Tippy>
+                              <Tippy content="View CAPA">
+                                <button 
+                                    onClick={() => navigate(`/capa`)}
+                                    className="flex items-center px-3 py-1.5 bg-purple-50 text-purple-700 hover:bg-purple-100 rounded-lg transition-colors text-sm"
+                                >
+                                    <IconFilter className="w-4 h-4 mr-1.5" />
+                                   CAPA
+                                </button>
+                            </Tippy>
                         </div>
 
                         <div className="flex space-x-2">

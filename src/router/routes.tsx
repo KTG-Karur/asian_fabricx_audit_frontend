@@ -31,6 +31,7 @@ import {
     Maintenence,
     LoginBoxed,
     Audit,
+    Capa,
     Suppliers,
     PrintEnquiry,
     EnquiryReport,
@@ -38,6 +39,7 @@ import {
     AuditFormPdf,
     AuditReSchedule,
 } from './Route_Menu';
+import path from 'path';
 
 const loading = () => <div className=""></div>;
 
@@ -287,6 +289,10 @@ const routes = [
     {
         path: '/audit/external-provider',
         element: <Audit />,
+    },
+    {
+     path: '/capa',
+     element : <Capa />,
     },
     //old
     {

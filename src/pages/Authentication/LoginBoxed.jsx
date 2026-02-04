@@ -11,6 +11,9 @@ import IconBuilding from '../../components/Icon/IconBuilding';
 import IconUser from '../../components/Icon/IconUser';
 import IconEye from '../../components/Icon/IconEye';
 import IconEyeOff from '../../components/Icon/IconEyeOff';
+import IconShield from '../../components/Icon/IconShield';
+import IconChecklist from '../../components/Icon/IconChecks';
+import IconFactory from '../../components/Icon/IconBuilding';
 import { getLogin, resetLoginStatus } from '../../redux/loginSlice';
 import { showMessage } from '../../util/AllFunction';
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
@@ -39,7 +42,7 @@ const LoginBoxed = () => {
     const desktopFormRef = useRef(null);
 
     useEffect(() => {
-        dispatch(setPageTitle('ERP System Login'));
+        dispatch(setPageTitle('Supplier Compliance Audit System'));
     }, [dispatch]);
 
     useEffect(() => {
@@ -66,7 +69,7 @@ const LoginBoxed = () => {
                     currentFormRef.classList.remove('shake-animation');
                 }, 500);
             }
-            showMessage('error', error || 'Login Failed');
+            showMessage('error', error || 'Authentication Failed');
         }
     }, [getLoginSuccess, getLoginFailed, loginData, error, navigate]);
 
@@ -114,7 +117,7 @@ const LoginBoxed = () => {
             <div
                 className="fixed inset-0 -z-10"
                 style={{
-                    background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #3730a3 100%)',
+                    background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 30%, #1e40af 70%, #3730a3 100%)',
                     width: '100vw',
                     height: '100vh',
                     margin: 0,
@@ -122,24 +125,34 @@ const LoginBoxed = () => {
                 }}
             ></div>
 
-            {/* Corporate Pattern Background */}
+            {/* Audit Pattern Background */}
             <div
                 className="fixed inset-0 opacity-10 -z-5"
                 style={{
-                    backgroundImage: `radial-gradient(circle at 25px 25px, rgba(255,255,255,0.2) 2%, transparent 40%), 
-                                    radial-gradient(circle at 75px 75px, rgba(255,255,255,0.1) 2%, transparent 40%)`,
-                    backgroundSize: '100px 100px',
+                    backgroundImage: `radial-gradient(circle at 2px 2px, rgba(255,255,255,0.15) 1px, transparent 0)`,
+                    backgroundSize: '40px 40px',
                     width: '100vw',
                     height: '100vh',
                 }}
             ></div>
 
-            {/* Geometric shapes for corporate feel */}
+            {/* Grid lines for audit sheet feel */}
+            <div className="fixed inset-0 overflow-hidden -z-5 opacity-5">
+                <div className="absolute inset-0" style={{
+                    backgroundImage: `
+                        linear-gradient(90deg, transparent 99%, rgba(255,255,255,0.3) 99%),
+                        linear-gradient(0deg, transparent 99%, rgba(255,255,255,0.3) 99%)
+                    `,
+                    backgroundSize: '20px 20px',
+                }}></div>
+            </div>
+
+            {/* Audit-themed geometric shapes */}
             <div className="fixed inset-0 overflow-hidden -z-5">
-                <div className="absolute top-20 left-10 w-32 h-32 bg-blue-600/10 rounded-full blur-xl"></div>
-                <div className="absolute bottom-20 right-10 w-40 h-40 bg-indigo-600/10 rounded-full blur-xl"></div>
-                <div className="absolute top-1/2 left-1/4 w-24 h-24 bg-white/5 rounded-lg blur-lg rotate-45"></div>
-                <div className="absolute bottom-40 right-1/4 w-20 h-20 bg-blue-500/10 rounded-lg blur-lg -rotate-45"></div>
+                <div className="absolute top-20 left-10 w-32 h-32 bg-blue-600/5 rounded-full blur-xl"></div>
+                <div className="absolute bottom-20 right-10 w-40 h-40 bg-indigo-600/5 rounded-full blur-xl"></div>
+                <div className="absolute top-1/3 right-1/4 w-16 h-16 bg-green-500/5 rounded-lg blur-lg rotate-12"></div>
+                <div className="absolute bottom-1/3 left-1/4 w-24 h-24 bg-yellow-500/5 rounded-lg blur-lg -rotate-12"></div>
             </div>
 
             {/* Main Content Container */}
@@ -148,14 +161,16 @@ const LoginBoxed = () => {
                 <div className="block lg:hidden w-full max-w-md">
                     {/* Mobile Header */}
                     <div className="text-center mb-8">
-                        {/* <div className="flex justify-center mb-6">
-                            <img style={{ width: '180px', height: '36px' }} className="flex-none drop-shadow-2xl filter brightness-110" src="/assets/images/Asian logo_02.png" alt="logo" />
-                        </div> */}
-                        <h1 className="text-2xl font-bold text-white mb-2">Event Management</h1>
-                        <p className="text-blue-200 text-sm">ERP Platform</p>
+                        <div className="flex justify-center mb-4">
+                            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center shadow-lg">
+                                <IconShield className="w-8 h-8 text-white" />
+                            </div>
+                        </div>
+                        <h1 className="text-2xl font-bold text-white mb-2">Supplier Compliance Audit</h1>
+                        <p className="text-blue-200 text-sm">Enterprise Audit Management System</p>
                     </div>
 
-                    {/* Mobile SVG - Smaller for mobile */}
+                    {/* Mobile Lottie Animation */}
                     <div className="flex justify-center mb-6">
                         <div className="w-64 h-52 flex items-center justify-center">
                             <DotLottieReact src="/Data Management.lottie" loop autoplay />
@@ -164,14 +179,24 @@ const LoginBoxed = () => {
 
                     {/* Mobile Features */}
                     <div className="bg-white/10 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-white/20">
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             <div className="flex items-center space-x-3">
-                                <div className="w-2 h-2 bg-green-400 rounded-full flex-shrink-0"></div>
-                                <span className="text-blue-100 text-sm">Event Entry Tracking</span>
+                                <div className="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
+                                    <IconFactory className="w-5 h-5 text-green-400" />
+                                </div>
+                                <div>
+                                    <div className="text-white font-medium">Supplier Audits</div>
+                                    <div className="text-blue-100 text-sm">Comprehensive factory inspections</div>
+                                </div>
                             </div>
                             <div className="flex items-center space-x-3">
-                                <div className="w-2 h-2 bg-green-400 rounded-full flex-shrink-0"></div>
-                                <span className="text-blue-100 text-sm">Record Management</span>
+                                <div className="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                                    <IconChecklist className="w-5 h-5 text-blue-400" />
+                                </div>
+                                <div>
+                                    <div className="text-white font-medium">CAPA Management</div>
+                                    <div className="text-blue-100 text-sm">Corrective & Preventive Actions</div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -181,19 +206,25 @@ const LoginBoxed = () => {
                         ref={mobileFormRef}
                         className="relative w-full rounded-2xl border border-white/20 bg-white/95 backdrop-blur-xl p-6 shadow-2xl transition-all duration-500"
                         style={{
-                            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.1)',
+                            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15)',
                         }}
                     >
                         <div className="mb-8 text-center">
                             <div className="flex justify-center mb-4">
-                                <img style={{ width: '200px', height: '40px' }} className="flex-none drop-shadow-2xl filter brightness-110" src="/assets/images/Asian logo_02.png" alt="logo" />
+                                <img 
+                                    style={{ width: '200px', height: '40px' }} 
+                                    className="flex-none drop-shadow-2xl filter brightness-110" 
+                                    src="/assets/images/Asian logo_02.png" 
+                                    alt="logo" 
+                                />
                             </div>
-                            <p className="text-gray-600 text-sm">Enter your credentials to access the event management system</p>
+                            <p className="text-gray-600 text-sm">Enter credentials for Audit System access</p>
                         </div>
                         <form className="space-y-5" onSubmit={submitForm}>
                             {/* Username Field */}
                             <div className="space-y-2">
-                                <label htmlFor="mobile-username" className="block text-sm font-semibold text-gray-700">
+                                <label htmlFor="mobile-username" className="block text-sm font-semibold text-gray-700 flex items-center">
+                                    <IconUser className="w-4 h-4 mr-2 text-gray-500" />
                                     Username
                                 </label>
                                 <div className="relative">
@@ -204,7 +235,7 @@ const LoginBoxed = () => {
                                         onChange={(e) => setUsername(e.target.value)}
                                         onFocus={() => handleFocus('username')}
                                         onBlur={() => handleBlur('username')}
-                                        placeholder="Enter your username"
+                                        placeholder="Auditor / Admin username"
                                         className="w-full rounded-xl border border-gray-300 bg-white px-12 py-3 text-gray-800 placeholder-gray-500 shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:shadow-lg text-base outline-none"
                                     />
                                     <span className="absolute start-4 top-1/2 -translate-y-1/2 text-gray-400">
@@ -215,7 +246,8 @@ const LoginBoxed = () => {
 
                             {/* Password Field */}
                             <div className="space-y-2">
-                                <label htmlFor="mobile-password" className="block text-sm font-semibold text-gray-700">
+                                <label htmlFor="mobile-password" className="block text-sm font-semibold text-gray-700 flex items-center">
+                                    <IconLockDots className="w-4 h-4 mr-2 text-gray-500" />
                                     Password
                                 </label>
                                 <div className="relative">
@@ -226,7 +258,7 @@ const LoginBoxed = () => {
                                         onChange={(e) => setPassword(e.target.value)}
                                         onFocus={() => handleFocus('password')}
                                         onBlur={() => handleBlur('password')}
-                                        placeholder="Enter your password"
+                                        placeholder="Enter secure password"
                                         className="w-full rounded-xl border border-gray-300 bg-white px-12 py-3 text-gray-800 placeholder-gray-500 shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:shadow-lg text-base outline-none"
                                     />
                                     <span className="absolute start-4 top-1/2 -translate-y-1/2 text-gray-400">
@@ -246,7 +278,7 @@ const LoginBoxed = () => {
                             <button
                                 type="submit"
                                 disabled={isLoading}
-                                className={`w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-700 py-3 font-semibold text-white shadow-lg transition-all duration-300 transform hover:shadow-xl hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${
+                                className={`w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-700 py-3 font-semibold text-white shadow-lg transition-all duration-300 transform hover:shadow-xl hover:from-blue-700 hover:to-indigo-800 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${
                                     isLoading ? 'animate-pulse' : ''
                                 }`}
                             >
@@ -256,7 +288,10 @@ const LoginBoxed = () => {
                                         <span>Authenticating...</span>
                                     </div>
                                 ) : (
-                                    'Access System'
+                                    <div className="flex items-center justify-center space-x-2">
+                                        <IconShield className="w-5 h-5" />
+                                        <span>Access Audit System</span>
+                                    </div>
                                 )}
                             </button>
                         </form>
@@ -264,46 +299,96 @@ const LoginBoxed = () => {
                         {/* Security Notice */}
                         <div className="mt-6 pt-4 border-t border-gray-200">
                             <div className="flex items-center justify-center space-x-2 text-xs text-gray-500">
-                                <IconLockDots className="w-4 h-4" />
-                                <span>Enterprise-grade security</span>
+                                <IconShield className="w-4 h-4" />
+                                <span>ISO 27001 Compliant Security</span>
                             </div>
                         </div>
 
                         {/* Version Info */}
                         <div className="mt-4 text-center">
-                            <p className="text-xs text-gray-400">v3.2.1 • Production</p>
+                            <p className="text-xs text-gray-400">Audit System v3.0 • Production</p>
                         </div>
                     </div>
                 </div>
 
                 {/* Desktop: Two Column Layout */}
-                <div className="hidden lg:grid grid-cols-1 lg:grid-cols-2 gap-8 w-full max-w-6xl items-center">
-                    {/* Left Side - Corporate Branding with Larger SVG */}
-                    <div className="flex flex-col justify-center text-white space-y-6 p-8">
-                        <div className="space-y-4">
-                            <h2 className="text-3xl font-bold leading-tight text-center">
-                                Event Management <br />
-                                <span className="text-blue-300">ERP Platform</span>
-                            </h2>
-                            {/* Larger Lottie Image */}
-                            <div className="flex justify-center mb-6">
-                                    <DotLottieReact src="/Data Management.lottie" loop autoplay className="w-full h-full" />
+                <div className="hidden lg:grid grid-cols-1 lg:grid-cols-2 gap-12 w-full max-w-6xl items-center">
+                    {/* Left Side - Audit System Introduction */}
+                    <div className="flex flex-col justify-center text-white space-y-8 p-8">
+                        <div className="space-y-6">
+                            <div className="flex items-center space-x-4">
+                                <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center shadow-xl">
+                                    <IconShield className="w-10 h-10 text-white" />
+                                </div>
+                                <div>
+                                    <h1 className="text-4xl font-bold leading-tight">
+                                        Supplier Compliance
+                                        <br />
+                                        <span className="text-blue-300">Audit System</span>
+                                    </h1>
+                                    <p className="text-blue-100 text-lg mt-2">Enterprise-grade compliance management</p>
+                                </div>
                             </div>
 
-                            <p className="text-md text-blue-100 leading-relaxed text-center">
-                                Streamline your event operations with our comprehensive ERP solution for record management and workflow automation.
+                            {/* Audit System Lottie */}
+                            <div className="flex justify-center mb-6">
+                                <div className="w-full h-64">
+                                   <DotLottieReact src="/Data Management.lottie" loop autoplay className="w-full h-full" />
+
+                                </div>
+                            </div>
+
+                            <p className="text-lg text-blue-100 leading-relaxed">
+                                Comprehensive audit management platform for supplier compliance, 
+                                CAPA tracking, and regulatory adherence across your supply chain.
                             </p>
                         </div>
 
-                        {/* Features List */}
-                        <div className="space-y-3">
-                            <div className="flex items-center space-x-3">
-                                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                                <span className="text-blue-100">Event Entry Tracking</span>
+                        {/* Features Grid */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                                <div className="flex items-center space-x-3">
+                                    <div className="w-12 h-12 rounded-lg bg-green-500/20 flex items-center justify-center">
+                                        <IconFactory className="w-6 h-6 text-green-400" />
+                                    </div>
+                                    <div>
+                                        <div className="text-white font-semibold">Factory Audits</div>
+                                        <div className="text-blue-100 text-xs">On-site inspections</div>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="flex items-center space-x-3">
-                                <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                                <span className="text-blue-100">Record Management</span>
+                            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                                <div className="flex items-center space-x-3">
+                                    <div className="w-12 h-12 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                                        <IconChecklist className="w-6 h-6 text-blue-400" />
+                                    </div>
+                                    <div>
+                                        <div className="text-white font-semibold">CAPA Tracking</div>
+                                        <div className="text-blue-100 text-xs">Action management</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                                <div className="flex items-center space-x-3">
+                                    <div className="w-12 h-12 rounded-lg bg-purple-500/20 flex items-center justify-center">
+                                        <IconShield className="w-6 h-6 text-purple-400" />
+                                    </div>
+                                    <div>
+                                        <div className="text-white font-semibold">Standards</div>
+                                        <div className="text-blue-100 text-xs">IWAY, BSCI, ISO</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="bg-white/10 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                                <div className="flex items-center space-x-3">
+                                    <div className="w-12 h-12 rounded-lg bg-yellow-500/20 flex items-center justify-center">
+                                        <div className="text-lg">📊</div>
+                                    </div>
+                                    <div>
+                                        <div className="text-white font-semibold">Reporting</div>
+                                        <div className="text-blue-100 text-xs">Analytics & insights</div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -314,21 +399,28 @@ const LoginBoxed = () => {
                             ref={desktopFormRef}
                             className="relative w-full max-w-md rounded-2xl border border-white/20 bg-white/95 backdrop-blur-xl p-8 shadow-2xl transition-all duration-500"
                             style={{
-                                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.1)',
+                                boxShadow: '0 20px 60px rgba(0, 0, 0, 0.15)',
                             }}
                         >
-                            {/* Form Header with Company Logo */}
+                            {/* Form Header */}
                             <div className="mb-8 text-center">
                                 <div className="flex justify-center mb-4">
-                                    <img style={{ width: '200px', height: '40px' }} className="flex-none drop-shadow-2xl filter brightness-110" src="/assets/images/Asian logo_02.png" alt="logo" />
+                                    <img 
+                                        style={{ width: '220px', height: '45px' }} 
+                                        className="flex-none drop-shadow-2xl filter brightness-110" 
+                                        src="/assets/images/Asian logo_02.png" 
+                                        alt="logo" 
+                                    />
                                 </div>
-                                <p className="text-gray-600 text-sm">Enter your credentials to access the event management system</p>
+                                <h2 className="text-xl font-bold text-gray-800 mb-2">Audit System Login</h2>
+                                <p className="text-gray-600 text-sm">Secure access to compliance management platform</p>
                             </div>
 
                             <form className="space-y-6" onSubmit={submitForm}>
                                 {/* Username Field */}
                                 <div className="space-y-2">
-                                    <label htmlFor="desktop-username" className="block text-sm font-semibold text-gray-700">
+                                    <label htmlFor="desktop-username" className="block text-sm font-semibold text-gray-700 flex items-center">
+                                        <IconUser className="w-4 h-4 mr-2 text-gray-500" />
                                         Username
                                     </label>
                                     <div className="relative">
@@ -339,7 +431,7 @@ const LoginBoxed = () => {
                                             onChange={(e) => setUsername(e.target.value)}
                                             onFocus={() => handleFocus('username')}
                                             onBlur={() => handleBlur('username')}
-                                            placeholder="Enter your username"
+                                            placeholder="Enter auditor/admin username"
                                             className="w-full rounded-xl border border-gray-300 bg-white px-12 py-4 text-gray-800 placeholder-gray-500 shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:shadow-lg text-base outline-none"
                                         />
                                         <span className="absolute start-4 top-1/2 -translate-y-1/2 text-gray-400">
@@ -350,7 +442,8 @@ const LoginBoxed = () => {
 
                                 {/* Password Field */}
                                 <div className="space-y-2">
-                                    <label htmlFor="desktop-password" className="block text-sm font-semibold text-gray-700">
+                                    <label htmlFor="desktop-password" className="block text-sm font-semibold text-gray-700 flex items-center">
+                                        <IconLockDots className="w-4 h-4 mr-2 text-gray-500" />
                                         Password
                                     </label>
                                     <div className="relative">
@@ -361,7 +454,7 @@ const LoginBoxed = () => {
                                             onChange={(e) => setPassword(e.target.value)}
                                             onFocus={() => handleFocus('password')}
                                             onBlur={() => handleBlur('password')}
-                                            placeholder="Enter your password"
+                                            placeholder="Enter secure password"
                                             className="w-full rounded-xl border border-gray-300 bg-white px-12 py-4 text-gray-800 placeholder-gray-500 shadow-sm transition-all duration-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:shadow-lg text-base outline-none"
                                         />
                                         <span className="absolute start-4 top-1/2 -translate-y-1/2 text-gray-400">
@@ -377,36 +470,32 @@ const LoginBoxed = () => {
                                     </div>
                                 </div>
 
+                               
                                 {/* Submit Button */}
                                 <button
                                     type="submit"
                                     disabled={isLoading}
-                                    className={`w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-700 py-4 font-semibold text-white shadow-lg transition-all duration-300 transform hover:shadow-xl hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${
+                                    className={`w-full rounded-xl bg-gradient-to-r from-blue-600 to-indigo-700 py-4 font-semibold text-white shadow-lg transition-all duration-300 transform hover:shadow-xl hover:from-blue-700 hover:to-indigo-800 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${
                                         isLoading ? 'animate-pulse' : ''
                                     }`}
                                 >
                                     {isLoading ? (
                                         <div className="flex items-center justify-center space-x-2">
-                                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                                            <span>Authenticating...</span>
+                                            <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                            <span className="text-lg">Authenticating...</span>
                                         </div>
                                     ) : (
-                                        'Access System'
+                                        <div className="flex items-center justify-center space-x-3">
+                                            <IconShield className="w-6 h-6" />
+                                            <span className="text-lg">Access Audit Dashboard</span>
+                                        </div>
                                     )}
                                 </button>
-                            </form>
-
-                            {/* Security Notice */}
-                            <div className="mt-8 pt-6 border-t border-gray-200">
-                                <div className="flex items-center justify-center space-x-2 text-xs text-gray-500">
-                                    <IconLockDots className="w-4 h-4" />
-                                    <span>Enterprise-grade security & compliance</span>
-                                </div>
-                            </div>
-
+                            </form>                          
                             {/* Version Info */}
                             <div className="mt-4 text-center">
-                                <p className="text-xs text-gray-400">V.1.0 • KTGT Production</p>
+                                <p className="text-xs text-gray-400">Supplier Compliance Audit System v3.0 • Asian Fabricx Pvt Ltd</p>
+                                <p className="text-xs text-gray-400 mt-1">© 2024 All rights reserved</p>
                             </div>
                         </div>
                     </div>
@@ -467,6 +556,14 @@ const LoginBoxed = () => {
                     button {
                         min-height: 44px; /* Minimum touch target size */
                     }
+                }
+
+                /* Audit-style grid background */
+                .audit-grid {
+                    background-image: 
+                        linear-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+                    background-size: 20px 20px;
                 }
             `}</style>
         </div>

@@ -635,8 +635,8 @@ function Suppliers() {
           { id: 3, si_no: 3, category: 'Supervision', male_count: 5, female_count: 2, total_numbers: 7 },
         ],
         customerStandards: [
-          { id: 1, standard_id: 1, standard_name: 'IWAY Standard 6.0', customer_type: 'ASIAN', acceptance_date: '2024-01-15', status: 'accepted' },
-          { id: 2, standard_id: 2, standard_name: 'BSCI Code of Conduct', customer_type: 'Other', customer_name: 'Brand X', acceptance_date: '2024-02-20', status: 'pending' },
+          { id: 1, standard_id: 1, standard_name: 'IWAY Standard 6.0', acceptance_date: '2024-01-15' },
+          { id: 2, standard_id: 2, standard_name: 'BSCI Code of Conduct', acceptance_date: '2024-02-20'},
         ],
         selfAssessment: [
           { id: 1, item_id: 1, particulars: 'Factory has proper fire safety equipment', details: 'All fire extinguishers are checked monthly', status: 'yes' },
@@ -995,10 +995,7 @@ function Suppliers() {
         id: uuidv4(),
         standard_id: standard.id,
         standard_name: standard.name,
-        customer_type: '',
-        customer_name: '',
         acceptance_date: '',
-        status: 'pending',
         details: '',
       }));
 
@@ -1158,10 +1155,7 @@ const handlePrintSupplier = useCallback((supplier) => {
         <tr>
           <td style="text-align: center; vertical-align: top;">${index + 1}</td>
           <td style="vertical-align: top;">${item.standard_name || ''}</td>
-          <td style="vertical-align: top;">${item.customer_type || ''}</td>
-          <td style="vertical-align: top;">${item.customer_name || ''}</td>
           <td style="vertical-align: top;">${item.acceptance_date || ''}</td>
-          <td style="text-align: center; vertical-align: top;">${item.status || ''}</td>
         </tr>
       `).join('')
     : `<tr><td style="text-align: center;">1</td><td></td><td></td><td></td><td></td><td style="text-align: center;"></td></tr>
@@ -1423,7 +1417,7 @@ const handlePrintSupplier = useCallback((supplier) => {
             <td colspan="2" class="company-name">ASIAN FABRICS PRIVATE LIMITED</td>
           </tr>
           <tr>
-            <td colspan="2" class="form-title">SUPPLIER REGISTRATION FORM</td>
+            <td colspan="2" class="form-title">SUPPLIER PROFILE</td>
           </tr>
           <tr class="supplier-info">
             <td class="label-cell">SUPPLIER NAME:</td>
@@ -1728,15 +1722,12 @@ const handlePrintSupplier = useCallback((supplier) => {
         <!-- SECTION 9: CUSTOMER STANDARDS -->
         <table class="section-table">
           <tr>
-            <td colspan="6" class="section-title">9. CUSTOMER STANDARDS COMMUNICATED</td>
+            <td colspan="6" class="section-title">9. LIST OF CUSTOMER STANDARDS COMMUNICATED</td>
           </tr>
           <tr>
             <th class="col-sno">SI No</th>
-            <th class="col-standard">Standard Name</th>
-            <th class="col-customer">Customer Type</th>
-            <th class="col-customer">Customer Name</th>
-            <th class="col-date">Acceptance Date</th>
-            <th class="col-status">Status</th>
+            <th class="col-standard">Customer / Other Standards communicated by ASIAN</th>
+            <th class="col-date">Date of Acceptance by the suppliers</th>
           </tr>
           ${standardsRows}
         </table>

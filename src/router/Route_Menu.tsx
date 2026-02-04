@@ -114,6 +114,7 @@ export const Department = lazy(() => import('../view/master/department'));
 export const Designation = lazy(() => import('../view/master/designation'));
 export const AuditAssignToAuditor = lazy(() => import('../view/master/auditAssignToAuditor'));
 export const Audit = lazy(() => import('../view/audit'));
+export const Capa = lazy(() => import('../view/capaManagement'));
 export const Suppliers = lazy(() => import('../view/master/suppliers/Index'));
 
 //new of asf ev
