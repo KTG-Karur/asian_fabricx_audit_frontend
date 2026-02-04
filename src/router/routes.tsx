@@ -41,6 +41,7 @@ import {
     PdfSubAuditChecklistBarChart,
     PdfSubAuditChecklistImages,
     AuditReportPdf,
+    AuditorReport,
 } from './Route_Menu';
 import path from 'path';
 
@@ -267,6 +268,10 @@ const routes = [
     {
         path: '/reports/audit-report',
         element: <AuditReport />,
+    },
+    {
+        path: '/reports/auditor-report',
+        element: <AuditorReport />,
     },
     //old
     {
