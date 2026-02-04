@@ -21,10 +21,136 @@ const AuditReportPaper = () => {
 
     const handlePrint = () => {
         setIsPrinting(true);
-        setTimeout(() => {
-            window.print();
-            setIsPrinting(false);
-        }, 100);
+        
+        // Get the printable content
+        const printContent = document.getElementById('audit-report-to-print').innerHTML;
+        
+        // Open print window
+        const printWindow = window.open('', '_blank');
+        printWindow.document.write(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <title>Audit Report - ${auditData?.auditId || 'Report'}</title>
+                <style>
+                    @page {
+                        size: A4 portrait;
+                        margin: 15mm;
+                    }
+                    
+                    body {
+                        margin: 0;
+                        padding: 15mm;
+                        font-family: 'Times New Roman', serif;
+                        font-size: 11px;
+                        line-height: 1.2;
+                        background: white;
+                    }
+                    
+                    table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-bottom: 10px;
+                        page-break-inside: avoid;
+                    }
+                    
+                    th, td {
+                        border: 1px solid #000;
+                        padding: 3px 5px;
+                        vertical-align: top;
+                    }
+                    
+                    th {
+                        font-weight: bold;
+                        text-align: center;
+                        background-color: #f5f5f5;
+                    }
+                    
+                    .text-center {
+                        text-align: center;
+                    }
+                    
+                    .text-left {
+                        text-align: left;
+                    }
+                    
+                    .text-right {
+                        text-align: right;
+                    }
+                    
+                    .font-bold {
+                        font-weight: bold;
+                    }
+                    
+                    .border-b {
+                        border-bottom: 1px solid #000;
+                    }
+                    
+                    .border-t {
+                        border-top: 1px solid #000;
+                    }
+                    
+                    .mb-4 {
+                        margin-bottom: 16px;
+                    }
+                    
+                    .mt-6 {
+                        margin-top: 24px;
+                    }
+                    
+                    .pb-3 {
+                        padding-bottom: 12px;
+                    }
+                    
+                    .pt-2 {
+                        padding-top: 8px;
+                    }
+                    
+                    .py-8 {
+                        padding-top: 32px;
+                        padding-bottom: 32px;
+                    }
+                    
+                    .inline-block {
+                        display: inline-block;
+                    }
+                    
+                    .bg-gray-50 {
+                        background-color: #f9fafb;
+                    }
+                    
+                    .bg-white {
+                        background-color: white;
+                    }
+                    
+                    .w-full {
+                        width: 100%;
+                    }
+                    
+                    .mx-auto {
+                        margin-left: auto;
+                        margin-right: auto;
+                    }
+                </style>
+            </head>
+            <body>
+                ${printContent}
+                <script>
+                    // Auto print after loading
+                    window.onload = function() {
+                        setTimeout(function() {
+                            window.print();
+                            window.onafterprint = function() {
+                                window.close();
+                            };
+                        }, 500);
+                    };
+                </script>
+            </body>
+            </html>
+        `);
+        printWindow.document.close();
+        setIsPrinting(false);
     };
 
     const handleBack = () => {
@@ -107,27 +233,34 @@ const AuditReportPaper = () => {
     }
 
     return (
-        <div className="p-4 bg-white min-h-screen d-print-none">
-            <div id="audit-report-to-print" className="bg-white mx-auto" style={{ 
-                width: '210mm',
-                minHeight: '297mm',
-                padding: '15mm',
-                fontFamily: 'Times New Roman, serif',
-                fontSize: '11px',
-                lineHeight: '1.2'
-            }}>
+        <div className="p-4 bg-gray-100 min-h-screen">
+            {/* Printable Area - Using inline styles to avoid CSS conflicts */}
+            <div 
+                id="audit-report-to-print"
+                style={{
+                    width: '210mm',
+                    minHeight: '297mm',
+                    padding: '15mm',
+                    fontFamily: '"Times New Roman", serif',
+                    fontSize: '11px',
+                    lineHeight: '1.2',
+                    backgroundColor: 'white',
+                    margin: '0 auto',
+                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                }}
+            >
                 {/* Header */}
-                <div className="text-center mb-4 border-b border-black pb-3">
-                    <h1 className="text-lg font-bold mb-3" style={{ fontSize: '18px' }}>
+                <div style={{ textAlign: 'center', marginBottom: '16px', borderBottom: '1px solid #000', paddingBottom: '12px' }}>
+                    <h1 style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '12px' }}>
                         ASIAN FABRICX - SUB SUPPLIER AUDIT REPORT
                     </h1>
-                    <div className="flex justify-between text-xs mb-2">
-                        <div className="text-left">
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', marginBottom: '8px' }}>
+                        <div style={{ textAlign: 'left' }}>
                             <div><strong>Supplier Name:</strong> {auditData?.supplierName || 'N/A'}</div>
                             <div><strong>Supplier Type:</strong> {auditData?.supplierType || 'N/A'}</div>
                             <div><strong>Location:</strong> {auditData?.location || 'N/A'}</div>
                         </div>
-                        <div className="text-right">
+                        <div style={{ textAlign: 'right' }}>
                             <div><strong>Audit Date:</strong> {auditData ? moment(auditData.auditDate).format('DD/MM/YYYY') : 'N/A'}</div>
                             <div><strong>Auditor:</strong> {auditData?.auditorName || 'N/A'}</div>
                             <div><strong>Report ID:</strong> {auditData?.auditId || 'AUD-REPORT'}</div>
@@ -136,143 +269,130 @@ const AuditReportPaper = () => {
                     </div>
                     
                     {/* Highlighted Total Applicable Requirements */}
-                    <div className="mt-2 py-1 px-3 inline-block ">
-                        <strong>Total Applicable Requirements: <span style={{ backgroundColor: 'yellow' }}>{summary.totalApplicable}</span></strong>
+                    <div style={{ marginTop: '8px', padding: '4px 12px', display: 'inline-block' }}>
+                        <strong>Total Applicable Requirements: <span style={{ backgroundColor: '#ffff00', padding: '2px 6px' }}>{summary.totalApplicable}</span></strong>
                     </div>
                 </div>
 
                 {/* Main Audit Table */}
-                <table className="w-full border-collapse border border-black mb-4 text-xs">
+                <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #000', marginBottom: '16px', fontSize: '11px' }}>
                     <thead>
-                        <tr className="bg-gray-50">
-                            <th className="border border-black p-1 text-center font-bold" style={{ width: '5%' }}>S.No</th>
-                            <th className="border border-black p-1 text-left font-bold" style={{ width: '45%' }}>Requirements</th>
-                            <th className="border border-black p-1 text-center font-bold" style={{ width: '25%' }} colSpan="3">
+                        <tr style={{ backgroundColor: '#f9fafb' }}>
+                            <th style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'center', fontWeight: 'bold', width: '5%' }}>S.No</th>
+                            <th style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'left', fontWeight: 'bold', width: '45%' }}>Requirements</th>
+                            <th style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'center', fontWeight: 'bold', width: '25%' }} colSpan="3">
                                 Basic
-                                <div className="font-normal" style={{ fontSize: '10px', marginTop: '2px' }}>
+                                <div style={{ fontWeight: 'normal', fontSize: '10px', marginTop: '2px' }}>
                                     OK &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Not OK &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; N/A
                                 </div>
                             </th>
-                            <th className="border border-black p-1 text-center font-bold" style={{ width: '8%' }}>Total</th>
-                            <th className="border border-black p-1 text-center font-bold" style={{ width: '8%' }}>%</th>
+                            <th style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'center', fontWeight: 'bold', width: '8%' }}>Total</th>
+                            <th style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'center', fontWeight: 'bold', width: '8%' }}>%</th>
                         </tr>
                     </thead>
                     <tbody>
                         {categoryData.map((item) => (
                             <tr key={item.sNo}>
-                                <td className="border border-black p-1 text-center">{item.sNo}</td>
-                                <td className="border border-black p-1">{item.requirement}</td>
-                                <td className="border border-black p-1 text-center">{item.ok}</td>
-                                <td className="border border-black p-1 text-center">{item.notOk}</td>
-                                <td className="border border-black p-1 text-center">{item.na}</td>
-                                <td className="border border-black p-1 text-center">{item.total}</td>
-                                <td className="border border-black p-1 text-center">{item.percentage}%</td>
+                                <td style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'center' }}>{item.sNo}</td>
+                                <td style={{ border: '1px solid #000', padding: '3px 5px' }}>{item.requirement}</td>
+                                <td style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'center' }}>{item.ok}</td>
+                                <td style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'center' }}>{item.notOk}</td>
+                                <td style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'center' }}>{item.na}</td>
+                                <td style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'center' }}>{item.total}</td>
+                                <td style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'center' }}>{item.percentage}%</td>
                             </tr>
                         ))}
                         
                         {/* Summary Row */}
-                        <tr className="font-bold">
-                            <td className="border border-black p-1 text-center" colSpan="2">TOTAL</td>
-                            <td className="border border-black p-1 text-center">{summary.totalOk}</td>
-                            <td className="border border-black p-1 text-center">{summary.totalNotOk}</td>
-                            <td className="border border-black p-1 text-center">{summary.totalNA}</td>
-                            <td className="border border-black p-1 text-center">{summary.totalItems}</td>
-                            <td className="border border-black p-1 text-center">{summary.overallPercentage}%</td>
+                        <tr style={{ fontWeight: 'bold' }}>
+                            <td style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'center' }} colSpan="2">TOTAL</td>
+                            <td style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'center' }}>{summary.totalOk}</td>
+                            <td style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'center' }}>{summary.totalNotOk}</td>
+                            <td style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'center' }}>{summary.totalNA}</td>
+                            <td style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'center' }}>{summary.totalItems}</td>
+                            <td style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'center' }}>{summary.overallPercentage}%</td>
                         </tr>
                     </tbody>
                 </table>
 
                 {/* Compliance Summary Table */}
-                <table className="w-full border-collapse border border-black mb-4 text-xs">
+                <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid #000', marginBottom: '16px', fontSize: '11px' }}>
                     <thead>
-                        <tr className="bg-gray-50">
-                            <th className="border border-black p-1 text-center font-bold" colSpan="6">COMPLIANCE SUMMARY</th>
+                        <tr style={{ backgroundColor: '#f9fafb' }}>
+                            <th style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'center', fontWeight: 'bold' }} colSpan="6">COMPLIANCE SUMMARY</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td className="border border-black p-1 text-left"><strong>Total OK Items:</strong></td>
-                            <td className="border border-black p-1 text-center">{summary.totalOk}</td>
-                            <td className="border border-black p-1 text-left"><strong>Total Not OK Items:</strong></td>
-                            <td className="border border-black p-1 text-center">{summary.totalNotOk}</td>
-                            <td className="border border-black p-1 text-left"><strong>Total N/A Items:</strong></td>
-                            <td className="border border-black p-1 text-center">{summary.totalNA}</td>
+                            <td style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'left' }}><strong>Total OK Items:</strong></td>
+                            <td style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'center' }}>{summary.totalOk}</td>
+                            <td style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'left' }}><strong>Total Not OK Items:</strong></td>
+                            <td style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'center' }}>{summary.totalNotOk}</td>
+                            <td style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'left' }}><strong>Total N/A Items:</strong></td>
+                            <td style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'center' }}>{summary.totalNA}</td>
                         </tr>
                         <tr>
-                            <td className="border border-black p-1 text-left"><strong>Total Items Checked:</strong></td>
-                            <td className="border border-black p-1 text-center">{summary.totalItems}</td>
-                            <td className="border border-black p-1 text-left"><strong>Total Applicable Requirements:</strong></td>
-                            <td className="border border-black p-1 text-center">{summary.totalApplicable}</td>
-                            <td className="border border-black p-1 text-left"><strong>Overall Compliance Rate:</strong></td>
-                            <td className="border border-black p-1 text-center">{summary.overallPercentage}%</td>
+                            <td style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'left' }}><strong>Total Items Checked:</strong></td>
+                            <td style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'center' }}>{summary.totalItems}</td>
+                            <td style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'left' }}><strong>Total Applicable Requirements:</strong></td>
+                            <td style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'center' }}>{summary.totalApplicable}</td>
+                            <td style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'left' }}><strong>Overall Compliance Rate:</strong></td>
+                            <td style={{ border: '1px solid #000', padding: '3px 5px', textAlign: 'center' }}>{summary.overallPercentage}%</td>
                         </tr>
                     </tbody>
                 </table>
 
                 {/* Footer */}
-                <div className="mt-6 pt-2 border-t border-black text-center text-xs">
+                <div style={{ marginTop: '24px', paddingTop: '8px', borderTop: '1px solid #000', textAlign: 'center', fontSize: '11px' }}>
                     <p><strong>ASIAN FABRICX QUALITY ASSURANCE DEPARTMENT</strong></p>
                     <p>Factory Audit Checklist - Form No: AFX-QA-003 Rev. 2.1</p>
-                    <p className="mt-1">Page 1 of 1 • This document shall not be reproduced without authorization</p>
+                    <p style={{ marginTop: '4px' }}>Page 1 of 1 • This document shall not be reproduced without authorization</p>
                 </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="d-print-none mt-6 flex justify-center gap-4">
-                <button onClick={handleBack} className="px-6 py-2 bg-gray-600 text-white hover:bg-gray-700 transition-colors font-medium"
-                        style={{ fontFamily: 'Arial, sans-serif', borderRadius: '0' }}>
+            <div style={{ 
+                marginTop: '24px', 
+                display: 'flex', 
+                justifyContent: 'center', 
+                gap: '16px' 
+            }}>
+                <button 
+                    onClick={handleBack}
+                    style={{
+                        padding: '8px 24px',
+                        backgroundColor: '#6b7280',
+                        color: 'white',
+                        border: 'none',
+                        fontFamily: 'Arial, sans-serif',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        transition: 'background-color 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4b5563'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6b7280'}
+                >
                     ← Back
                 </button>
-                <button onClick={handlePrint} className="px-6 py-2 bg-gray-800 text-white hover:bg-black transition-colors font-medium"
-                        style={{ fontFamily: 'Arial, sans-serif', borderRadius: '0' }}>
-                    🖨️ Print Report
+                <button 
+                    onClick={handlePrint}
+                    style={{
+                        padding: '8px 24px',
+                        backgroundColor: '#1f2937',
+                        color: 'white',
+                        border: 'none',
+                        fontFamily: 'Arial, sans-serif',
+                        fontWeight: '500',
+                        cursor: 'pointer',
+                        transition: 'background-color 0.2s'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#111827'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1f2937'}
+                    disabled={isPrinting}
+                >
+                    {isPrinting ? 'Printing...' : '🖨️ Print Report'}
                 </button>
             </div>
-
-            <style jsx global>{`
-                @media print {
-                    body, html {
-                        margin: 0 !important;
-                        padding: 0 !important;
-                        background: white !important;
-                        font-family: 'Times New Roman', serif !important;
-                        font-size: 11px !important;
-                    }
-
-                    body * {
-                        visibility: hidden !important;
-                    }
-
-                    #audit-report-to-print {
-                        visibility: visible !important;
-                        position: absolute !important;
-                        left: 0 !important;
-                        top: 0 !important;
-                        width: 210mm !important;
-                        min-height: 297mm !important;
-                        margin: 0 !important;
-                        padding: 15mm !important;
-                        background: white !important;
-                        box-shadow: none !important;
-                        border: none !important;
-                        -webkit-print-color-adjust: exact !important;
-                        color-adjust: exact !important;
-                    }
-
-                    #audit-report-to-print * {
-                        visibility: visible !important;
-                    }
-
-                    .d-print-none {
-                        display: none !important;
-                    }
-
-                    @page {
-                        size: A4 portrait;
-                        margin: 15mm;
-                    }
-                }
-            `}</style>
         </div>
     );
 };

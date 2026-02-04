@@ -120,7 +120,9 @@ export const Suppliers = lazy(() => import('../view/master/suppliers/Index'));
 //new of asf ev
 export const Auditor = lazy(() => import('../view/master/auditor'));
 export const AuditReport = lazy(() => import('../view/report/audit'));
+export const AuditReportPdf = lazy(() => import('../view/documents/audit-report-pdf'));
 export const PdfSubAuditChecklist = lazy(() => import('../view/documents/sub-audit-checklist-report-pdf'));
+export const PdfSubAuditChecklistImages = lazy(() => import('../view/documents/sub-audit-checklist-images'));
 export const PdfSubAuditChecklistBarChart = lazy(() => import('../view/documents/sub-audit-checklist-report-bar-chart'));
 export const SubChecklistAudit = lazy(() => import('../view/master/subChecklistAudit'));
 export const SubChecklistSupplier = lazy(() => import('../view/master/subChecklistSupplier'));

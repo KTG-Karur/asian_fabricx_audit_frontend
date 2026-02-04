@@ -8,6 +8,7 @@ import IconEye from '../../../components/Icon/IconEye';
 import IconDownload from '../../../components/Icon/IconFile';
 import IconExternalLink from '../../../components/Icon/IconExternalLink';
 import IconChartBar from '../../../components/Icon/IconBarChart';
+import IconImages from '../../../components/Icon/IconCamera'; // Added for images PDF
 import Table from '../../../util/Table';
 import ModelViewBox from '../../../util/ModelViewBox';
 import * as XLSX from 'xlsx';
@@ -17,7 +18,7 @@ import _ from 'lodash';
 const Index = () => {
     const navigate = useNavigate();
 
-    // Static audit data based on your requirements
+    // Static audit data with images
     const staticAuditData = [
         {
             id: 1,
@@ -47,6 +48,55 @@ const Index = () => {
             recruitmentScore: 100,
             accommodationScore: 100,
             transportScore: 100,
+
+            // Images data
+            images: [
+                {
+                    id: 1,
+                    title: 'Factory Entrance',
+                    checklistId: 1,
+                    itemId: 1.1,
+                    url: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    description: 'Main entrance with security check',
+                    uploadDate: '2024-01-15',
+                },
+                {
+                    id: 2,
+                    title: 'Production Area',
+                    checklistId: 5,
+                    itemId: 5.1,
+                    url: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    description: 'Clean and organized production floor',
+                    uploadDate: '2024-01-15',
+                },
+                {
+                    id: 3,
+                    title: 'Safety Equipment',
+                    checklistId: 2,
+                    itemId: 2.2,
+                    url: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    description: 'Fire extinguishers properly maintained',
+                    uploadDate: '2024-01-15',
+                },
+                {
+                    id: 4,
+                    title: 'Worker Facilities',
+                    checklistId: 6,
+                    itemId: 6.3,
+                    url: 'https://images.unsplash.com/photo-1564069114553-7215e1ff1890?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    description: 'Clean cafeteria area for workers',
+                    uploadDate: '2024-01-15',
+                },
+                {
+                    id: 5,
+                    title: 'Quality Check',
+                    checklistId: 4,
+                    itemId: 4.1,
+                    url: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    description: 'Quality control station',
+                    uploadDate: '2024-01-15',
+                },
+            ],
 
             // Detailed checklist data
             checklists: {
@@ -105,7 +155,36 @@ const Index = () => {
             accommodationScore: 85,
             transportScore: 80,
 
-            status: 'Completed',
+            // Images data
+            images: [
+                {
+                    id: 6,
+                    title: 'Warehouse Storage',
+                    checklistId: 7,
+                    itemId: 7.2,
+                    url: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    description: 'Organized raw material storage',
+                    uploadDate: '2024-01-20',
+                },
+                {
+                    id: 7,
+                    title: 'Environmental Controls',
+                    checklistId: 3,
+                    itemId: 3.1,
+                    url: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    description: 'Waste management system',
+                    uploadDate: '2024-01-20',
+                },
+                {
+                    id: 8,
+                    title: 'Training Room',
+                    checklistId: 10,
+                    itemId: 10.1,
+                    url: 'https://images.unsplash.com/photo-1564069114553-7215e1ff1890?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    description: 'Worker training facility',
+                    uploadDate: '2024-01-20',
+                },
+            ],
         },
         {
             id: 3,
@@ -136,7 +215,27 @@ const Index = () => {
             accommodationScore: 60,
             transportScore: 55,
 
-            status: 'In Progress',
+            // Images data
+            images: [
+                {
+                    id: 9,
+                    title: 'Machine Maintenance',
+                    checklistId: 11,
+                    itemId: 11.2,
+                    url: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    description: 'Regular machine maintenance logs',
+                    uploadDate: '2024-01-25',
+                },
+                {
+                    id: 10,
+                    title: 'Emergency Exit',
+                    checklistId: 9,
+                    itemId: 9.1,
+                    url: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    description: 'Clearly marked emergency exits',
+                    uploadDate: '2024-01-25',
+                },
+            ],
         },
         {
             id: 4,
@@ -167,7 +266,45 @@ const Index = () => {
             accommodationScore: 85,
             transportScore: 100,
 
-            status: 'Completed',
+            // Images data
+            images: [
+                {
+                    id: 11,
+                    title: 'Documentation Room',
+                    checklistId: 7,
+                    itemId: 7.1,
+                    url: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    description: 'Proper documentation storage',
+                    uploadDate: '2024-02-01',
+                },
+                {
+                    id: 12,
+                    title: 'Quality Testing',
+                    checklistId: 4,
+                    itemId: 4.3,
+                    url: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    description: 'Advanced quality testing equipment',
+                    uploadDate: '2024-02-01',
+                },
+                {
+                    id: 13,
+                    title: 'Worker Rest Area',
+                    checklistId: 6,
+                    itemId: 6.2,
+                    url: 'https://images.unsplash.com/photo-1564069114553-7215e1ff1890?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    description: 'Comfortable rest area for workers',
+                    uploadDate: '2024-02-01',
+                },
+                {
+                    id: 14,
+                    title: 'Environmental Certificate',
+                    checklistId: 3,
+                    itemId: 3.3,
+                    url: 'https://images.unsplash.com/photo-1582719508461-905c673771fd?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    description: 'ISO 14001 certification displayed',
+                    uploadDate: '2024-02-01',
+                },
+            ],
         },
         {
             id: 5,
@@ -198,7 +335,36 @@ const Index = () => {
             accommodationScore: 85,
             transportScore: 80,
 
-            status: 'Pending Review',
+            // Images data
+            images: [
+                {
+                    id: 15,
+                    title: 'Solar Panels',
+                    checklistId: 3,
+                    itemId: 3.2,
+                    url: 'https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    description: 'Renewable energy installation',
+                    uploadDate: '2024-02-05',
+                },
+                {
+                    id: 16,
+                    title: 'Safety Training',
+                    checklistId: 10,
+                    itemId: 10.2,
+                    url: 'https://images.unsplash.com/photo-1564069114553-7215e1ff1890?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    description: 'Monthly safety training session',
+                    uploadDate: '2024-02-05',
+                },
+                {
+                    id: 17,
+                    title: 'Raw Material Storage',
+                    checklistId: 8,
+                    itemId: 8.1,
+                    url: 'https://images.unsplash.com/photo-1581094794329-c8112a89af12?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80',
+                    description: 'Sustainable raw materials',
+                    uploadDate: '2024-02-05',
+                },
+            ],
         },
     ];
 
@@ -209,6 +375,8 @@ const Index = () => {
     const [pageSize, setPageSize] = useState(10);
     const [selectedAudit, setSelectedAudit] = useState(null);
     const [showDetailsModal, setShowDetailsModal] = useState(false);
+    const [showImagesModal, setShowImagesModal] = useState(false);
+    const [selectedAuditImages, setSelectedAuditImages] = useState([]);
 
     const [filters, setFilters] = useState({
         searchQuery: '',
@@ -368,7 +536,7 @@ const Index = () => {
         {
             Header: 'Actions',
             accessor: 'actions',
-            width: 150,
+            width: 180,
             Cell: ({ row }) => {
                 const data = row.original;
                 return (
@@ -376,6 +544,11 @@ const Index = () => {
                         {/* View Details */}
                         <button onClick={() => handleViewDetails(data)} className="flex items-center justify-center w-8 h-8 text-blue-600 hover:text-blue-800 transition-colors" title="View Details">
                             <IconEye className="w-4 h-4" />
+                        </button>
+
+                        {/* View Images */}
+                        <button onClick={() => handleViewImages(data)} className="flex items-center justify-center w-8 h-8 text-indigo-600 hover:text-indigo-800 transition-colors" title="View Images">
+                            <IconImages className="w-4 h-4" />
                         </button>
 
                         {/* Export to Excel */}
@@ -480,6 +653,16 @@ const Index = () => {
         setShowDetailsModal(true);
     };
 
+    const handleViewImages = (audit) => {
+        // Navigate to images PDF page
+        navigate('/documents/print-sub-checklist-sub-audit-images', {
+            state: {
+                auditData: audit,
+                images: audit.images || [],
+            },
+        });
+    };
+
     const handleViewChart = (audit) => {
         navigate('/documents/print-sub-checklist-sub-audit-bar-chart', {
             state: {
@@ -499,6 +682,17 @@ const Index = () => {
                 auditData: audit,
             },
         });
+    };
+
+    const handleExportPDFWithImages = () => {
+        if (filteredData.length > 0) {
+            navigate('/documents/print-sub-checklist-sub-audit-images', {
+                state: {
+                    auditData: filteredData[0],
+                    images: filteredData[0].images || [],
+                },
+            });
+        }
     };
 
     const closeDetailsModal = () => {
@@ -560,8 +754,23 @@ const Index = () => {
         const ws2 = XLSX.utils.aoa_to_sheet(checklistData);
         ws2['!cols'] = [{ wch: 10 }, { wch: 40 }, { wch: 15 }, { wch: 30 }, { wch: 30 }];
 
+        // Images Sheet
+        const imagesData = [['AUDIT IMAGES'], [], ['Image ID', 'Title', 'Description', 'Checklist', 'Upload Date']];
+
+        if (audit.images && audit.images.length > 0) {
+            audit.images.forEach((image) => {
+                imagesData.push([image.id, image.title, image.description, `Checklist ${image.checklistId} - Item ${image.itemId}`, moment(image.uploadDate).format('DD/MM/YYYY')]);
+            });
+        } else {
+            imagesData.push(['No images available for this audit']);
+        }
+
+        const ws3 = XLSX.utils.aoa_to_sheet(imagesData);
+        ws3['!cols'] = [{ wch: 10 }, { wch: 25 }, { wch: 40 }, { wch: 25 }, { wch: 15 }];
+
         XLSX.utils.book_append_sheet(wb, ws1, 'Audit Summary');
         XLSX.utils.book_append_sheet(wb, ws2, 'Detailed Checklist');
+        XLSX.utils.book_append_sheet(wb, ws3, 'Audit Images');
 
         const fileName = `Audit-Report-${audit.auditId}-${moment().format('DD-MM-YYYY')}.xlsx`;
         XLSX.writeFile(wb, fileName);
@@ -598,6 +807,7 @@ const Index = () => {
                 'Recruitment',
                 'Accommodation',
                 'Transport',
+                'Images Count',
             ],
         ];
 
@@ -625,12 +835,13 @@ const Index = () => {
             audit.recruitmentScore,
             audit.accommodationScore,
             audit.transportScore,
+            audit.images ? audit.images.length : 0,
         ]);
 
         const allRows = [...header, ...data];
         const ws = XLSX.utils.aoa_to_sheet(allRows);
 
-        ws['!cols'] = Array(23)
+        ws['!cols'] = Array(24)
             .fill(null)
             .map(() => ({ wch: 15 }));
 
@@ -641,10 +852,10 @@ const Index = () => {
     };
 
     const onDownloadPDF = () => {
-        navigate('/documents/print-sub-checklist-sub-audit', {
+        navigate('/documents/audit-report-pdf', {
             state: {
-                auditData: selectedAudit || filteredData[0],
                 allAudits: filteredData,
+                filters: appliedFilters,
             },
         });
     };
@@ -832,6 +1043,14 @@ const Index = () => {
                                         <IconPrinter className="mr-2 w-4 h-4" />
                                         Export PDF
                                     </button>
+                                    {/* <button
+                                        type="button"
+                                        onClick={handleExportPDFWithImages}
+                                        className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 font-medium shadow-sm flex items-center"
+                                    >
+                                        <IconImages className="mr-2 w-4 h-4" />
+                                        Images PDF
+                                    </button> */}
                                 </>
                             )}
                         </div>
@@ -879,6 +1098,10 @@ const Index = () => {
                                     <div className="bg-white px-4 py-2 rounded-lg border border-gray-200 shadow-sm">
                                         <span className="text-gray-600">Avg Score: </span>
                                         <span className="font-semibold text-green-600">{Math.round(filteredData.reduce((sum, audit) => sum + audit.currentScore, 0) / filteredData.length)}%</span>
+                                    </div>
+                                    <div className="bg-white px-4 py-2 rounded-lg border border-gray-200 shadow-sm">
+                                        <span className="text-gray-600">Total Images: </span>
+                                        <span className="font-semibold text-indigo-600">{filteredData.reduce((sum, audit) => sum + (audit.images ? audit.images.length : 0), 0)}</span>
                                     </div>
                                 </div>
                             </div>
@@ -966,6 +1189,10 @@ const Index = () => {
                                         <span className="text-gray-600">Audit Date:</span>
                                         <span className="font-medium">{moment(selectedAudit.auditDate).format('DD/MM/YYYY')}</span>
                                     </div>
+                                    <div className="flex justify-between">
+                                        <span className="text-gray-600">Images:</span>
+                                        <span className="font-medium text-indigo-600">{selectedAudit.images ? selectedAudit.images.length : 0} uploaded</span>
+                                    </div>
                                 </div>
                             </div>
 
@@ -990,6 +1217,43 @@ const Index = () => {
                                 </div>
                             </div>
                         </div>
+
+                        {/* Images Preview */}
+                        {selectedAudit.images && selectedAudit.images.length > 0 && (
+                            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <h4 className="font-semibold text-gray-800 mb-4">Audit Images ({selectedAudit.images.length})</h4>
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    {selectedAudit.images.slice(0, 4).map((image) => (
+                                        <div key={image.id} className="relative group">
+                                            <div className="aspect-square overflow-hidden rounded-lg border border-gray-200 bg-white">
+                                                <img src={image.url} alt={image.title} className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" />
+                                            </div>
+                                            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-300 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                                                <button
+                                                    onClick={() => handleViewImages(selectedAudit)}
+                                                    className="px-3 py-1 bg-white text-gray-800 rounded-lg text-sm font-medium hover:bg-gray-100 transition-colors"
+                                                >
+                                                    View All
+                                                </button>
+                                            </div>
+                                            <div className="mt-1">
+                                                <p className="text-xs font-medium text-gray-700 truncate">{image.title}</p>
+                                                <p className="text-xs text-gray-500 truncate">{image.description}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="mt-4 text-center">
+                                    <button
+                                        onClick={() => handleViewImages(selectedAudit)}
+                                        className="text-indigo-600 hover:text-indigo-800 font-medium flex items-center justify-center gap-2 mx-auto"
+                                    >
+                                        <IconImages className="w-4 h-4" />
+                                        View All Images ({selectedAudit.images.length})
+                                    </button>
+                                </div>
+                            </div>
+                        )}
 
                         {/* Checklist Scores Grid */}
                         <div>
@@ -1038,6 +1302,9 @@ const Index = () => {
                                 </p>
                                 <p>
                                     Visit Date: <span className="font-medium">{moment(selectedAudit.visitDate).format('DD/MM/YYYY')}</span>
+                                </p>
+                                <p>
+                                    Images: <span className="font-medium text-indigo-600">{selectedAudit.images ? selectedAudit.images.length : 0} evidence images</span>
                                 </p>
                             </div>
                         </div>

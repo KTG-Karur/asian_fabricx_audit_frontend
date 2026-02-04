@@ -39,6 +39,8 @@ import {
     AuditFormPdf,
     AuditReSchedule,
     PdfSubAuditChecklistBarChart,
+    PdfSubAuditChecklistImages,
+    AuditReportPdf,
 } from './Route_Menu';
 import path from 'path';
 
@@ -317,6 +319,14 @@ const routes = [
         path: '/documents/print-sub-checklist-sub-audit-bar-chart',
         element: <PdfSubAuditChecklistBarChart />,
     },
+    {
+        path: '/documents/print-sub-checklist-sub-audit-images',
+        element: <PdfSubAuditChecklistImages />,
+    },
+    {
+        path: '/documents/audit-report-pdf',
+        element: <AuditReportPdf />,
+    },
     // pages
 
     {
@@ -402,6 +412,14 @@ const dontCkeckRouts = [
     {
         path: '/documents/print-sub-checklist-sub-audit',
         element: <PdfSubAuditChecklist />,
+    },
+    {
+        path: '/documents/print-sub-checklist-sub-audit-images',
+        element: <PdfSubAuditChecklistImages />,
+    },
+    {
+        path: '/documents/audit-report-pdf',
+        element: <AuditReportPdf />,
     },
     {
         path: '/pages/contact-us-boxed',
