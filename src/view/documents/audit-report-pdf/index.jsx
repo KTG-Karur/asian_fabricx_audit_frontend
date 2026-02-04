@@ -1,16 +1,29 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { getCompany, resetCompanyStatus } from '../../../redux/companySlice';
+import { baseURL } from '../../../api/ApiConfig';
 import moment from 'moment';
 
 const AuditReportPDF = () => {
     const location = useLocation();
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const [auditData, setAuditData] = useState([]);
     const [filters, setFilters] = useState({});
     const [companyInfo, setCompanyInfo] = useState({});
     const [summaryStats, setSummaryStats] = useState({});
     const [selectedAudit, setSelectedAudit] = useState(null);
+    const [loading, setLoading] = useState(true);
+
+    // Get company data from Redux
+    const { getCompanySuccess, companyData, getCompanyFailed, errorMessage } = useSelector((state) => ({
+        getCompanySuccess: state.ComapnySlice.getCompanySuccess,
+        companyData: state.ComapnySlice.companyData,
+        getCompanyFailed: state.ComapnySlice.getCompanyFailed,
+        errorMessage: state.ComapnySlice.errorMessage,
+    }));
 
     useEffect(() => {
         if (location.state?.auditData) {
@@ -31,15 +44,40 @@ const AuditReportPDF = () => {
     }, [location.state]);
 
     useEffect(() => {
-        // Set company info (you might want to fetch this from your API)
-        setCompanyInfo({
-            companyName: 'ASIAN FABRIC X',
-            companyAddress: '123 Textile Street, Mumbai, India - 400001',
-            companyGstNo: 'GSTIN123456789',
-            companyEmail: 'info@asianfabricx.com',
-            companyPhone: '+91 9876543210',
-        });
+        dispatch(getCompany());
+    }, [dispatch]);
 
+    useEffect(() => {
+        if (getCompanySuccess && companyData?.data?.[0]) {
+            const companyDataItem = companyData.data[0];
+            setCompanyInfo({
+                companyName: companyDataItem?.companyName || 'Audit Management System',
+                companyMobile: companyDataItem?.companyMobile || '',
+                companyAltMobile: companyDataItem?.companyAltMobile || '',
+                companyMail: companyDataItem?.companyMail || '',
+                companyAddressOne: companyDataItem?.companyAddressOne || '',
+                companyGstNo: companyDataItem?.companyGstNo || '',
+                companyAddressTwo: companyDataItem?.companyAddressTwo || '',
+                logoPreview: companyDataItem?.companyLogo ? `${baseURL}${companyDataItem?.companyLogo}` : '',
+            });
+            dispatch(resetCompanyStatus());
+            setLoading(false);
+        } else if (getCompanyFailed) {
+            // Set default company info if API fails
+            setCompanyInfo({
+                companyName: 'ASIAN FABRIC X',
+                companyAddressOne: '123 Textile Street, Mumbai',
+                companyAddressTwo: 'Maharashtra, India - 400001',
+                companyGstNo: 'GSTIN123456789',
+                companyMail: 'info@asianfabricx.com',
+                companyMobile: '+91 9876543210',
+                logoPreview: '',
+            });
+            setLoading(false);
+        }
+    }, [getCompanySuccess, getCompanyFailed, companyData, dispatch]);
+
+    useEffect(() => {
         // Calculate summary statistics
         if (auditData.length > 0) {
             const stats = {
@@ -51,6 +89,8 @@ const AuditReportPDF = () => {
                 mainSuppliers: auditData.filter(a => a.supplierType === 'Main Supplier').length,
                 subSuppliers: auditData.filter(a => a.supplierType === 'Sub Supplier').length,
                 totalImages: auditData.reduce((sum, audit) => sum + (audit.images ? audit.images.length : 0), 0),
+                totalNonCompliant: auditData.filter(a => a.currentScore < 100).length,
+                avgImprovement: Math.round(auditData.reduce((sum, audit) => sum + (audit.currentScore - audit.lastAuditScore), 0) / auditData.length),
             };
             setSummaryStats(stats);
         }
@@ -129,9 +169,50 @@ const AuditReportPDF = () => {
         );
     };
 
+    // Function to get key checklist scores (only non-100% or top issues)
+    const getKeyChecklistScores = (audit) => {
+        const checklistScores = [
+            { label: 'Child Labour', score: audit.childLabourScore, key: 'childLabourScore' },
+            { label: 'Forced Labour', score: audit.forcedLabourScore, key: 'forcedLabourScore' },
+            { label: 'Freedom Assoc', score: audit.freedomOfAssociationScore, key: 'freedomOfAssociationScore' },
+            { label: 'Discrimination', score: audit.discriminationScore, key: 'discriminationScore' },
+            { label: 'Mgmt System', score: audit.mgmtSystemScore, key: 'mgmtSystemScore' },
+            { label: 'Business Ethics', score: audit.businessEthicsScore, key: 'businessEthicsScore' },
+            { label: 'Env Mgmt', score: audit.envMgmtScore, key: 'envMgmtScore' },
+            { label: 'Health Safety', score: audit.healthSafetyScore, key: 'healthSafetyScore' },
+            { label: 'Working Hours', score: audit.workingHoursScore, key: 'workingHoursScore' },
+            { label: 'Accident Ins', score: audit.accidentInsuranceScore, key: 'accidentInsuranceScore' },
+            { label: 'Licenses', score: audit.licensesPermitsScore, key: 'licensesPermitsScore' },
+            { label: 'Housekeeping', score: audit.housekeepingScore, key: 'housekeepingScore' },
+            { label: 'Recruitment', score: audit.recruitmentScore, key: 'recruitmentScore' },
+            { label: 'Accommodation', score: audit.accommodationScore, key: 'accommodationScore' },
+            { label: 'Transport', score: audit.transportScore, key: 'transportScore' },
+        ];
+
+        // Filter out 100% scores
+        const nonPerfectScores = checklistScores.filter(item => item.score < 100);
+        
+        if (nonPerfectScores.length === 0) {
+            // All scores are 100%
+            return [{
+                label: 'All Checklists',
+                score: 100,
+                status: 'Fully Compliant',
+                isPerfect: true
+            }];
+        }
+
+        // Sort by score (lowest first)
+        return nonPerfectScores
+            .sort((a, b) => a.score - b.score)
+            .slice(0, 3); // Show only top 3 issues
+    };
+
     const getTableData = () => {
         const tableData = [];
         auditData.forEach((audit, index) => {
+            const keyScores = getKeyChecklistScores(audit);
+            
             tableData.push({
                 sno: index + 1,
                 auditId: audit.auditId,
@@ -143,15 +224,9 @@ const AuditReportPDF = () => {
                 currentScore: audit.currentScore,
                 status: audit.status,
                 improvement: audit.currentScore - audit.lastAuditScore,
-                childLabour: audit.childLabourScore,
-                forcedLabour: audit.forcedLabourScore,
-                freedomAssoc: audit.freedomOfAssociationScore,
-                discrimination: audit.discriminationScore,
-                mgmtSystem: audit.mgmtSystemScore,
-                businessEthics: audit.businessEthicsScore,
-                envMgmt: audit.envMgmtScore,
-                healthSafety: audit.healthSafetyScore,
+                keyScores: keyScores,
                 imagesCount: audit.images ? audit.images.length : 0,
+                isAllPerfect: keyScores.length === 1 && keyScores[0].isPerfect,
             });
         });
         return tableData;
@@ -167,6 +242,16 @@ const AuditReportPDF = () => {
         navigate(-1);
     };
 
+    if (loading) {
+        return (
+            <div className="p-12 text-center">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <h3 className="text-xl font-semibold text-gray-800 mb-2">Loading Report</h3>
+                <p className="text-gray-500">Preparing audit report...</p>
+            </div>
+        );
+    }
+
     return (
         <div className="p-4 bg-gray-100 min-h-screen">
             <div id="audit-report-to-print" className="bg-white mx-auto" style={{ 
@@ -174,19 +259,35 @@ const AuditReportPDF = () => {
                 minHeight: '190mm',
                 height: 'auto'
             }}>
-                {/* Header Section */}
+                {/* Header Section with Company Logo */}
                 <div className="pb-2 mb-2" style={{ padding: '0', borderBottom: '2px solid #e5e7eb' }}>
                     <div className="flex justify-between items-start" style={{ width: '100%' }}>
-                        <div>
-                            <h1 className="font-bold text-gray-800" style={{ fontSize: '18pt', lineHeight: '1.1' }}>
-                                {companyInfo.companyName}
-                            </h1>
-                            <p className="text-gray-600" style={{ fontSize: '10pt', lineHeight: '1.1' }}>
-                                {companyInfo.companyAddress}
-                            </p>
-                            <p className="text-gray-500" style={{ fontSize: '9pt', lineHeight: '1.1' }}>
-                                GST: {companyInfo.companyGstNo} • {companyInfo.companyEmail} • {formatMobileNumber(companyInfo.companyPhone)}
-                            </p>
+                        <div className="flex items-center">
+                            {companyInfo.logoPreview && (
+                                <img
+                                    src={companyInfo.logoPreview}
+                                    alt="Company Logo"
+                                    crossOrigin="anonymous"
+                                    style={{
+                                        maxHeight: '35px',
+                                        marginRight: '10px',
+                                    }}
+                                />
+                            )}
+                            <div>
+                                <h1 className="font-bold text-gray-800" style={{ fontSize: '16pt', lineHeight: '1.1' }}>
+                                    {companyInfo.companyName}
+                                </h1>
+                                <p className="text-gray-600" style={{ fontSize: '9pt', lineHeight: '1.1' }}>
+                                    {companyInfo.companyAddressOne}
+                                    {companyInfo.companyAddressTwo && `, ${companyInfo.companyAddressTwo}`}
+                                </p>
+                                <p className="text-gray-500" style={{ fontSize: '8pt', lineHeight: '1.1' }}>
+                                    {companyInfo.companyGstNo && `GST: ${companyInfo.companyGstNo}`}
+                                    {companyInfo.companyMail && ` • ${companyInfo.companyMail}`}
+                                    {companyInfo.companyMobile && ` • ${formatMobileNumber(companyInfo.companyMobile)}`}
+                                </p>
+                            </div>
                         </div>
                         <div className="text-right">
                             <h2 className="font-bold text-blue-800 uppercase" style={{ fontSize: '14pt', lineHeight: '1.1' }}>
@@ -205,30 +306,6 @@ const AuditReportPDF = () => {
                     </div>
                 </div>
 
-                {/* Summary Statistics */}
-                <div className="mb-4" style={{ padding: '4px 0', borderBottom: '1px solid #e5e7eb' }}>
-                    <div className="grid grid-cols-3 gap-2" style={{ fontSize: '9pt' }}>
-                        <div className="text-center">
-                            <div className="font-bold text-blue-700" style={{ fontSize: '11pt' }}>
-                                {summaryStats.totalAudits || 0}
-                            </div>
-                            <div className="text-gray-600">Total Audits</div>
-                        </div>
-                        <div className="text-center">
-                            <div className={`font-bold ${getScoreColor(summaryStats.avgScore || 0)}`} style={{ fontSize: '11pt' }}>
-                                {summaryStats.avgScore || 0}%
-                            </div>
-                            <div className="text-gray-600">Average Score</div>
-                        </div>
-                        <div className="text-center">
-                            <div className="font-bold text-indigo-700" style={{ fontSize: '11pt' }}>
-                                {summaryStats.totalImages || 0}
-                            </div>
-                            <div className="text-gray-600">Total Images</div>
-                        </div>
-                    </div>
-                </div>
-
                 {/* Main Audit Table */}
                 <div style={{ width: '100%', marginBottom: '10px' }}>
                     <table className="border-collapse border border-gray-300" style={{ 
@@ -243,10 +320,10 @@ const AuditReportPDF = () => {
                                 <th className="border border-gray-300 font-semibold text-gray-700 text-left p-1" style={{ width: '8%' }}>Audit ID</th>
                                 <th className="border border-gray-300 font-semibold text-gray-700 text-left p-1" style={{ width: '15%' }}>Supplier Details</th>
                                 <th className="border border-gray-300 font-semibold text-gray-700 text-left p-1" style={{ width: '7%' }}>Auditor</th>
-                                <th className="border border-gray-300 font-semibold text-gray-700 text-center p-1" style={{ width: '5%' }}>Scores</th>
-                                <th className="border border-gray-300 font-semibold text-gray-700 text-center p-1" style={{ width: '5%' }}>Status</th>
+                                <th className="border border-gray-300 font-semibold text-gray-700 text-center p-1" style={{ width: '6%' }}>Scores</th>
+                                <th className="border border-gray-300 font-semibold text-gray-700 text-center p-1" style={{ width: '6%' }}>Status</th>
                                 <th className="border border-gray-300 font-semibold text-gray-700 text-left p-1" style={{ width: '7%' }}>Date</th>
-                                <th className="border border-gray-300 font-semibold text-gray-700 text-center p-1" style={{ width: '8%' }}>Key Checklist Scores</th>
+                                <th className="border border-gray-300 font-semibold text-gray-700 text-left p-1" style={{ width: '12%' }}>Key Checklist Scores</th>
                                 <th className="border border-gray-300 font-semibold text-gray-700 text-center p-1" style={{ width: '4%' }}>Images</th>
                             </tr>
                         </thead>
@@ -316,38 +393,51 @@ const AuditReportPDF = () => {
                                         {row.auditDate}
                                     </td>
                                     <td className="border border-gray-300 align-top p-1" style={{ wordWrap: 'break-word' }}>
-                                        <div className="space-y-1">
-                                            <div className="flex justify-between items-center">
-                                                <span style={{ fontSize: '7pt' }}>Child Labour:</span>
-                                                <span style={{ 
-                                                    fontSize: '7.5pt', 
+                                        {row.isAllPerfect ? (
+                                            <div className="text-center">
+                                                <div style={{ 
+                                                    color: '#059669',
+                                                    fontSize: '8pt',
                                                     fontWeight: 'bold',
-                                                    color: row.childLabour === 100 ? '#059669' : '#dc2626'
+                                                    padding: '2px 4px',
+                                                    backgroundColor: '#dcfce7',
+                                                    borderRadius: '4px'
                                                 }}>
-                                                    {row.childLabour}%
-                                                </span>
+                                                    ✓ All Compliant
+                                                </div>
+                                                <div style={{ fontSize: '7pt', color: '#059669', marginTop: '2px' }}>
+                                                    100% in all checklists
+                                                </div>
                                             </div>
-                                            <div className="flex justify-between items-center">
-                                                <span style={{ fontSize: '7pt' }}>Health & Safety:</span>
-                                                <span style={{ 
-                                                    fontSize: '7.5pt', 
-                                                    fontWeight: 'bold',
-                                                    color: row.healthSafety >= 70 ? '#059669' : '#dc2626'
-                                                }}>
-                                                    {row.healthSafety}%
-                                                </span>
+                                        ) : (
+                                            <div className="space-y-1">
+                                                {row.keyScores.map((scoreItem, idx) => (
+                                                    <div key={idx} className="flex justify-between items-center">
+                                                        <span style={{ fontSize: '7pt' }}>{scoreItem.label}:</span>
+                                                        <div className="flex items-center gap-1">
+                                                            <span style={{ 
+                                                                fontSize: '7.5pt', 
+                                                                fontWeight: 'bold',
+                                                                color: scoreItem.score >= 70 ? '#3b82f6' : '#dc2626'
+                                                            }}>
+                                                                {scoreItem.score}%
+                                                            </span>
+                                                            <div style={{ 
+                                                                width: '15px', 
+                                                                height: '3px',
+                                                                backgroundColor: scoreItem.score >= 70 ? '#3b82f6' : '#dc2626',
+                                                                borderRadius: '2px'
+                                                            }}></div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                {row.keyScores.length < 3 && row.currentScore < 100 && (
+                                                    <div style={{ fontSize: '7pt', color: '#6b7280', textAlign: 'center', marginTop: '2px' }}>
+                                                        +{15 - row.keyScores.length} more at 100%
+                                                    </div>
+                                                )}
                                             </div>
-                                            <div className="flex justify-between items-center">
-                                                <span style={{ fontSize: '7pt' }}>Env Mgmt:</span>
-                                                <span style={{ 
-                                                    fontSize: '7.5pt', 
-                                                    fontWeight: 'bold',
-                                                    color: row.envMgmt >= 70 ? '#059669' : '#dc2626'
-                                                }}>
-                                                    {row.envMgmt}%
-                                                </span>
-                                            </div>
-                                        </div>
+                                        )}
                                     </td>
                                     <td className="border border-gray-300 align-top p-1 text-center" style={{ wordWrap: 'break-word' }}>
                                         <div style={{ 
@@ -423,13 +513,17 @@ const AuditReportPDF = () => {
                             </div>
                         </div>
 
-                        {/* Checklist Scores Grid */}
+                        {/* Checklist Scores Grid - Show only non-100% scores */}
                         <div className="mb-4">
                             <h4 className="font-semibold text-gray-800 mb-2" style={{ fontSize: '10pt' }}>
                                 Checklist Scores Breakdown
+                                <span className="text-gray-500 text-xs font-normal ml-2">
+                                    (Showing only areas needing improvement)
+                                </span>
                             </h4>
-                            <div className="grid grid-cols-3 gap-2" style={{ fontSize: '8.5pt' }}>
-                                {[
+                            
+                            {(() => {
+                                const checklistScores = [
                                     { label: '1. Child Labour', score: selectedAudit.childLabourScore },
                                     { label: '2. Forced Labour', score: selectedAudit.forcedLabourScore },
                                     { label: '3. Freedom of Association', score: selectedAudit.freedomOfAssociationScore },
@@ -445,34 +539,69 @@ const AuditReportPDF = () => {
                                     { label: '13. Recruitment', score: selectedAudit.recruitmentScore },
                                     { label: '14. Accommodation', score: selectedAudit.accommodationScore },
                                     { label: '15. Transport', score: selectedAudit.transportScore },
-                                ].map((item, index) => (
-                                    <div key={index} className="border border-gray-200 rounded p-2">
-                                        <div className="flex justify-between items-center mb-1">
-                                            <span className="font-medium text-gray-700">{item.label}</span>
-                                            <span style={{ 
-                                                fontSize: '8pt', 
-                                                fontWeight: 'bold',
-                                                padding: '1px 6px',
-                                                borderRadius: '4px',
-                                                backgroundColor: getScoreBgColor(item.score).replace('bg-', ''),
-                                                color: getScoreColor(item.score).replace('text-', '')
-                                            }}>
-                                                {item.score}%
-                                            </span>
+                                ];
+
+                                const nonPerfectScores = checklistScores.filter(item => item.score < 100);
+                                
+                                if (nonPerfectScores.length === 0) {
+                                    return (
+                                        <div className="text-center py-4 border border-green-200 bg-green-50 rounded-lg">
+                                            <div className="text-green-700 font-bold" style={{ fontSize: '10pt' }}>
+                                                ✓ ALL CHECKLISTS FULLY COMPLIANT
+                                            </div>
+                                            <div className="text-green-600" style={{ fontSize: '9pt', marginTop: '4px' }}>
+                                                All 15 checklist categories scored 100%
+                                            </div>
+                                            <div className="mt-2" style={{ fontSize: '8pt', color: '#059669' }}>
+                                                Perfect Compliance Status
+                                            </div>
                                         </div>
-                                        {renderProgressBar(item.score, '100%', '4px')}
-                                        <div className="text-center mt-1" style={{ 
-                                            fontSize: '7pt',
-                                            color: item.score === 100 ? '#059669' : 
-                                                   item.score >= 70 ? '#3b82f6' : '#dc2626'
-                                        }}>
-                                            {item.score === 100 ? 'Fully Compliant' : 
-                                             item.score >= 70 ? 'Partially Compliant' : 
-                                             'Needs Improvement'}
-                                        </div>
+                                    );
+                                }
+
+                                return (
+                                    <div className="grid grid-cols-3 gap-2" style={{ fontSize: '8.5pt' }}>
+                                        {nonPerfectScores
+                                            .sort((a, b) => a.score - b.score) // Sort by lowest score first
+                                            .map((item, index) => (
+                                            <div key={index} className="border border-gray-200 rounded p-2">
+                                                <div className="flex justify-between items-center mb-1">
+                                                    <span className="font-medium text-gray-700">{item.label}</span>
+                                                    <span style={{ 
+                                                        fontSize: '8pt', 
+                                                        fontWeight: 'bold',
+                                                        padding: '1px 6px',
+                                                        borderRadius: '4px',
+                                                        backgroundColor: getScoreBgColor(item.score).replace('bg-', ''),
+                                                        color: getScoreColor(item.score).replace('text-', '')
+                                                    }}>
+                                                        {item.score}%
+                                                    </span>
+                                                </div>
+                                                {renderProgressBar(item.score, '100%', '4px')}
+                                                <div className="text-center mt-1" style={{ 
+                                                    fontSize: '7pt',
+                                                    color: item.score >= 70 ? '#3b82f6' : '#dc2626',
+                                                    fontWeight: 'bold'
+                                                }}>
+                                                    {item.score >= 70 ? 'NEEDS MINOR IMPROVEMENT' : 'NEEDS MAJOR IMPROVEMENT'}
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
-                            </div>
+                                );
+                            })()}
+                            
+                            {(() => {
+                                const perfectCount = 15 - (getKeyChecklistScores(selectedAudit).length === 1 && getKeyChecklistScores(selectedAudit)[0].isPerfect ? 15 : getKeyChecklistScores(selectedAudit).length);
+                                if (perfectCount > 0) {
+                                    return (
+                                        <div className="mt-2 text-center" style={{ fontSize: '8pt', color: '#059669' }}>
+                                            ✓ {perfectCount} checklist(s) scored 100% (Fully Compliant)
+                                        </div>
+                                    );
+                                }
+                            })()}
                         </div>
 
                         {/* Images Section if available */}
@@ -539,15 +668,9 @@ const AuditReportPDF = () => {
 
                 {/* Footer */}
                 <div className="mt-6 pt-2 border-t border-gray-300 text-center">
-                    <div className="flex justify-between text-gray-600 mb-1" style={{ fontSize: '9pt' }}>
-                        <div>Total Audits: {summaryStats.totalAudits}</div>
-                        <div>Completed: {summaryStats.completed} • In Progress: {summaryStats.inProgress} • Pending: {summaryStats.pendingReview}</div>
-                        <div>Main Suppliers: {summaryStats.mainSuppliers} • Sub Suppliers: {summaryStats.subSuppliers}</div>
-                    </div>
                     <p className="text-gray-500" style={{ fontSize: '8pt' }}>
-                        Computer generated audit report • {moment().format('DD/MM/YYYY HH:mm')} • 
-                        Total Records: {tableData.length} • 
-                        {summaryStats.totalImages > 0 && ` Evidence Images: ${summaryStats.totalImages}`}
+                        {companyInfo.companyName} • Computer generated audit report • {moment().format('DD/MM/YYYY HH:mm')} • 
+                        Total Records: {tableData.length}
                     </p>
                 </div>
             </div>
@@ -699,6 +822,13 @@ const AuditReportPDF = () => {
                         color: #a16207 !important; 
                         background-color: #fef3c7 !important; 
                     }
+
+                    /* Perfect compliance styling */
+                    #audit-report-to-print > div:nth-child(3) table tbody tr td:nth-child(8) > div > div:first-child {
+                        background-color: #dcfce7 !important;
+                        color: #047857 !important;
+                        border: 0.5px solid #10b981 !important;
+                    }
                 }
 
                 /* Screen styles */
@@ -729,6 +859,16 @@ const AuditReportPDF = () => {
                     /* Progress bars for screen */
                     .progress-bar {
                         transition: width 0.3s ease;
+                    }
+
+                    /* Perfect compliance badge */
+                    #audit-report-to-print > div:nth-child(3) table tbody tr td:nth-child(8) > div > div:first-child {
+                        transition: all 0.2s ease;
+                    }
+                    
+                    #audit-report-to-print > div:nth-child(3) table tbody tr td:nth-child(8) > div > div:first-child:hover {
+                        transform: scale(1.02);
+                        box-shadow: 0 1px 3px rgba(16, 185, 129, 0.2);
                     }
                 }
 
