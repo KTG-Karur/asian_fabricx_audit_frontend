@@ -1,5 +1,5 @@
-// export const baseURL = 'http://localhost:5091';
-export const baseURL = 'https://auditapi.ktgt.in'; // live
+export const baseURL = 'http://localhost:5091';
+// export const baseURL = 'https://auditapi.ktgt.in'; // live
 
 const getBaseUrl = (url) => {
     return `${baseURL}${url}`;
