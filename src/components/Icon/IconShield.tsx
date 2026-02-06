@@ -1,7 +1,27 @@
-const IconShield = ({ className = '' }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-  </svg>
-);
+import { FC } from 'react';
+
+interface IconShieldProps {
+    className?: string;
+    fill?: boolean;
+    duotone?: boolean;
+}
+
+const IconShield: FC<IconShieldProps> = ({ className, fill = false, duotone = true }) => {
+    return (
+        <>
+            {!fill ? (
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+                    <path d="M3 10.4167C3 7.21907 3 5.62028 3.37752 5.08241C3.75503 4.54454 5.25832 4.02996 8.26491 3.00079L8.83772 2.80472C10.405 2.26824 11.1886 2 12 2C12.8114 2 13.595 2.26824 15.1623 2.80472L15.7351 3.00079C18.7417 4.02996 20.245 4.54454 20.6225 5.08241C21 5.62028 21 7.21907 21 10.4167C21 10.8996 21 11.4234 21 11.9914C21 14.4963 20.1632 16.4284 19 17.9041M3.19284 14C4.05026 18.2984 7.57641 20.5129 9.89856 21.5273C10.62 21.8424 10.9807 22 12 22C13.0193 22 13.38 21.8424 14.1014 21.5273C16.4236 20.5129 19.9497 18.2984 20.8072 14" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                </svg>
+            ) : (
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className={className}>
+                    <path opacity={duotone ? '0.5' : '1'} d="M3 10.4167C3 7.21907 3 5.62028 3.37752 5.08241C3.75503 4.54454 5.25832 4.02996 8.26491 3.00079L8.83772 2.80472C10.405 2.26824 11.1886 2 12 2C12.8114 2 13.595 2.26824 15.1623 2.80472L15.7351 3.00079C18.7417 4.02996 20.245 4.54454 20.6225 5.08241C21 5.62028 21 7.21907 21 10.4167C21 10.8996 21 11.4234 21 11.9914C21 14.4963 20.1632 16.4284 19 17.9041M12 22C13.0193 22 13.38 21.8424 14.1014 21.5273C16.4236 20.5129 19.9497 18.2984 20.8072 14" fill="currentColor" />
+                    <path d="M8 13C8 12.4477 8.44772 12 9 12H15C15.5523 12 16 12.4477 16 13C16 13.5523 15.5523 14 15 14H9C8.44772 14 8 13.5523 8 13Z" fill="currentColor" />
+                    <path d="M8 17C8 16.4477 8.44772 16 9 16H13C13.5523 16 14 16.4477 14 17C14 17.5523 13.5523 18 13 18H9C8.44772 18 8 17.5523 8 17Z" fill="currentColor" />
+                </svg>
+            )}
+        </>
+    );
+};
 
 export default IconShield;

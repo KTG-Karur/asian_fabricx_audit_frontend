@@ -16,6 +16,8 @@ import { useState, useEffect } from 'react';
 import IconCaretsDown from '../Icon/IconCaretsDown';
 import IconMinus from '../Icon/IconMinus';
 import IconMenuDashboard from '../Icon/Menu/IconMenuDashboard';
+
+// Existing Icons
 import IconShield from '../Icon/IconShield';
 import IconUsers from '../Icon/IconUsers';
 import IconBuilding from '../Icon/IconBuilding';
@@ -30,6 +32,48 @@ import IconChartBar from '../Icon/IconChartBar';
 import Navigation from './navigation';
 import IconDollarSign from '../Icon/IconDollarSign';
 import IconNotes from '../Icon/IconNotes';
+
+// ============ NEWLY ADDED ICONS ============
+// Dashboard and Layout
+import IconHome from '../Icon/IconHome';
+import IconMenu from '../Icon/IconMenu';
+import IconSettings from '../Icon/IconSettings';
+
+// Audit and Checklist
+import IconClipboardCheck from '../Icon/IconClipboardCheck';
+import IconClipboardList from '../Icon/IconClipboardList';
+import IconFileCheck from '../Icon/IconFileCheck';
+// import IconFileReport from '../Icon/IconFileReport';
+import IconCheckCircle from '../Icon/IconCircleCheck';
+import IconChecklist from '../Icon/IconChecklist';
+
+// Suppliers and Scheduling
+import IconTruck from '../Icon/IconTruck';
+import IconBuildingWarehouse from '../Icon/IconBuildingWarehouse';
+import IconCalendar from '../Icon/IconCalendar';
+import IconCalendarEdit from '../Icon/IconCalendarEdit';
+import IconCalendarEvent from '../Icon/IconCalendarEvent';
+
+// General Actions
+import IconSearch from '../Icon/IconSearch';
+import IconPlus from '../Icon/IconPlus';
+import IconTrashLines from '../Icon/IconTrashLines';
+import IconDownload from '../Icon/IconDownload';
+import IconEdit from '../Icon/IconEdit';
+import IconRefresh from '../Icon/IconRefresh';
+
+// Reports and Status
+// import IconFileText from '../Icon/IconFileText';
+import IconFlag from '../Icon/IconFlag';
+
+// Optional alternative icons
+import IconLayoutDashboard from '../Icon/IconLayoutDashboard';
+import IconBriefcase from '../Icon/IconBriefcase';
+import IconClipboardData from '../Icon/IconClipboardData';
+import IconCalendarClock from '../Icon/IconCalendarClock';
+import IconUserCheck from '../Icon/IconUserCheck';
+import IconIdBadge from '../Icon/IconIdBadge';
+// ============ END OF NEW ICONS ============
 
 const getIcon = (name?: string) => {
     switch (name) {
@@ -69,6 +113,84 @@ const getIcon = (name?: string) => {
             return IconMenuAuthentication;
         case 'fe-company':
             return IconDatabase;
+            
+        // ============ NEW MAPPINGS FOR AUDIT SYSTEM ============
+        // Dashboard and Layout
+        case 'fe-home':
+            return IconHome;
+        case 'fe-menu':
+            return IconMenu;
+        case 'fe-settings':
+            return IconSettings;
+        case 'fe-building':
+            return IconBuilding;
+            
+        // User and Role Management
+        case 'fe-user':
+            return IconUsers; // Single user
+        case 'fe-id-badge':
+            return IconIdBadge;
+        case 'fe-users':
+            return IconUsersGroup; // Multiple users
+            
+        // Audit and Checklist
+        case 'fe-clipboard-check':
+            return IconClipboardCheck;
+        case 'fe-clipboard-list':
+            return IconClipboardList;
+        case 'fe-file-check':
+            return IconFileCheck;
+        // case 'fe-file-report':
+        //     return IconFileReport;
+        case 'fe-check-circle':
+            return IconCheckCircle;
+        case 'fe-checklist':
+            return IconChecklist;
+            
+        // Suppliers and Scheduling
+        case 'fe-truck':
+            return IconTruck;
+        case 'fe-warehouse':
+            return IconBuildingWarehouse;
+        case 'fe-calendar':
+            return IconCalendar;
+        case 'fe-calendar-edit':
+            return IconCalendarEdit;
+        case 'fe-calendar-event':
+            return IconCalendarEvent;
+            
+        // Reports
+        // case 'fe-file-text':
+        //     return IconFileText;
+        case 'fe-flag':
+            return IconFlag;
+            
+        // Actions
+        case 'fe-search':
+            return IconSearch;
+        case 'fe-plus':
+            return IconPlus;
+        case 'fe-trash':
+            return IconTrashLines;
+        case 'fe-download':
+            return IconDownload;
+        case 'fe-edit':
+            return IconEdit;
+        case 'fe-refresh':
+            return IconRefresh;
+            
+        // Alternative icons
+        case 'fe-layout-dashboard':
+            return IconLayoutDashboard;
+        case 'fe-briefcase':
+            return IconBriefcase;
+        case 'fe-clipboard-data':
+            return IconClipboardData;
+        case 'fe-calendar-clock':
+            return IconCalendarClock;
+        case 'fe-user-check':
+            return IconUserCheck;
+            
         default:
             return IconMinus; // fallback
     }
